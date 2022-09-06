@@ -1,6 +1,7 @@
 {
-  "name": "mattar-li",
+  "name": "mattar",
   "private": true,
+  "license": "BSD-3-Clause-Clear",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
