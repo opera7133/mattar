@@ -19,6 +19,7 @@
     "@types/request-ip": "^0.0.37",
     "argon2": "^0.29.1",
     "check-password-strength": "^2.0.7",
+    "cloudinary": "^1.31.0",
     "date-fns": "^2.29.2",
     "linkify-html": "^4.0.0-beta.5",
     "linkify-plugin-mention": "^4.0.0-beta.5",

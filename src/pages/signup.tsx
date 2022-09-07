@@ -38,7 +38,7 @@ export default function SignUp() {
     /*if (ignoreDomains.includes(emailDomain)) {
       return
     }*/
-    const res = await fetch('/api/user', {
+    const res = await fetch('/api/account/create', {
       body: JSON.stringify({
         id: data.id,
         name: data.name,

@@ -22,7 +22,9 @@ import linkifyHtml from 'linkify-html'
 import 'linkify-plugin-mention'
 import { useSession, getSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
-import { Menu, Transition } from '@headlessui/react'
+import { Menu, Transition, Dialog } from '@headlessui/react'
+import { useForm, SubmitHandler } from 'react-hook-form'
+import Image from 'next/image'
 
 type Props = {
   mattars: Mattar[]
@@ -30,11 +32,22 @@ type Props = {
   pUser: User
 }
 
+type Inputs = {
+  id: string
+  name: string
+  avatar: string
+  description: string
+  location: string
+  website: string
+}
+
 const Profile = (props: Props) => {
   const { data: session } = useSession()
   const router = useRouter()
   const page = router.query.page || 'mattars'
   const [state, setState] = useState(page)
+  const [isOpen, setIsOpen] = useState(false)
+  const [img, setImg] = useState(props.user?.profile_picture)
   const deleteMattar = async (id: string) => {
     await fetch('/api/statuses/destroy/' + id, {
       method: 'DELETE',
@@ -77,11 +90,65 @@ const Profile = (props: Props) => {
       return 'たった今'
     }
   }
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    formState: { errors },
+  } = useForm<Inputs>()
+
   const setPage = (name: string) => {
     setState(name)
     router.query.page = name
     router.push(router)
   }
+  const showModal = (e?: React.ChangeEvent<HTMLInputElement>) => {
+    if (e) {
+      e.preventDefault()
+    }
+    if (isOpen) {
+      setImg(props.user?.profile_picture)
+      setIsOpen(false)
+    } else {
+      setIsOpen(true)
+    }
+  }
+  const onChangeInputFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0]
+      const reader = new FileReader()
+      reader.onload = (e: any) => {
+        setImg(e.target.result)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    const res = await fetch('/api/account/update_profile', {
+      body: JSON.stringify({
+        oldId: props.user?.id,
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        location: data.location,
+        website: data.website,
+        profile_picture: img,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+    })
+    const { error } = await res.json()
+    if (error) {
+      console.log(error)
+      return
+    }
+    setIsOpen(false)
+    router.reload()
+  }
+
   return (
     <div className="dark:bg-zinc-800 dark:text-white h-screen">
       <Head>
@@ -136,7 +203,7 @@ const Profile = (props: Props) => {
                 {props.user?.id === props.pUser.id ? (
                   <Button
                     className="absolute top-2 right-5 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
-                    onClick={() => {}}
+                    onClick={() => showModal()}
                   >
                     プロフィールを編集
                   </Button>
@@ -156,6 +223,147 @@ const Profile = (props: Props) => {
                     </Button>
                   </div>
                 )}
+                <Transition appear show={isOpen} as={Fragment}>
+                  <Dialog
+                    className="relative z-10"
+                    onClose={() => setIsOpen(false)}
+                  >
+                    <Transition.Child
+                      as={Fragment}
+                      enter="ease-out duration-300"
+                      enterFrom="opacity-0"
+                      enterTo="opacity-100"
+                      leave="ease-in duration-200"
+                      leaveFrom="opacity-100"
+                      leaveTo="opacity-0"
+                    >
+                      <div className="fixed inset-0 bg-black bg-opacity-25" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                      <div className="flex min-h-full items-center justify-center p-4 text-center">
+                        <Transition.Child
+                          as={Fragment}
+                          enter="ease-out duration-300"
+                          enterFrom="opacity-0 scale-95"
+                          enterTo="opacity-100 scale-100"
+                          leave="ease-in duration-200"
+                          leaveFrom="opacity-100 scale-100"
+                          leaveTo="opacity-0 scale-95"
+                        >
+                          <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                            <Dialog.Title
+                              as="h3"
+                              className="text-lg font-medium leading-6 text-gray-900"
+                            >
+                              プロフィールを編集
+                            </Dialog.Title>
+                            <form
+                              className="my-3"
+                              onSubmit={handleSubmit(onSubmit)}
+                            >
+                              <div className="flex flex-col mb-2">
+                                <label htmlFor="id">ユーザー名</label>
+                                <input
+                                  type="text"
+                                  id="id"
+                                  {...register('id', {
+                                    required: true,
+                                  })}
+                                  className="bg-gray-200 border-none duration-200 focus:border-none focus:ring-gray-300 rounded-md focus:bg-gray-100"
+                                  defaultValue={props.user?.id}
+                                />
+                              </div>
+                              <div className="flex flex-col mb-2">
+                                <label htmlFor="name">表示名</label>
+                                <input
+                                  type="text"
+                                  id="name"
+                                  {...register('name', {
+                                    required: true,
+                                  })}
+                                  defaultValue={props.user?.name}
+                                  className="bg-gray-200 border-none duration-200 focus:border-none focus:ring-gray-300 rounded-md focus:bg-gray-100"
+                                />
+                              </div>
+                              <div className="flex flex-col mb-2">
+                                <label htmlFor="avatar">アバター</label>
+                                <div className="flex flex-row">
+                                  <div className="w-28 h-28 relative">
+                                    <img src={img} />
+                                  </div>
+                                  <div className="ml-3 inline-flex gap-3 flex-col">
+                                    <label className="cursor-pointer text-center bg-primary text-white px-4 py-2 block rounded-md duration-200 shadow-md hover:shadow-sm">
+                                      <input
+                                        type="file"
+                                        {...register('avatar')}
+                                        onChange={(e) => onChangeInputFile(e)}
+                                        className="hidden"
+                                      />
+                                      アップロード
+                                    </label>
+                                    <Button
+                                      onClick={() => {}}
+                                      className="bg-primary text-white shadow-md duration-200 block px-4 py-2 rounded-md hover:shadow-sm"
+                                    >
+                                      デフォルトに戻す
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex flex-col mb-2">
+                                <label htmlFor="description">概要</label>
+                                <textarea
+                                  {...register('description')}
+                                  id="description"
+                                  defaultValue={props.user?.description}
+                                  className="bg-gray-200 border-none duration-200 focus:border-none focus:ring-gray-300 rounded-md focus:bg-gray-100"
+                                ></textarea>
+                              </div>
+                              <div className="flex flex-col mb-2">
+                                <label htmlFor="location">場所</label>
+                                <input
+                                  type="text"
+                                  id="location"
+                                  {...register('location')}
+                                  className="bg-gray-200 border-none duration-200 focus:border-none focus:ring-gray-300 rounded-md focus:bg-gray-100"
+                                  defaultValue={props.user?.location}
+                                />
+                              </div>
+                              <div className="flex flex-col mb-2">
+                                <label htmlFor="website">ウェブサイト</label>
+                                <input
+                                  type="text"
+                                  id="website"
+                                  {...register('website', {
+                                    pattern:
+                                      /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/,
+                                  })}
+                                  className="bg-gray-200 border-none duration-200 focus:border-none focus:ring-gray-300 rounded-md focus:bg-gray-100"
+                                  defaultValue={props.user?.website}
+                                />
+                              </div>
+                              <div className="mt-4 text-right">
+                                <Button
+                                  className="rounded-md bg-primary text-white shadow-md duration-200 px-4 py-2 hover:shadow-sm"
+                                  onClick={(e) => showModal(e)}
+                                >
+                                  キャンセル
+                                </Button>
+                                <input
+                                  type="submit"
+                                  value="更新"
+                                  className="cursor-pointer ml-3 rounded-md bg-primary text-white shadow-md duration-200 px-4 py-2 hover:shadow-sm"
+                                  onClick={() => {}}
+                                />
+                              </div>
+                            </form>
+                          </Dialog.Panel>
+                        </Transition.Child>
+                      </div>
+                    </div>
+                  </Dialog>
+                </Transition>
               </div>
             </div>
             <hr className="my-3" />
