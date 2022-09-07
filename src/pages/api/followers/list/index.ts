@@ -9,9 +9,13 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { user_id } = query
+  const { user_id, count } = query
   switch (method) {
     case 'GET':
+      if (count && Number(count) > 200) {
+        return res.status(400).json({ error: "maximum count is 200" })
+        break
+      }
       if (user_id) {
         const user = await prisma.user.findUnique({
           where: {
@@ -19,15 +23,20 @@ export default async function handler(
           },
           select: {
             id: true,
-            name: true,
-            description: true,
-            location: true,
-            website: true,
-            profile_picture: true,
-            mattars: true,
-            createdAt: true
-          },
+            follower: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                location: true,
+                website: true,
+                profile_picture: true,
+                createdAt: true
+              }
+            }
+          }
         })
+
         res.status(200).json(user)
         break
       } else {

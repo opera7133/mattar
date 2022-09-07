@@ -232,8 +232,6 @@ export default function TOS() {
               本サービスに関して紛争が生じた場合には、当団体の本店所在地を管轄する裁判所を専属的合意管轄とします。
             </li>
           </ol>
-
-          <p>以上</p>
         </details>
         <h2 className="text-2xl font-bold mb-3">利用規約の要約</h2>
         <h3 className="text-xl font-bold my-3">❌やってはいけないこと</h3>

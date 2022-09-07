@@ -11,6 +11,11 @@ export default async function handler(
   const { method } = req
   const clientIp = requestIp.getClientIp(req) || 'IP_NOT_FOUND'
   const query = req.query
+  const toHtmlEntities = (text: string) => {
+    return text.replace(/./gm, function (s) {
+      return (s.match(/[a-z0-9\s]+/i)) ? s : "&#" + s.charCodeAt(0) + ";";
+    })
+  }
   switch (method) {
     case 'POST':
       if (stringWidth(req.body.message.replace(/\n/g, '')) > 60) {
@@ -18,6 +23,7 @@ export default async function handler(
         break
       }
       req.body.ip = clientIp
+      req.body.message = toHtmlEntities(req.body.message)
       const mattar = await prisma.mattar.create({
         data: req.body,
       })

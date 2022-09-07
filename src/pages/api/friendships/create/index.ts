@@ -9,26 +9,37 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { user_id } = query
+  const { user_id, follow_user_id } = query
   switch (method) {
     case 'GET':
-      if (user_id) {
-        const user = await prisma.user.findUnique({
+      if (user_id && follow_user_id) {
+        const fupdate = await prisma.user.update({
           where: {
-            id: user_id,
+            id: follow_user_id
+          },
+          data: {
+            follower: {
+              connect: {
+                id: user_id
+              }
+            }
           },
           select: {
             id: true,
-            name: true,
-            description: true,
-            location: true,
-            website: true,
-            profile_picture: true,
-            mattars: true,
-            createdAt: true
-          },
+            follower: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                location: true,
+                website: true,
+                profile_picture: true,
+                createdAt: true
+              }
+            }
+          }
         })
-        res.status(200).json(user)
+        res.status(200).json(fupdate)
         break
       } else {
         res.status(400).json({ error: "Provide User ID" })

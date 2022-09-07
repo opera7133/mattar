@@ -11,12 +11,13 @@ import {
   BsReply,
   BsStarFill,
 } from 'react-icons/bs'
-import { useState, Fragment } from 'react'
+import { useState, Fragment, useEffect } from 'react'
 import stringWidth from 'string-width'
 import twemoji from 'twemoji'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
 import type { Mattar, User } from '@prisma/client'
+import Image from 'next/image'
 import * as linkify from 'linkifyjs'
 import linkifyHtml from 'linkify-html'
 import 'linkify-plugin-mention'
@@ -31,10 +32,14 @@ type Props = {
 
 const Home = (props: Props) => {
   const [text, setText] = useState('')
+  const [searchText, setSearchText] = useState('')
   const { data: session } = useSession()
   const router = useRouter()
   const page = router.query.page || 'home'
   const [state, setState] = useState(page)
+  const refreshData = () => {
+    router.replace(router.asPath)
+  }
   const checkTextArea = (e: any) => {
     const newText = e.target.value.replace(/\n/g, '')
     setText(e.target.value)
@@ -80,11 +85,13 @@ const Home = (props: Props) => {
         isRemattar: false,
       }),
     })
+    refreshData()
   }
   const deleteMattar = async (id: string) => {
     await fetch('/api/statuses/destroy/' + id, {
       method: 'POST',
     })
+    refreshData()
   }
   const favMattar = async (id: string) => {
     await fetch(
@@ -93,6 +100,7 @@ const Home = (props: Props) => {
         method: 'POST',
       }
     )
+    refreshData()
   }
   const disfavMattar = async (id: string) => {
     await fetch(
@@ -101,6 +109,7 @@ const Home = (props: Props) => {
         method: 'POST',
       }
     )
+    refreshData()
   }
   const linkifyOptions = {
     className: function (_href: string, type: string) {
@@ -116,6 +125,24 @@ const Home = (props: Props) => {
     setState(name)
     router.query.page = name
     router.push(router)
+  }
+  const followState = async (id) => {
+    if (
+      props.user?.following
+        .map(function (i: any) {
+          return i.id
+        })
+        .includes(id)
+    ) {
+      const res = await fetch(
+        `/api/friendships/destroy?user_id=${props.user?.id}&unfollow_user_id=${id}`
+      )
+    } else {
+      const ref = await fetch(
+        `/api/friendships/create?user_id=${props.user?.id}&follow_user_id=${id}`
+      )
+    }
+    refreshData()
   }
   return (
     <div className="dark:bg-zinc-800 dark:text-white h-screen">
@@ -206,10 +233,16 @@ const Home = (props: Props) => {
                         className="relative flex gap-3 group"
                         key={item.id}
                       >
-                        <img
-                          src={item.user.profile_picture}
-                          className="w-14 h-14 shrink-0 mt-2"
-                        />
+                        <div className="mt-2 w-14 h-14 relative">
+                          <Image
+                            src={
+                              item.user.profile_picture || '/img/default.png'
+                            }
+                            layout="fill"
+                            objectFit="cover"
+                            className="shrink-0"
+                          />
+                        </div>
                         <div>
                           <span className="font-bold">{item.user.name}</span>
                           <div
@@ -298,7 +331,7 @@ const Home = (props: Props) => {
                         </div>
                         <Menu>
                           <Menu.Button>
-                            <BsThreeDots className="absolute right-0 top-2 opacity-80 lg:opacity-0 duration-200 lg:group-hover:opacity-80" />
+                            <BsThreeDots className="absolute z-0 right-0 top-2 opacity-80 lg:opacity-0 duration-200 lg:group-hover:opacity-80" />
                           </Menu.Button>
                           <Transition
                             as={Fragment}
@@ -309,16 +342,27 @@ const Home = (props: Props) => {
                             leaveFrom="transform opacity-100 scale-100"
                             leaveTo="transform opacity-0 scale-95"
                           >
-                            <Menu.Items className="text-sm shadow-md absolute right-0 top-7 flex flex-col">
+                            <Menu.Items className="text-sm z-10 shadow-md absolute right-0 top-7 flex flex-col">
                               <Menu.Item>
-                                <button className="duration-200 px-2 py-1 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                <button
+                                  className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
+                                  onClick={() =>
+                                    navigator.clipboard.writeText(
+                                      `${window.location.protocol}://${
+                                        window.location.hostname === 'localhost'
+                                          ? 'localhost:3000'
+                                          : window.location.hostname
+                                      }/${item.userId}/status/${item.id}`
+                                    )
+                                  }
+                                >
                                   リンクをコピー
                                 </button>
                               </Menu.Item>
                               {props.user?.id === item.user?.id && (
                                 <Menu.Item>
                                   <button
-                                    className="duration-200 px-2 py-1 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
+                                    className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
                                     onClick={() => deleteMattar(item.id)}
                                   >
                                     削除
@@ -344,10 +388,16 @@ const Home = (props: Props) => {
                         className="relative flex gap-3 group"
                         key={item.id}
                       >
-                        <img
-                          src={item.user.profile_picture}
-                          className="w-14 h-14 shrink-0 mt-2"
-                        />
+                        <div className="mt-2 w-14 h-14 relative">
+                          <Image
+                            src={
+                              item.user.profile_picture || '/img/default.png'
+                            }
+                            layout="fill"
+                            objectFit="cover"
+                            className="shrink-0"
+                          />
+                        </div>
                         <div>
                           <span className="font-bold">{item.user.name}</span>
                           <div
@@ -436,7 +486,7 @@ const Home = (props: Props) => {
                         </div>
                         <Menu>
                           <Menu.Button>
-                            <BsThreeDots className="absolute right-0 top-2 opacity-80 lg:opacity-0 duration-200 lg:group-hover:opacity-80" />
+                            <BsThreeDots className="absolute z-0 right-0 top-2 opacity-80 lg:opacity-0 duration-200 lg:group-hover:opacity-80" />
                           </Menu.Button>
                           <Transition
                             as={Fragment}
@@ -447,16 +497,27 @@ const Home = (props: Props) => {
                             leaveFrom="transform opacity-100 scale-100"
                             leaveTo="transform opacity-0 scale-95"
                           >
-                            <Menu.Items className="text-sm shadow-md absolute right-0 top-7 flex flex-col">
+                            <Menu.Items className="text-sm z-10 shadow-md absolute right-0 top-7 flex flex-col">
                               <Menu.Item>
-                                <button className="duration-200 px-2 py-1 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                <button
+                                  className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
+                                  onClick={() =>
+                                    navigator.clipboard.writeText(
+                                      `${window.location.protocol}://${
+                                        window.location.hostname === 'localhost'
+                                          ? 'localhost:3000'
+                                          : window.location.hostname
+                                      }/${item.userId}/status/${item.id}`
+                                    )
+                                  }
+                                >
                                   リンクをコピー
                                 </button>
                               </Menu.Item>
                               {props.user?.id === item.user?.id && (
                                 <Menu.Item>
                                   <button
-                                    className="duration-200 px-2 py-1 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
+                                    className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
                                     onClick={() => deleteMattar(item.id)}
                                   >
                                     削除
@@ -469,16 +530,20 @@ const Home = (props: Props) => {
                       </article>
                     )
                   }
-                } else {
+                } else if (state === 'home') {
                   return (
                     <article
                       className="flex gap-3 group relative"
                       key={item.id}
                     >
-                      <img
-                        src={item.user.profile_picture}
-                        className="w-14 h-14 shrink-0 mt-2"
-                      />
+                      <div className="mt-2 w-14 h-14 relative">
+                        <Image
+                          src={item.user.profile_picture || '/img/default.png'}
+                          layout="fill"
+                          objectFit="cover"
+                          className="shrink-0"
+                        />
+                      </div>
                       <div>
                         <span className="font-bold">
                           <Link href={`/${item.userId}`}>{item.user.name}</Link>
@@ -573,7 +638,7 @@ const Home = (props: Props) => {
                       </div>
                       <Menu>
                         <Menu.Button>
-                          <BsThreeDots className="absolute right-0 top-2 duration-200 opacity-80 lg:opacity-0 lg:group-hover:opacity-80" />
+                          <BsThreeDots className="absolute z-0 right-0 top-2 duration-200 opacity-80 lg:opacity-0 lg:group-hover:opacity-80" />
                         </Menu.Button>
                         <Transition
                           as={Fragment}
@@ -584,31 +649,31 @@ const Home = (props: Props) => {
                           leaveFrom="transform opacity-100 scale-100"
                           leaveTo="transform opacity-0 scale-95"
                         >
-                          <Menu.Items className="text-sm shadow-md absolute right-0 top-7 flex flex-col">
+                          <Menu.Items className="text-sm z-10 shadow-md absolute right-0 top-7 flex flex-col">
                             <Menu.Item>
-                              {({ active }) => (
-                                <button
-                                  className="duration-200 px-2 py-1 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
-                                  onClick={() =>
-                                    navigator.clipboard.writeText(
-                                      `http://localhost:3000/${item.userId}/status/${item.id}`
-                                    )
-                                  }
-                                >
-                                  リンクをコピー
-                                </button>
-                              )}
+                              <button
+                                className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
+                                onClick={() =>
+                                  navigator.clipboard.writeText(
+                                    `${window.location.protocol}://${
+                                      window.location.hostname === 'localhost'
+                                        ? 'localhost:3000'
+                                        : window.location.hostname
+                                    }/${item.userId}/status/${item.id}`
+                                  )
+                                }
+                              >
+                                リンクをコピー
+                              </button>
                             </Menu.Item>
                             {props.user?.id === item.user?.id && (
                               <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    className="duration-200 px-2 py-1 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
-                                    onClick={() => deleteMattar(item.id)}
-                                  >
-                                    削除
-                                  </button>
-                                )}
+                                <button
+                                  className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
+                                  onClick={() => deleteMattar(item.id)}
+                                >
+                                  削除
+                                </button>
                               </Menu.Item>
                             )}
                           </Menu.Items>
@@ -618,6 +683,204 @@ const Home = (props: Props) => {
                   )
                 }
               })}
+              {state === 'following' &&
+                props.user?.following.map((item) => {
+                  return (
+                    <article
+                      className="flex gap-3 group relative"
+                      key={item.id}
+                    >
+                      <div className="w-16 h-16 relative">
+                        <Image
+                          src={item.profile_picture}
+                          alt={`${item.name}\'s Avatar`}
+                          layout="fill"
+                          objectFit="cover"
+                          className="shrink-0"
+                        />
+                      </div>
+                      <Link href={`/${item.id}`}>
+                        <a>
+                          <div>
+                            <span className="font-bold text-lg block">
+                              {item.name}
+                            </span>
+                            <span className="text-md">@{item.id}</span>
+                          </div>
+                        </a>
+                      </Link>
+                      <div>
+                        <Button
+                          className="absolute top-2 right-20 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
+                          onClick={() => followState(item.id)}
+                        >
+                          {props.user?.following
+                            .map(function (i: any) {
+                              return i.id
+                            })
+                            .includes(item.id)
+                            ? 'フォロー中'
+                            : 'フォロー'}
+                        </Button>
+                        <Menu as="div" className="inline-block text-left">
+                          <div>
+                            <Menu.Button className="absolute top-2 right-5 bg-primary text-white px-3.5 py-3 shadow-md duration-200 hover:shadow-sm rounded-md">
+                              <BsThreeDots />
+                            </Menu.Button>
+                          </div>
+                          <Transition
+                            as={Fragment}
+                            enter="transition ease-out duration-100"
+                            enterFrom="transform opacity-0 scale-95"
+                            enterTo="transform opacity-100 scale-100"
+                            leave="transition ease-in duration-75"
+                            leaveFrom="transform opacity-100 scale-100"
+                            leaveTo="transform opacity-0 scale-95"
+                          >
+                            <Menu.Items className="absolute right-5 top-14 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                              <div className="flex flex-col">
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                      ミュート
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                      ブロック
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                              </div>
+                              <div className="flex flex-col">
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button
+                                      className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
+                                      onClick={() =>
+                                        navigator.clipboard.writeText(
+                                          `${window.location.protocol}://${
+                                            window.location.hostname ===
+                                            'localhost'
+                                              ? 'localhost:3000'
+                                              : window.location.hostname
+                                          }/${item.id}`
+                                        )
+                                      }
+                                    >
+                                      リンクをコピー
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                              </div>
+                            </Menu.Items>
+                          </Transition>
+                        </Menu>
+                      </div>
+                    </article>
+                  )
+                })}
+              {state === 'follower' &&
+                props.user.follower.map((item) => {
+                  return (
+                    <article
+                      className="flex gap-3 group relative"
+                      key={item.id}
+                    >
+                      <div className="w-16 h-16 relative">
+                        <Image
+                          src={item.profile_picture}
+                          alt={`${item.name}\'s Avatar`}
+                          layout="fill"
+                          objectFit="cover"
+                          className="shrink-0"
+                        />
+                      </div>
+                      <Link href={`/${item.id}`}>
+                        <a>
+                          <div>
+                            <span className="font-bold text-lg block">
+                              {item.name}
+                            </span>
+                            <span className="text-md">@{item.id}</span>
+                          </div>
+                        </a>
+                      </Link>
+                      <div>
+                        <Button
+                          className="absolute top-2 right-20 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
+                          onClick={() => followState(item.id)}
+                        >
+                          {props.user?.following
+                            .map(function (i: any) {
+                              return i.id
+                            })
+                            .includes(item.id)
+                            ? 'フォロー中'
+                            : 'フォロー'}
+                        </Button>
+                        <Menu as="div" className="inline-block text-left">
+                          <div>
+                            <Menu.Button className="absolute top-2 right-5 bg-primary text-white px-3.5 py-3 shadow-md duration-200 hover:shadow-sm rounded-md">
+                              <BsThreeDots />
+                            </Menu.Button>
+                          </div>
+                          <Transition
+                            as={Fragment}
+                            enter="transition ease-out duration-100"
+                            enterFrom="transform opacity-0 scale-95"
+                            enterTo="transform opacity-100 scale-100"
+                            leave="transition ease-in duration-75"
+                            leaveFrom="transform opacity-100 scale-100"
+                            leaveTo="transform opacity-0 scale-95"
+                          >
+                            <Menu.Items className="absolute right-5 top-14 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                              <div className="flex flex-col">
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                      ミュート
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                      ブロック
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                              </div>
+                              <div className="flex flex-col">
+                                <Menu.Item>
+                                  {({ active }) => (
+                                    <button
+                                      className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
+                                      onClick={() =>
+                                        navigator.clipboard.writeText(
+                                          `${window.location.protocol}://${
+                                            window.location.hostname ===
+                                            'localhost'
+                                              ? 'localhost:3000'
+                                              : window.location.hostname
+                                          }/${item.id}`
+                                        )
+                                      }
+                                    >
+                                      リンクをコピー
+                                    </button>
+                                  )}
+                                </Menu.Item>
+                              </div>
+                            </Menu.Items>
+                          </Transition>
+                        </Menu>
+                      </div>
+                    </article>
+                  )
+                })}
             </div>
           </div>
         </div>
@@ -625,7 +888,14 @@ const Home = (props: Props) => {
           {session && (
             <div>
               <div className="px-3 flex gap-3 items-center">
-                <img src={props.user.profile_picture} className="w-12" />
+                <div className="w-16 h-16 relative">
+                  <Image
+                    src={props.user.profile_picture || '/img/default.png'}
+                    layout="fill"
+                    objectFit="cover"
+                    alt={`${props.user?.name}\'s Avatar`}
+                  />
+                </div>
                 <div>
                   <p className="font-bold">{props.user?.name}</p>
                   <p>
@@ -638,12 +908,30 @@ const Home = (props: Props) => {
                 <tbody>
                   <tr>
                     <td>
-                      <p className="font-bold">1</p>
-                      <p>フォロー中</p>
+                      <Button
+                        className="text-left"
+                        onClick={() => setState('following')}
+                      >
+                        <div>
+                          <p className="font-bold">
+                            {props.user?.following.length}
+                          </p>
+                          <p>フォロー中</p>
+                        </div>
+                      </Button>
                     </td>
                     <td>
-                      <p className="font-bold">0</p>
-                      <p>フォロワー</p>
+                      <Button
+                        className="text-left"
+                        onClick={() => setState('follower')}
+                      >
+                        <div>
+                          <p className="font-bold">
+                            {props.user?.follower.length}
+                          </p>
+                          <p>フォロワー</p>
+                        </div>
+                      </Button>
                     </td>
                     <td>
                       <p className="font-bold">0</p>
@@ -698,11 +986,13 @@ const Home = (props: Props) => {
                 <input
                   placeholder="検索"
                   type="text"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
                   className="text-black w-full h-9 rounded-md rounded-r-none focus:ring-0 focus:border-gray-500 border-r-0"
                 />
                 <Button
                   className="bg-primary px-3 h-9 border border-primary rounded-md rounded-l-none hover:opacity-80 duration-300"
-                  onClick={() => {}}
+                  onClick={() => router.push(`/search?query=${searchText}`)}
                 >
                   <BsSearch className="fill-white" size={18} />
                 </Button>
@@ -737,6 +1027,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           },
           include: {
             favorites: true,
+            following: true,
+            follower: true,
           },
         })
       )

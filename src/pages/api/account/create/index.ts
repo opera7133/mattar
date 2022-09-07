@@ -22,6 +22,15 @@ export default async function handler(
         res.status(400).json({ error: "You can\'t use that id" })
         break
       }
+      const allowedId = /^[0-9a-zA-Z]+[_]*[0-9a-zA-Z]*$/
+      if (!req.body.id.test(allowedId)) {
+        res.status(400).json({ error: "You can\'t use that symbol" })
+        break
+      }
+      if (req.body.id.length > 15 || req.body.id.length < 4) {
+        res.status(400).json({ error: "Maximum ID length is 15" })
+        break
+      }
       const check = await prisma.user.findUnique({
         where: {
           id: req.body.id

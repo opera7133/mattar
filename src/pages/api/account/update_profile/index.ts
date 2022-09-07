@@ -15,6 +15,15 @@ export default async function handler(
         res.status(400).json({ error: "You can\'t use that id" })
         break
       }
+      const allowedId = /^[0-9a-zA-Z]+[_]*[0-9a-zA-Z]*$/
+      if (!req.body.id.test(allowedId)) {
+        res.status(400).json({ error: "You can\'t use that symbol" })
+        break
+      }
+      if (req.body.id.length > 15 || req.body.id.length < 4) {
+        res.status(400).json({ error: "Maximum ID length is 15" })
+        break
+      }
       const check = await prisma.user.findUnique({
         where: {
           id: req.body.oldId
@@ -23,7 +32,7 @@ export default async function handler(
       if (check && (req.body.oldId !== req.body.id)) {
         res.status(400).json({ error: "ID is already taken" })
       }
-      if (req.body.profile_picture !== check?.profile_picture) {
+      if (req.body.profile_picture !== check?.profile_picture && req.body.profile_picture !== "/img/default.png") {
         const imgId = check?.profile_picture?.match(/https\:\/\/res\.cloudinary\.com\/mattarli\/image\/upload\/v.*\/(mattar\/.*)\..*/)
         cloudinary.v2.config({
           cloud_name: process.env.CLOUDINARY_NAME,

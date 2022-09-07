@@ -31,14 +31,18 @@ type Props = {
 }
 
 const Mattar = (props: Props) => {
-  const [text, setText] = useState('')
+  const [searchText, setSearchText] = useState('')
   const { data: session } = useSession()
   const router = useRouter()
   const { user, id } = router.query
+  const refreshData = () => {
+    router.replace(router.asPath)
+  }
   const deleteMattar = async (id: string) => {
     await fetch('/api/statuses/destroy/' + id, {
       method: 'POST',
     })
+    refreshData()
   }
   const linkifyOptions = {
     className: function (_href: string, type: string) {
@@ -177,7 +181,11 @@ const Mattar = (props: Props) => {
                       className="duration-200 hover:text-sky-400"
                       onClick={() =>
                         navigator.clipboard.writeText(
-                          `http://localhost:3000/${user}/status/${id}`
+                          `${window.location.protocol}://${
+                            window.location.hostname === 'localhost'
+                              ? 'localhost:3000'
+                              : window.location.hostname
+                          }/${user}/status/${id}`
                         )
                       }
                     >
@@ -272,11 +280,13 @@ const Mattar = (props: Props) => {
             <input
               placeholder="検索"
               type="text"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
               className="text-black w-full h-9 rounded-md rounded-r-none focus:ring-0 focus:border-gray-500 border-r-0"
             />
             <Button
               className="bg-primary px-3 h-9 border border-primary rounded-md rounded-l-none hover:opacity-80 duration-300"
-              onClick={() => {}}
+              onClick={() => router.push(`/search?query=${searchText}`)}
             >
               <BsSearch className="fill-white" size={18} />
             </Button>

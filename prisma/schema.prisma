@@ -56,5 +56,7 @@ model User {
   mattars         Mattar[]
   favorites       Favorite[]
   remattars       Remattar[]
-  createdAt   DateTime    @default(now())
+  follower        User[]    @relation("UserFollows")
+  following       User[]    @relation("UserFollows") 
+  createdAt       DateTime  @default(now())
 }
