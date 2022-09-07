@@ -5,12 +5,15 @@ import Head from 'next/head'
 import Link from 'next/link'
 import { BsEyeFill, BsEyeSlashFill } from 'react-icons/bs'
 import { useForm, SubmitHandler } from 'react-hook-form'
-import { getCsrfToken, signIn } from 'next-auth/react'
+import { getCsrfToken, signIn, useSession } from 'next-auth/react'
 import { CtxOrReq } from 'next-auth/client/_utils'
-import router from 'next/router'
+import { useRouter } from 'next/router'
 import { passwordStrength } from 'check-password-strength'
 
 export default function SignUp() {
+  const router = useRouter()
+  const { data: session } = useSession()
+
   type Inputs = {
     id: string
     name: string
@@ -41,6 +44,7 @@ export default function SignUp() {
         name: data.name,
         email: data.email,
         password: data.password,
+        profile_picture: '/img/default.png',
       }),
       headers: {
         'Content-Type': 'application/json',
@@ -70,189 +74,193 @@ export default function SignUp() {
   const classNames = (...classes: any[]) => {
     return classes.filter(Boolean).join(' ')
   }
-  return (
-    <div className="">
-      <Head>
-        <title>新規登録 | mattar.li</title>
-      </Head>
-      <Header />
-      <article className="pt-10 mb-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
-        <h1 className="text-2xl font-bold mb-3">新規登録</h1>
-        <p>
-          アカウントをお持ちですか？
-          <Link href="/signin">
-            <a className="text-sky-500 duration-200 hover:text-sky-800">
-              ログイン
-            </a>
-          </Link>
-        </p>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="max-w-xl flex flex-col gap-3 my-5">
-            <div className="inline-flex flex-col">
-              <label className="text-lg" htmlFor="userid">
-                ユーザー名
-              </label>
-              <input
-                className={classNames(
-                  errors.id ? 'bg-red-200' : '',
-                  'bg-gray-200 border-none rounded-md text-lg px-5 py-3 duration-200 text-black focus:ring-0 focus:bg-gray-100'
-                )}
-                type="text"
-                {...register('id', { required: true })}
-                id="userid"
-                placeholder="john_doe"
-              />
-            </div>
+  if (session) {
+    router.push('/')
+  } else {
+    return (
+      <div className="">
+        <Head>
+          <title>新規登録 | mattar.li</title>
+        </Head>
+        <Header />
+        <article className="pt-10 mb-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
+          <h1 className="text-2xl font-bold mb-3">新規登録</h1>
+          <p>
+            アカウントをお持ちですか？
+            <Link href="/signin">
+              <a className="text-sky-500 duration-200 hover:text-sky-800">
+                ログイン
+              </a>
+            </Link>
+          </p>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="max-w-xl flex flex-col gap-3 my-5">
+              <div className="inline-flex flex-col">
+                <label className="text-lg" htmlFor="userid">
+                  ユーザー名
+                </label>
+                <input
+                  className={classNames(
+                    errors.id ? 'bg-red-200' : '',
+                    'bg-gray-200 border-none rounded-md text-lg px-5 py-3 duration-200 text-black focus:ring-0 focus:bg-gray-100'
+                  )}
+                  type="text"
+                  {...register('id', { required: true })}
+                  id="userid"
+                  placeholder="john_doe"
+                />
+              </div>
 
-            <div className="inline-flex flex-col">
-              <label className="text-lg" htmlFor="name">
-                表示名
-              </label>
-              <input
-                className={classNames(
-                  errors.name ? 'bg-red-200' : '',
-                  'bg-gray-200 border-none rounded-md text-lg px-5 py-3 duration-200 text-black focus:ring-0 focus:bg-gray-100'
-                )}
-                type="text"
-                {...register('name', {
-                  required: true,
-                })}
-                id="name"
-                placeholder="John Doe"
-              />
-            </div>
+              <div className="inline-flex flex-col">
+                <label className="text-lg" htmlFor="name">
+                  表示名
+                </label>
+                <input
+                  className={classNames(
+                    errors.name ? 'bg-red-200' : '',
+                    'bg-gray-200 border-none rounded-md text-lg px-5 py-3 duration-200 text-black focus:ring-0 focus:bg-gray-100'
+                  )}
+                  type="text"
+                  {...register('name', {
+                    required: true,
+                  })}
+                  id="name"
+                  placeholder="John Doe"
+                />
+              </div>
 
-            <div className="inline-flex flex-col">
-              <label className="text-lg" htmlFor="email">
-                メールアドレス
-              </label>
-              <input
-                className={classNames(
-                  errors.email ? 'bg-red-200' : '',
-                  'bg-gray-200 border-none rounded-md text-lg px-5 py-3 duration-200 text-black focus:ring-0 focus:bg-gray-100'
-                )}
-                type="email"
-                {...register('email', {
-                  required: true,
-                  pattern:
-                    /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/,
-                })}
-                id="email"
-                placeholder="sample@example.com"
-              />
-            </div>
+              <div className="inline-flex flex-col">
+                <label className="text-lg" htmlFor="email">
+                  メールアドレス
+                </label>
+                <input
+                  className={classNames(
+                    errors.email ? 'bg-red-200' : '',
+                    'bg-gray-200 border-none rounded-md text-lg px-5 py-3 duration-200 text-black focus:ring-0 focus:bg-gray-100'
+                  )}
+                  type="email"
+                  {...register('email', {
+                    required: true,
+                    pattern:
+                      /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/,
+                  })}
+                  id="email"
+                  placeholder="sample@example.com"
+                />
+              </div>
 
-            <div className="inline-flex flex-col">
-              <label className="text-lg" htmlFor="password">
-                パスワード
-              </label>
-              <input
-                className={classNames(
-                  errors.password ? 'bg-red-200' : '',
-                  'bg-gray-200 border-none rounded-md text-lg px-5 py-3 duration-200 text-black focus:ring-0 focus:bg-gray-100'
-                )}
-                type="password"
-                {...register('password', {
-                  required: true,
-                  minLength: {
-                    value: 8,
-                    message: '8文字以上',
-                  },
-                  pattern:
-                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                })}
-                id="password"
-              />
-              <div className="flex my-3">
-                <div className="w-1/4 px-1">
-                  <div
-                    className={classNames(
-                      'h-2 rounded-xl transition-colors bg-gray-200',
-                      passwordStrength(watchPassword).value === 'Too weak' &&
-                        'bg-red-500',
-                      passwordStrength(watchPassword).value === 'Weak' &&
-                        'bg-orange-500',
-                      passwordStrength(watchPassword).value === 'Medium' &&
-                        'bg-yellow-400',
-                      passwordStrength(watchPassword).value === 'Strong' &&
-                        'bg-green-500'
-                    )}
-                  ></div>
+              <div className="inline-flex flex-col">
+                <label className="text-lg" htmlFor="password">
+                  パスワード
+                </label>
+                <input
+                  className={classNames(
+                    errors.password ? 'bg-red-200' : '',
+                    'bg-gray-200 border-none rounded-md text-lg px-5 py-3 duration-200 text-black focus:ring-0 focus:bg-gray-100'
+                  )}
+                  type="password"
+                  {...register('password', {
+                    required: true,
+                    minLength: {
+                      value: 8,
+                      message: '8文字以上',
+                    },
+                    pattern:
+                      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                  })}
+                  id="password"
+                />
+                <div className="flex my-3">
+                  <div className="w-1/4 px-1">
+                    <div
+                      className={classNames(
+                        'h-2 rounded-xl transition-colors bg-gray-200',
+                        passwordStrength(watchPassword).value === 'Too weak' &&
+                          'bg-red-500',
+                        passwordStrength(watchPassword).value === 'Weak' &&
+                          'bg-orange-500',
+                        passwordStrength(watchPassword).value === 'Medium' &&
+                          'bg-yellow-400',
+                        passwordStrength(watchPassword).value === 'Strong' &&
+                          'bg-green-500'
+                      )}
+                    ></div>
+                  </div>
+                  <div className="w-1/4 px-1">
+                    <div
+                      className={classNames(
+                        'h-2 rounded-xl transition-colors bg-gray-200',
+                        passwordStrength(watchPassword).value === 'Weak' &&
+                          'bg-orange-500',
+                        passwordStrength(watchPassword).value === 'Medium' &&
+                          'bg-yellow-400',
+                        passwordStrength(watchPassword).value === 'Strong' &&
+                          'bg-green-500'
+                      )}
+                    ></div>
+                  </div>
+                  <div className="w-1/4 px-1">
+                    <div
+                      className={classNames(
+                        'h-2 rounded-xl transition-colors bg-gray-200',
+                        passwordStrength(watchPassword).value === 'Medium' &&
+                          'bg-yellow-400',
+                        passwordStrength(watchPassword).value === 'Strong' &&
+                          'bg-green-500'
+                      )}
+                    ></div>
+                  </div>
+                  <div className="w-1/4 px-1">
+                    <div
+                      className={classNames(
+                        'h-2 rounded-xl transition-colors bg-gray-200',
+                        passwordStrength(watchPassword).value === 'Strong' &&
+                          'bg-green-500'
+                      )}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-1/4 px-1">
-                  <div
-                    className={classNames(
-                      'h-2 rounded-xl transition-colors bg-gray-200',
-                      passwordStrength(watchPassword).value === 'Weak' &&
-                        'bg-orange-500',
-                      passwordStrength(watchPassword).value === 'Medium' &&
-                        'bg-yellow-400',
-                      passwordStrength(watchPassword).value === 'Strong' &&
-                        'bg-green-500'
-                    )}
-                  ></div>
-                </div>
-                <div className="w-1/4 px-1">
-                  <div
-                    className={classNames(
-                      'h-2 rounded-xl transition-colors bg-gray-200',
-                      passwordStrength(watchPassword).value === 'Medium' &&
-                        'bg-yellow-400',
-                      passwordStrength(watchPassword).value === 'Strong' &&
-                        'bg-green-500'
-                    )}
-                  ></div>
-                </div>
-                <div className="w-1/4 px-1">
-                  <div
-                    className={classNames(
-                      'h-2 rounded-xl transition-colors bg-gray-200',
-                      passwordStrength(watchPassword).value === 'Strong' &&
-                        'bg-green-500'
-                    )}
-                  ></div>
-                </div>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  className={classNames(
+                    errors.agree ? 'ring-red-500 ring' : '',
+                    'border-gray-300 rounded duration-200 text-primary focus:ring-primary focus:ring-offset-0 focus:ring-opacity-50'
+                  )}
+                  id="privacy"
+                  {...register('agree', { required: true })}
+                />
+                <label className="text-lg" htmlFor="privacy">
+                  <Link href="/privacy">
+                    <a className="text-sky-500 duration-200 hover:text-sky-800">
+                      <span className="ml-2">プライバシーポリシー</span>
+                    </a>
+                  </Link>
+                  および
+                  <Link href="/tos">
+                    <a className="text-sky-500 duration-200 hover:text-sky-800">
+                      <span>利用規約</span>
+                    </a>
+                  </Link>
+                  をよく読み、同意しました。
+                </label>
               </div>
             </div>
 
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                className={classNames(
-                  errors.agree ? 'ring-red-500 ring' : '',
-                  'border-gray-300 rounded duration-200 text-primary focus:ring-primary focus:ring-offset-0 focus:ring-opacity-50'
-                )}
-                id="privacy"
-                {...register('agree', { required: true })}
-              />
-              <label className="text-lg" htmlFor="privacy">
-                <Link href="/privacy">
-                  <a className="text-sky-500 duration-200 hover:text-sky-800">
-                    <span className="ml-2">プライバシーポリシー</span>
-                  </a>
-                </Link>
-                および
-                <Link href="/tos">
-                  <a className="text-sky-500 duration-200 hover:text-sky-800">
-                    <span>利用規約</span>
-                  </a>
-                </Link>
-                をよく読み、同意しました。
-              </label>
-            </div>
-          </div>
-
-          <Button
-            className="px-4 text-white py-2 rounded-md bg-primary shadow-md duration-200 hover:shadow-sm"
-            onClick={() => {}}
-          >
-            登録
-          </Button>
-        </form>
-      </article>
-      <Footer />
-    </div>
-  )
+            <Button
+              className="px-4 text-white py-2 rounded-md bg-primary shadow-md duration-200 hover:shadow-sm"
+              onClick={() => {}}
+            >
+              登録
+            </Button>
+          </form>
+        </article>
+        <Footer />
+      </div>
+    )
+  }
 }
 
 export const getServerSideProps = async (context: CtxOrReq | undefined) => {

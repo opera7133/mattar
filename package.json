@@ -1,5 +1,8 @@
 {
   "name": "mattar",
+  "version": "1.0.0",
+  "homepage": "https://mattar.li",
+  "author": "wamo <ainznino@pm.me> (https://wmsci.com)",
   "private": true,
   "license": "BSD-3-Clause-Clear",
   "scripts": {
@@ -16,6 +19,7 @@
     "@types/request-ip": "^0.0.37",
     "argon2": "^0.29.1",
     "check-password-strength": "^2.0.7",
+    "date-fns": "^2.29.2",
     "linkify-html": "^4.0.0-beta.5",
     "linkify-plugin-mention": "^4.0.0-beta.5",
     "linkifyjs": "^4.0.0-beta.5",

@@ -18,25 +18,43 @@ model Mattar {
   source      String
   ip          String
   userId      String
-  user        User @relation(fields: [userId], references: [id])
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isRemattar  Boolean
+  favorites   Favorite[]
+  remattar    Remattar[]
   createdAt   DateTime    @default(now())
 }
 
-model Favorites {
+model Remattar {
   id              String    @id @default(cuid())
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId          String
-  mattarId          String
+  mattar          Mattar    @relation(fields: [mattarId], references: [id], onDelete: Cascade)
+  mattarId        String
+}
+
+model Favorite {
+  id              String    @id @default(cuid())
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  mattar          Mattar    @relation(fields: [mattarId], references: [id], onDelete: Cascade)
+  mattarId        String
 }
 
 model User {
   id              String    @id
   name            String
   description     String?
+  location        String?
+  website         String?
   profile_picture String?
   hash            String
   salt            String
-  email           String
+  email           String    @unique
+  mattar_count    Int
   verified        Boolean
-  mattars           Mattar[]
+  mattars         Mattar[]
+  favorites       Favorite[]
+  remattars       Remattar[]
   createdAt   DateTime    @default(now())
 }

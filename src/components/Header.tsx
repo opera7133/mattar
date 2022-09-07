@@ -75,7 +75,7 @@ function Header() {
   }, [darkMode])
 
   return (
-    <div className="bg-white dark:bg-zinc-800 text-lg">
+    <div className="bg-white dark:bg-zinc-800 text-lg px-4">
       <header className="max-w-6xl mx-auto py-4 flex flex-row justify-between items-center">
         <Link href="/">
           <a>
@@ -108,21 +108,13 @@ function Header() {
             </li>
             {session && (
               <li>
-                <Link href="/profile">
+                <Link href={`/${session.user?.id}`}>
                   <a className="hover:opacity-70 duration-200">
                     <BsPersonFill className="dark:fill-white" size={25} />
                   </a>
                 </Link>
               </li>
             )}
-
-            <li>
-              <Link href="/find">
-                <a className="hover:opacity-70 duration-200">
-                  <BsPeopleFill className="dark:fill-white" size={25} />
-                </a>
-              </Link>
-            </li>
             {session && (
               <li>
                 <Link href="/settings">
@@ -132,13 +124,6 @@ function Header() {
                 </Link>
               </li>
             )}
-            <li>
-              <Link href="/help">
-                <a className="hover:opacity-70 duration-200">
-                  <BsQuestionCircleFill className="dark:fill-white" size={23} />
-                </a>
-              </Link>
-            </li>
             <li>
               <button
                 className="hover:opacity-70 duration-200 pt-1"
