@@ -128,6 +128,27 @@ const Settings = (props: Props) => {
     }
     refreshData()
   }
+
+  const issueToken = async () => {
+    const res = await fetch(
+      `/api/account/verify/issue?user_id=${props.user.id}`
+    )
+    const { error } = await res.json()
+    if (error) {
+      console.log(error)
+      return
+    }
+  }
+
+  const issueAPI = async () => {
+    const res = await fetch(`/api/developer/issue?user_id=${props.user.id}`)
+    const { error } = await res.json()
+    if (error) {
+      console.log(error)
+      return
+    }
+    refreshData()
+  }
   if (session) {
     return (
       <div className="dark:bg-zinc-800 dark:text-white h-screen">
@@ -175,7 +196,10 @@ const Settings = (props: Props) => {
                     <p className="text-red-500 font-bold mb-3">
                       メールアドレスが認証されていません。メールをご確認ください。
                       <span>
-                        <button className="text-sky-500 duration-200 hover:text-sky-700">
+                        <button
+                          onClick={issueToken}
+                          className="text-sky-500 duration-200 hover:text-sky-700"
+                        >
                           メールを再送
                         </button>
                       </span>
@@ -193,7 +217,7 @@ const Settings = (props: Props) => {
                         type="text"
                         defaultValue={props.user.email}
                         {...register('email', { required: true })}
-                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       />
                     </div>
                     <div className="flex flex-col mb-4">
@@ -204,7 +228,7 @@ const Settings = (props: Props) => {
                         pattern="\d{4}-\d{2}-\d{2}"
                         defaultValue={props.user.birthday}
                         {...register('bday')}
-                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       />
                     </div>
                     <div className="flex flex-col mb-4">
@@ -212,7 +236,7 @@ const Settings = (props: Props) => {
                       <select
                         defaultValue={props.user.lang}
                         {...register('lang', { required: true })}
-                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       >
                         <option value="ja_JP">日本語</option>
                         <option value="en_US">English (US)</option>
@@ -238,7 +262,10 @@ const Settings = (props: Props) => {
                     <p className="text-red-500 font-bold mb-3">
                       メールアドレスが認証されていません。メールをご確認ください。
                       <span>
-                        <button className="text-sky-500 duration-200 hover:text-sky-700">
+                        <button
+                          onClick={issueToken}
+                          className="text-sky-500 duration-200 hover:text-sky-700"
+                        >
                           メールを再送
                         </button>
                       </span>
@@ -252,7 +279,7 @@ const Settings = (props: Props) => {
                         id="oldPassword"
                         type="password"
                         {...sregister('oldPassword')}
-                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       />
                     </div>
                     <div className="flex flex-col mb-4">
@@ -261,7 +288,7 @@ const Settings = (props: Props) => {
                         id="newPassword"
                         type="password"
                         {...sregister('newPassword')}
-                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       />
                     </div>
                     <div className="flex flex-col mb-4">
@@ -280,7 +307,7 @@ const Settings = (props: Props) => {
                             )
                           },
                         })}
-                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       />
                     </div>
                     <h2 className="text-2xl font-bold my-3">二段階認証</h2>
@@ -302,14 +329,14 @@ const Settings = (props: Props) => {
                           type="text"
                           readOnly
                           value={secret}
-                          className="mb-3 bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                          className="mb-3 bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                         />
                         <label htmlFor="2fact">コード</label>
                         <input
                           id="2fact"
                           type="text"
                           {...sregister('twoFactor')}
-                          className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                          className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                         />
                       </div>
                     )}
@@ -327,19 +354,28 @@ const Settings = (props: Props) => {
                     <p className="text-red-500 font-bold mb-3">
                       メールアドレスが認証されていません。メールをご確認ください。
                       <span>
-                        <button className="text-sky-500 duration-200 hover:text-sky-700">
+                        <button
+                          onClick={issueToken}
+                          className="text-sky-500 duration-200 hover:text-sky-700"
+                        >
                           メールを再送
                         </button>
                       </span>
                     </p>
                   )}
-                  <form key={3} className="mb-3">
+                  <div className="mb-3">
                     <div className="flex flex-col mb-4">
                       <label htmlFor="token">APIトークン</label>
                       <input
                         id="token"
                         type="text"
-                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                        value={
+                          props.user.apiCredentials
+                            ? props.user.apiCredentials.token
+                            : ''
+                        }
+                        readOnly
+                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       />
                     </div>
                     <div className="flex flex-col mb-4">
@@ -347,15 +383,22 @@ const Settings = (props: Props) => {
                       <input
                         id="secret"
                         type="text"
-                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                        value={
+                          props.user.apiCredentials
+                            ? props.user.apiCredentials.secret
+                            : ''
+                        }
+                        readOnly
+                        className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       />
                     </div>
-                    <input
-                      type="submit"
-                      value="生成"
+                    <button
+                      onClick={issueAPI}
                       className="cursor-pointer px-4 text-white py-2 rounded-md bg-primary shadow-md duration-200 hover:shadow-sm"
-                    />
-                  </form>
+                    >
+                      生成
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -411,10 +454,6 @@ const Settings = (props: Props) => {
                         </a>
                       </Link>
                     </td>
-                    <td>
-                      <p className="font-bold">0</p>
-                      <p>リスト</p>
-                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -454,6 +493,11 @@ const Settings = (props: Props) => {
                 <input
                   placeholder="検索"
                   type="text"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                      router.push(`/search?query=${searchText}`)
+                    }
+                  }}
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
                   className="text-black w-full h-9 rounded-md rounded-r-none focus:ring-0 focus:border-gray-500 border-r-0"
@@ -486,6 +530,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           include: {
             favorites: true,
             following: true,
+            apiCredentials: true,
           },
         })
       )

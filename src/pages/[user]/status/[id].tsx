@@ -20,6 +20,7 @@ import type { Mattar, User } from '@prisma/client'
 import * as linkify from 'linkifyjs'
 import linkifyHtml from 'linkify-html'
 import 'linkify-plugin-mention'
+import 'linkify-plugin-hashtag'
 import { useSession, getSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { format } from 'date-fns'
@@ -27,7 +28,7 @@ import { enUS, ja } from 'date-fns/locale'
 
 type Props = {
   mattar: Mattar
-  user?: User | undefined
+  user: User | undefined
 }
 
 const Mattar = (props: Props) => {
@@ -44,9 +45,39 @@ const Mattar = (props: Props) => {
     })
     refreshData()
   }
+  const reMattar = async (id: string) => {
+    const res = await fetch(
+      `/api/statuses/remattar?user_id=${props.user.id}&mattar_id=${id}&source=Mattar Web Client`,
+      {
+        method: 'POST',
+      }
+    )
+  }
+  const favMattar = async (id: string) => {
+    await fetch(
+      `/api/favorites/create?user_id=${props.user.id}&mattar_id=${id}`,
+      {
+        method: 'POST',
+      }
+    )
+    refreshData()
+  }
+  const disfavMattar = async (id: string) => {
+    await fetch(
+      `/api/favorites/destroy?user_id=${props.user.id}&mattar_id=${id}`,
+      {
+        method: 'POST',
+      }
+    )
+    refreshData()
+  }
   const linkifyOptions = {
     className: function (_href: string, type: string) {
       return 'text-sky-500'
+    },
+    formatHref: {
+      mention: (href: string) => href,
+      hashtag: (href: string) => 'search?query=' + href.substring(1),
     },
     target: {
       url: '_blank',
@@ -109,19 +140,10 @@ const Mattar = (props: Props) => {
               </span>
               {session && (
                 <div>
-                  <span
-                    className={`ml-3 duration-200 ${
-                      !props.user?.favorites
-                        .map(function (i: any) {
-                          return i.mattarId
-                        })
-                        .includes(props.mattar.id) &&
-                      'lg:opacity-0 lg:group-hover:opacity-100'
-                    }`}
-                  >
+                  <span>
                     <button
                       className={`duration-200 ${
-                        props.user?.favorites
+                        props.user.favorites
                           .map(function (i: any) {
                             return i.mattarId
                           })
@@ -131,7 +153,7 @@ const Mattar = (props: Props) => {
                       }`}
                       onClick={() => {
                         if (
-                          props.user?.favorites
+                          props.user.favorites
                             .map(function (i: any) {
                               return i.mattarId
                             })
@@ -143,7 +165,7 @@ const Mattar = (props: Props) => {
                         }
                       }}
                     >
-                      {props.user?.favorites
+                      {props.user.favorites
                         .map(function (i: any) {
                           return i.mattarId
                         })
@@ -155,27 +177,34 @@ const Mattar = (props: Props) => {
                       お気に入り
                     </button>
                   </span>
-                  <span className="ml-2">
-                    <button className="duration-200 hover:text-green-400">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        fill="currentColor"
-                        className="inline-block mb-1"
-                        viewBox="0 0 16 16"
+                  {!props.mattar.isRemattar && (
+                    <span className="ml-2">
+                      <button
+                        className="duration-200 hover:text-green-400"
+                        onClick={() => reMattar(props.mattar.id)}
                       >
-                        <path d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192Zm3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z" />
-                      </svg>
-                      リツイート
-                    </button>
-                  </span>
-                  <span className="ml-2">
-                    <button className="duration-200 hover:text-sky-400">
-                      <BsReply className="inline-block mb-1" size={15} />
-                      返信
-                    </button>
-                  </span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          fill="currentColor"
+                          className="inline-block mb-1"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192Zm3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z" />
+                        </svg>
+                        リツイート
+                      </button>
+                    </span>
+                  )}
+                  {/*!props.mattar.isRemattar && (
+                    <span className="ml-2">
+                      <button className="duration-200 hover:text-sky-400">
+                        <BsReply className="inline-block mb-1" size={15} />
+                        返信
+                      </button>
+                    </span>
+                  )*/}
                   <span className="ml-2">
                     <button
                       className="duration-200 hover:text-sky-400"
@@ -193,7 +222,7 @@ const Mattar = (props: Props) => {
                       コピー
                     </button>
                   </span>
-                  {user === props.user?.id && (
+                  {user === props.user.id && (
                     <span className="ml-2">
                       <button
                         className="duration-200 hover:text-red-500"
@@ -224,9 +253,9 @@ const Mattar = (props: Props) => {
           <div className="px-3 flex gap-3 items-center">
             <img src={props.mattar.user.profile_picture} className="w-12" />
             <div>
-              <p className="font-bold">{props.user?.name}</p>
+              <p className="font-bold">{props.user.name}</p>
               <p>
-                {props.user?.mattar_count}
+                {props.user.mattar_count}
                 のつぶやき
               </p>
             </div>
@@ -235,16 +264,26 @@ const Mattar = (props: Props) => {
             <tbody>
               <tr>
                 <td>
-                  <p className="font-bold">1</p>
-                  <p>フォロー中</p>
+                  <Link href="/?page=following">
+                    <a>
+                      <p className="font-bold">
+                        {props.user.following
+                          ? props.user.following.length
+                          : '0'}
+                      </p>
+                      <p>フォロー中</p>
+                    </a>
+                  </Link>
                 </td>
                 <td>
-                  <p className="font-bold">0</p>
-                  <p>フォロワー</p>
-                </td>
-                <td>
-                  <p className="font-bold">0</p>
-                  <p>リスト</p>
+                  <Link href="/?page=follower">
+                    <a>
+                      <p className="font-bold">
+                        {props.user.follower ? props.user.follower.length : '0'}
+                      </p>
+                      <p>フォロワー</p>
+                    </a>
+                  </Link>
                 </td>
               </tr>
             </tbody>
@@ -257,7 +296,7 @@ const Mattar = (props: Props) => {
             </Link>
             <Link href="/?page=at">
               <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
-                @{props.user?.id}
+                @{props.user.id}
               </a>
             </Link>
             <Link href="/msg">
@@ -280,6 +319,11 @@ const Mattar = (props: Props) => {
             <input
               placeholder="検索"
               type="text"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                  router.push(`/search?query=${searchText}`)
+                }
+              }}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="text-black w-full h-9 rounded-md rounded-r-none focus:ring-0 focus:border-gray-500 border-r-0"

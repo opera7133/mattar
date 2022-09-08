@@ -14,7 +14,7 @@ datasource db {
 
 generator erd {
   provider = "prisma-erd-generator"
-  output = "./prisma/ERD.svg"
+  output = "./ERD.png"
 }
 
 model Mattar {
@@ -26,21 +26,7 @@ model Mattar {
   user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
   isRemattar  Boolean
   favorites   Favorite[]
-  remattar    Remattar[]  @relation("Remattars")
-  remattarParent Remattar[] @relation("Mattars")
   createdAt   DateTime    @default(now())
-}
-
-model Remattar {
-  id              String    @id @default(cuid())
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId          String
-  // リツイート参照元
-  mattar          Mattar    @relation("Mattars", fields: [mattarId], references: [id], onDelete: Cascade)
-  mattarId        String
-  // リツイート
-  remattar        Mattar    @relation("Remattars", fields: [remattarId], references: [id], onDelete: Cascade)
-  remattarId      String
 }
 
 model Favorite {
@@ -66,10 +52,19 @@ model User {
   email           String    @unique
   mattar_count    Int
   verified        Boolean
+  verifyToken     String?
   mattars         Mattar[]
   favorites       Favorite[]
-  remattars       Remattar[]
   follower        User[]    @relation("UserFollows")
   following       User[]    @relation("UserFollows") 
+  apiCredentials  Token?
   createdAt       DateTime  @default(now())
+}
+
+model Token {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String  @unique
+  secret    String  @unique
 }

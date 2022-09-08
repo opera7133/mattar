@@ -11,19 +11,22 @@ import {
   BsStarFill,
   BsRssFill,
 } from 'react-icons/bs'
-import { useState, Fragment } from 'react'
+import { useState, Fragment, useEffect } from 'react'
 import twemoji from 'twemoji'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
 import type { Mattar, User } from '@prisma/client'
+import { io } from 'socket.io-client'
 import * as linkify from 'linkifyjs'
 import linkifyHtml from 'linkify-html'
 import 'linkify-plugin-mention'
+import 'linkify-plugin-hashtag'
 import { useSession, getSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { Menu, Transition, Dialog } from '@headlessui/react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import Image from 'next/image'
+import Mattars from 'components/Mattar'
 
 type Props = {
   mattars: Mattar[]
@@ -56,6 +59,10 @@ const Profile = (props: Props) => {
   const linkifyOptions = {
     className: function (_href: string, type: string) {
       return 'text-sky-500'
+    },
+    formatHref: {
+      hashtag: (href: string) => 'search?query=' + href.substring(1),
+      mention: (href: string) => href,
     },
     target: {
       url: '_blank',
@@ -147,6 +154,33 @@ const Profile = (props: Props) => {
       reader.readAsDataURL(file)
     }
   }
+  const reMattar = async (id: string) => {
+    const res = await fetch(
+      `/api/statuses/remattar?user_id=${props.user.id}&mattar_id=${id}&source=Mattar Web Client`,
+      {
+        method: 'POST',
+      }
+    )
+    refreshData()
+  }
+  const favMattar = async (id: string) => {
+    await fetch(
+      `/api/favorites/create?user_id=${props.user.id}&mattar_id=${id}`,
+      {
+        method: 'POST',
+      }
+    )
+    refreshData()
+  }
+  const disfavMattar = async (id: string) => {
+    await fetch(
+      `/api/favorites/destroy?user_id=${props.user.id}&mattar_id=${id}`,
+      {
+        method: 'POST',
+      }
+    )
+    refreshData()
+  }
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     const res = await fetch('/api/account/update_profile', {
@@ -172,6 +206,17 @@ const Profile = (props: Props) => {
     setIsModalOpen(false)
     refreshData()
   }
+
+  useEffect((): any => {
+    const socket = io('http://localhost:3000', {
+      path: '/api/statuses/filter',
+    })
+    socket.on('connect', () => {})
+    socket.on(`message`, (message: string) => {
+      refreshData()
+    })
+    if (socket) return () => socket.disconnect()
+  }, [refreshData])
 
   return (
     <div className="dark:bg-zinc-800 dark:text-white h-screen">
@@ -363,7 +408,7 @@ const Profile = (props: Props) => {
                                   {...register('id', {
                                     required: true,
                                   })}
-                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                                   defaultValue={props.user?.id}
                                 />
                               </div>
@@ -376,7 +421,7 @@ const Profile = (props: Props) => {
                                     required: true,
                                   })}
                                   defaultValue={props.user?.name}
-                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                                 />
                               </div>
                               <div className="flex flex-col mb-2">
@@ -415,7 +460,7 @@ const Profile = (props: Props) => {
                                   {...register('description')}
                                   id="description"
                                   defaultValue={props.user?.description}
-                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                                 ></textarea>
                               </div>
                               <div className="flex flex-col mb-2">
@@ -424,7 +469,7 @@ const Profile = (props: Props) => {
                                   type="text"
                                   id="location"
                                   {...register('location')}
-                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                                   defaultValue={props.user?.location}
                                 />
                               </div>
@@ -437,7 +482,7 @@ const Profile = (props: Props) => {
                                     pattern:
                                       /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/,
                                   })}
-                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
+                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                                   defaultValue={props.user?.website}
                                 />
                               </div>
@@ -468,159 +513,7 @@ const Profile = (props: Props) => {
             <div className="flex flex-col gap-1">
               {props.mattars.map((item) => {
                 if (state === 'mattars') {
-                  return (
-                    <article
-                      className="flex gap-3 group relative"
-                      key={item.id}
-                    >
-                      <div className="mt-2 w-14 h-14 relative">
-                        <Image
-                          src={item.user.profile_picture}
-                          alt="avatar"
-                          layout="fill"
-                          objectFit="cover"
-                          className="shrink-0"
-                        />
-                      </div>
-                      <div>
-                        <span className="font-bold">{item.user.name}</span>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: linkifyHtml(
-                              twemoji.parse(item.message),
-                              linkifyOptions
-                            ),
-                          }}
-                        ></div>
-                        <div className="text-xs text-gray-400">
-                          <span title={item.createdAt.toString()}>
-                            {getElapsedTime(item.createdAt)}
-                          </span>
-                          {session && (
-                            <span>
-                              <span
-                                className={`ml-3 duration-200 ${
-                                  !props.user?.favorites
-                                    .map(function (i: any) {
-                                      return i.mattarId
-                                    })
-                                    .includes(item.id) &&
-                                  'lg:opacity-0 lg:group-hover:opacity-100'
-                                }`}
-                              >
-                                <button
-                                  className={`duration-200 ${
-                                    props.user?.favorites
-                                      .map(function (i: any) {
-                                        return i.mattarId
-                                      })
-                                      .includes(item.id)
-                                      ? 'text-orange-400'
-                                      : 'hover:text-orange-400'
-                                  }`}
-                                  onClick={() => {
-                                    if (
-                                      props.user?.favorites
-                                        .map(function (i: any) {
-                                          return i.mattarId
-                                        })
-                                        .includes(item.id)
-                                    ) {
-                                      disfavMattar(item.id)
-                                    } else {
-                                      favMattar(item.id)
-                                    }
-                                  }}
-                                >
-                                  {props.user?.favorites
-                                    .map(function (i: any) {
-                                      return i.mattarId
-                                    })
-                                    .includes(item.id) ? (
-                                    <BsStarFill className="inline-block mb-1" />
-                                  ) : (
-                                    <BsStar className="inline-block mb-1" />
-                                  )}
-                                  お気に入り
-                                </button>
-                              </span>
-                              <span className="ml-2 duration-200 lg:opacity-0 lg:group-hover:opacity-100 z-0">
-                                <button className="duration-200 hover:text-green-400 z-0">
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="14"
-                                    height="14"
-                                    fill="currentColor"
-                                    className="inline-block mb-1"
-                                    viewBox="0 0 16 16"
-                                  >
-                                    <path d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192Zm3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z" />
-                                  </svg>
-                                  リツイート
-                                </button>
-                              </span>
-                              <span className="ml-2 duration-200 lg:opacity-0 lg:group-hover:opacity-100">
-                                <button className="duration-200 hover:text-sky-400">
-                                  <BsReply
-                                    className="inline-block mb-1"
-                                    size={15}
-                                  />
-                                  返信
-                                </button>
-                              </span>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <Menu>
-                        <Menu.Button>
-                          <BsThreeDots className="absolute z-0 right-0 top-2 duration-200 opacity-80 lg:opacity-0 lg:group-hover:opacity-80" />
-                        </Menu.Button>
-                        <Transition
-                          as={Fragment}
-                          enter="transition ease-out duration-100"
-                          enterFrom="transform opacity-0 scale-95"
-                          enterTo="transform opacity-100 scale-100"
-                          leave="transition ease-in duration-75"
-                          leaveFrom="transform opacity-100 scale-100"
-                          leaveTo="transform opacity-0 scale-95"
-                        >
-                          <Menu.Items className="text-sm z-10 shadow-md absolute right-0 top-7 flex flex-col">
-                            <Menu.Item>
-                              {({ active }) => (
-                                <button
-                                  className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
-                                  onClick={() =>
-                                    navigator.clipboard.writeText(
-                                      `${window.location.protocol}://${
-                                        window.location.hostname === 'localhost'
-                                          ? 'localhost:3000'
-                                          : window.location.hostname
-                                      }/${item.userId}/status/${item.id}`
-                                    )
-                                  }
-                                >
-                                  リンクをコピー
-                                </button>
-                              )}
-                            </Menu.Item>
-                            {props.user?.id === item.user?.id && (
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
-                                    onClick={() => deleteMattar(item.id)}
-                                  >
-                                    削除
-                                  </button>
-                                )}
-                              </Menu.Item>
-                            )}
-                          </Menu.Items>
-                        </Transition>
-                      </Menu>
-                    </article>
-                  )
+                  return <Mattars item={item} props={props} key={item.id} />
                 } else if (state === 'fav') {
                   if (
                     item.favorites
@@ -629,158 +522,10 @@ const Profile = (props: Props) => {
                       })
                       .includes(props.user?.id)
                   )
-                    return (
-                      <article
-                        className="flex gap-3 group relative"
-                        key={item.id}
-                      >
-                        <div className="mt-2 w-14 h-14 relative">
-                          <Image
-                            src={item.user.profile_picture}
-                            alt={`${item.user.name}\'s Avatar`}
-                            layout="fill"
-                            objectFit="cover"
-                            className="shrink-0"
-                          />
-                        </div>
-                        <div>
-                          <span className="font-bold">{item.user.name}</span>
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: linkifyHtml(
-                                twemoji.parse(item.message),
-                                linkifyOptions
-                              ),
-                            }}
-                          ></div>
-                          <div className="text-xs text-gray-400">
-                            <span title={item.createdAt.toString()}>
-                              {getElapsedTime(item.createdAt)}
-                            </span>
-                            {session && (
-                              <span>
-                                <span
-                                  className={`ml-3 duration-200 ${
-                                    !props.user?.favorites
-                                      .map(function (i: any) {
-                                        return i.mattarId
-                                      })
-                                      .includes(item.id) &&
-                                    'lg:opacity-0 lg:group-hover:opacity-100'
-                                  }`}
-                                >
-                                  <button
-                                    className={`duration-200 ${
-                                      props.user?.favorites
-                                        .map(function (i: any) {
-                                          return i.mattarId
-                                        })
-                                        .includes(item.id)
-                                        ? 'text-orange-400'
-                                        : 'hover:text-orange-400'
-                                    }`}
-                                    onClick={() => {
-                                      if (
-                                        props.user?.favorites
-                                          .map(function (i: any) {
-                                            return i.mattarId
-                                          })
-                                          .includes(item.id)
-                                      ) {
-                                        disfavMattar(item.id)
-                                      } else {
-                                        favMattar(item.id)
-                                      }
-                                    }}
-                                  >
-                                    {props.user?.favorites
-                                      .map(function (i: any) {
-                                        return i.mattarId
-                                      })
-                                      .includes(item.id) ? (
-                                      <BsStarFill className="inline-block mb-1" />
-                                    ) : (
-                                      <BsStar className="inline-block mb-1" />
-                                    )}
-                                    お気に入り
-                                  </button>
-                                </span>
-                                <span className="ml-2 duration-200 lg:opacity-0 lg:group-hover:opacity-100 z-0">
-                                  <button className="duration-200 hover:text-green-400 z-0">
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      width="14"
-                                      height="14"
-                                      fill="currentColor"
-                                      className="inline-block mb-1"
-                                      viewBox="0 0 16 16"
-                                    >
-                                      <path d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192Zm3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z" />
-                                    </svg>
-                                    リツイート
-                                  </button>
-                                </span>
-                                <span className="ml-2 duration-200 lg:opacity-0 lg:group-hover:opacity-100">
-                                  <button className="duration-200 hover:text-sky-400">
-                                    <BsReply
-                                      className="inline-block mb-1"
-                                      size={15}
-                                    />
-                                    返信
-                                  </button>
-                                </span>
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <Menu>
-                          <Menu.Button>
-                            <BsThreeDots className="absolute z-0 right-0 top-2 duration-200 opacity-80 lg:opacity-0 lg:group-hover:opacity-80" />
-                          </Menu.Button>
-                          <Transition
-                            as={Fragment}
-                            enter="transition ease-out duration-100"
-                            enterFrom="transform opacity-0 scale-95"
-                            enterTo="transform opacity-100 scale-100"
-                            leave="transition ease-in duration-75"
-                            leaveFrom="transform opacity-100 scale-100"
-                            leaveTo="transform opacity-0 scale-95"
-                          >
-                            <Menu.Items className="text-sm z-10 shadow-md absolute right-0 top-7 flex flex-col">
-                              <Menu.Item>
-                                {({ active }) => (
-                                  <button
-                                    className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
-                                    onClick={() =>
-                                      navigator.clipboard.writeText(
-                                        `${window.location.protocol}://${
-                                          window.location.hostname ===
-                                          'localhost'
-                                            ? 'localhost:3000'
-                                            : window.location.hostname
-                                        }/${item.userId}/status/${item.id}`
-                                      )
-                                    }
-                                  >
-                                    リンクをコピー
-                                  </button>
-                                )}
-                              </Menu.Item>
-                              {props.user?.id === item.user?.id && (
-                                <Menu.Item>
-                                  <button
-                                    className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
-                                    onClick={() => deleteMattar(item.id)}
-                                  >
-                                    削除
-                                  </button>
-                                </Menu.Item>
-                              )}
-                            </Menu.Items>
-                          </Transition>
-                        </Menu>
-                      </article>
-                    )
+                    return <Mattars item={item} props={props} key={item.id} />
+                } else if (state === 'remattars') {
+                  if (item.isRemattar)
+                    return <Mattars item={item} props={props} key={item.id} />
                 }
               })}
               {state === 'following' &&
@@ -1037,10 +782,6 @@ const Profile = (props: Props) => {
                         </div>
                       </Button>
                     </td>
-                    <td>
-                      <p className="font-bold">0</p>
-                      <p>リスト</p>
-                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -1080,6 +821,11 @@ const Profile = (props: Props) => {
                 <input
                   placeholder="検索"
                   type="text"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                      router.push(`/search?query=${searchText}`)
+                    }
+                  }}
                   value={searchText}
                   onChange={(e) => setSearchText(e.target.value)}
                   className="text-black w-full h-9 rounded-md rounded-r-none focus:ring-0 focus:border-gray-500 border-r-0"

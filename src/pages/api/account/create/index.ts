@@ -20,10 +20,8 @@ export default async function handler(
   switch (method) {
     case 'POST':
       if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
-        if (!api_token || !api_secret) {
-          res.status(403).json({ error: "You don\'t have permission" })
-          break
-        }
+        res.status(403).json({ error: "You don\'t have permission" })
+        break
       }
       const badUserName = ["about", "tos", "signup", "signin", "search", "settings", "privacy", "media", "faq"]
       if (badUserName.includes(req.body.id)) {
@@ -58,6 +56,7 @@ export default async function handler(
       const newUser = await prisma.user.create({
         data: req.body,
       })
+      const issue = await fetch(`/api/account/verify/issue?user_id=${req.body.id}`)
       res.status(200).json(newUser)
       break
 

@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
+import checkToken from 'lib/checkToken'
 const prisma = new PrismaClient()
 
 export default async function handler(
@@ -8,14 +9,13 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { mattar_id, user_id, api_token, api_secret } = query
+  const { mattar_id, user_id } = query
   switch (method) {
     case 'POST':
-      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
-        if (!api_token || !api_secret) {
-          res.status(403).json({ error: "You don\'t have permission" })
-          break
-        }
+      const token = await checkToken(req)
+      if (!token) {
+        res.status(400).json({ error: "You don\'t have permission" })
+        break
       }
       if (!mattar_id || !user_id) {
         res.status(400).json({ error: "Provide Mattar ID and User ID" })

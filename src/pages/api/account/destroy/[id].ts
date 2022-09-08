@@ -12,10 +12,8 @@ export default async function handler(
   switch (method) {
     case 'POST':
       if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
-        if (!api_token || !api_secret) {
-          res.status(403).json({ error: "You don\'t have permission" })
-          break
-        }
+        res.status(403).json({ error: "You don\'t have permission" })
+        break
       }
       if (!id) {
         res.status(400).json({ error: "Provide User ID" })

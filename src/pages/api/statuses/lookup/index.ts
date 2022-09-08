@@ -10,7 +10,9 @@ export default async function handler(
   const { method } = req
   switch (method) {
     case 'GET':
-      const mattars = await prisma.mattar.findMany()
+      const mattars = await prisma.mattar.findMany({
+        take: 100
+      })
       res.status(200).json(mattars)
       break
 

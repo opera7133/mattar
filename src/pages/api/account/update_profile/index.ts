@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
 import cloudinary from "cloudinary"
 import stringWidth from 'string-width'
+import checkToken from 'lib/checkToken'
 const prisma = new PrismaClient()
 
 export default async function handler(
@@ -13,11 +14,10 @@ export default async function handler(
   const { api_token, api_secret } = query
   switch (method) {
     case 'POST':
-      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
-        if (!api_token || !api_secret) {
-          res.status(403).json({ error: "You don\'t have permission" })
-          break
-        }
+      const token = await checkToken(req)
+      if (!token) {
+        res.status(400).json({ error: "You don\'t have permission" })
+        break
       }
       const badUserName = ["about", "tos", "signup", "signin", "search", "settings", "privacy", "media", "faq"]
       if (badUserName.includes(req.body.id)) {
@@ -45,6 +45,9 @@ export default async function handler(
       if (check && req.body.oldId && (req.body.oldId !== req.body.id)) {
         res.status(400).json({ error: "ID is already taken" })
         break
+      }
+      if (check?.email !== req.body.email) {
+        const issue = await fetch(`/api/account/verify/issue?user_id=${userId}`)
       }
       if (req.body.profile_picture && req.body.profile_picture !== check?.profile_picture && req.body.profile_picture !== "/img/default.png") {
         const imgId = check?.profile_picture?.match(/https\:\/\/res\.cloudinary\.com\/mattarli\/image\/upload\/v.*\/(mattar\/.*)\..*/)
