@@ -6,11 +6,10 @@ import Button from 'components/Button'
 import {
   BsSearch,
   BsThreeDots,
-  BsLink,
   BsStar,
   BsReply,
   BsStarFill,
-  BsTrash,
+  BsRssFill,
 } from 'react-icons/bs'
 import { useState, Fragment } from 'react'
 import twemoji from 'twemoji'
@@ -231,6 +230,13 @@ const Profile = (props: Props) => {
                   )}
                 </h2>
                 <p>{props.pUser.description}</p>
+                <div className="absolute right-5 bottom-0">
+                  <Link href={`/${props.pUser.id}/feed`}>
+                    <a>
+                      <BsRssFill size={23} className="fill-orange-500" />
+                    </a>
+                  </Link>
+                </div>
                 {props.user?.id === props.pUser.id ? (
                   <Button
                     className="absolute top-2 right-5 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
@@ -338,10 +344,10 @@ const Profile = (props: Props) => {
                           leaveFrom="opacity-100 scale-100"
                           leaveTo="opacity-0 scale-95"
                         >
-                          <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                          <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 p-6 text-left align-middle shadow-xl transition-all">
                             <Dialog.Title
                               as="h3"
-                              className="text-lg font-medium leading-6 text-gray-900"
+                              className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100"
                             >
                               プロフィールを編集
                             </Dialog.Title>
@@ -357,7 +363,7 @@ const Profile = (props: Props) => {
                                   {...register('id', {
                                     required: true,
                                   })}
-                                  className="bg-gray-200 border-none duration-200 focus:border-none focus:ring-gray-300 rounded-md focus:bg-gray-100"
+                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
                                   defaultValue={props.user?.id}
                                 />
                               </div>
@@ -370,7 +376,7 @@ const Profile = (props: Props) => {
                                     required: true,
                                   })}
                                   defaultValue={props.user?.name}
-                                  className="bg-gray-200 border-none duration-200 focus:border-none focus:ring-gray-300 rounded-md focus:bg-gray-100"
+                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
                                 />
                               </div>
                               <div className="flex flex-col mb-2">
@@ -409,7 +415,7 @@ const Profile = (props: Props) => {
                                   {...register('description')}
                                   id="description"
                                   defaultValue={props.user?.description}
-                                  className="bg-gray-200 border-none duration-200 focus:border-none focus:ring-gray-300 rounded-md focus:bg-gray-100"
+                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
                                 ></textarea>
                               </div>
                               <div className="flex flex-col mb-2">
@@ -418,7 +424,7 @@ const Profile = (props: Props) => {
                                   type="text"
                                   id="location"
                                   {...register('location')}
-                                  className="bg-gray-200 border-none duration-200 focus:border-none focus:ring-gray-300 rounded-md focus:bg-gray-100"
+                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
                                   defaultValue={props.user?.location}
                                 />
                               </div>
@@ -431,7 +437,7 @@ const Profile = (props: Props) => {
                                     pattern:
                                       /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/,
                                   })}
-                                  className="bg-gray-200 border-none duration-200 focus:border-none focus:ring-gray-300 rounded-md focus:bg-gray-100"
+                                  className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-zinc-500 rounded-md focus:bg-zinc-600"
                                   defaultValue={props.user?.website}
                                 />
                               </div>
@@ -981,23 +987,27 @@ const Profile = (props: Props) => {
         <div className="col-span-3 lg:col-span-1 py-4">
           {session && (
             <div>
-              <div className="px-3 flex gap-3 items-center">
-                <div className="mt-2 w-12 h-12 relative">
-                  <Image
-                    src={props.pUser.profile_picture || '/img/default.png'}
-                    layout="fill"
-                    objectFit="cover"
-                    className="shrink-0"
-                  />
-                </div>
-                <div>
-                  <p className="font-bold">{props.pUser.name}</p>
-                  <p>
-                    {props.pUser.mattar_count}
-                    のつぶやき
-                  </p>
-                </div>
-              </div>
+              <Link href={`/${props.pUser.id}`}>
+                <a>
+                  <div className="px-3 flex gap-3 items-center">
+                    <div className="mt-2 w-16 h-16 relative">
+                      <Image
+                        src={props.pUser.profile_picture || '/img/default.png'}
+                        layout="fill"
+                        objectFit="cover"
+                        className="shrink-0"
+                      />
+                    </div>
+                    <div>
+                      <p className="font-bold">{props.pUser.name}</p>
+                      <p>
+                        {props.pUser.mattar_count}
+                        のつぶやき
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              </Link>
               <table className="my-3 border-separate border-spacing-x-2.5">
                 <tbody>
                   <tr>

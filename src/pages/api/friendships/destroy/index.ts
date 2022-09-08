@@ -9,9 +9,15 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { user_id, unfollow_user_id } = query
+  const { user_id, unfollow_user_id, api_token, api_secret } = query
   switch (method) {
     case 'GET':
+      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+        if (!api_token || !api_secret) {
+          res.status(403).json({ error: "You don\'t have permission" })
+          break
+        }
+      }
       if (user_id && unfollow_user_id) {
         const fupdate = await prisma.user.update({
           where: {

@@ -8,9 +8,15 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { mattar_id, user_id } = query
+  const { mattar_id, user_id, api_token, api_secret } = query
   switch (method) {
     case 'POST':
+      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+        if (!api_token || !api_secret) {
+          res.status(403).json({ error: "You don\'t have permission" })
+          break
+        }
+      }
       if (!mattar_id || !user_id) {
         res.status(400).json({ error: "Provide Mattar ID and User ID" })
         break

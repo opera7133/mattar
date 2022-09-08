@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
 import cloudinary from "cloudinary"
+import stringWidth from 'string-width'
 const prisma = new PrismaClient()
 
 export default async function handler(
@@ -8,15 +9,23 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { method } = req
+  const query = req.query
+  const { api_token, api_secret } = query
   switch (method) {
     case 'POST':
+      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+        if (!api_token || !api_secret) {
+          res.status(403).json({ error: "You don\'t have permission" })
+          break
+        }
+      }
       const badUserName = ["about", "tos", "signup", "signin", "search", "settings", "privacy", "media", "faq"]
       if (badUserName.includes(req.body.id)) {
         res.status(400).json({ error: "You can\'t use that id" })
         break
       }
       const allowedId = /^[0-9a-zA-Z]+[_]*[0-9a-zA-Z]*$/
-      if (!req.body.id.test(allowedId)) {
+      if (!allowedId.test(req.body.id)) {
         res.status(400).json({ error: "You can\'t use that symbol" })
         break
       }
@@ -24,33 +33,43 @@ export default async function handler(
         res.status(400).json({ error: "Maximum ID length is 15" })
         break
       }
+      if (stringWidth(req.body.description) > 80) {
+        res.status(400).json({ error: "Description is too long" })
+      }
+      const userId = req.body.oldId || req.body.id
       const check = await prisma.user.findUnique({
         where: {
-          id: req.body.oldId
+          id: userId
         }
       })
-      if (check && (req.body.oldId !== req.body.id)) {
+      if (check && req.body.oldId && (req.body.oldId !== req.body.id)) {
         res.status(400).json({ error: "ID is already taken" })
+        break
       }
-      if (req.body.profile_picture !== check?.profile_picture && req.body.profile_picture !== "/img/default.png") {
+      if (req.body.profile_picture && req.body.profile_picture !== check?.profile_picture && req.body.profile_picture !== "/img/default.png") {
         const imgId = check?.profile_picture?.match(/https\:\/\/res\.cloudinary\.com\/mattarli\/image\/upload\/v.*\/(mattar\/.*)\..*/)
         cloudinary.v2.config({
           cloud_name: process.env.CLOUDINARY_NAME,
           api_key: process.env.CLOUDINARY_API,
           api_secret: process.env.CLOUDINARY_SECRET,
         })
-        if (!imgId) return res.status(400).json({ error: "Image ID is not found" })
+        if (!imgId) {
+          res.status(400).json({ error: "Image ID is not found" })
+          break
+        }
         const deleteImg = await cloudinary.v2.uploader.destroy(imgId[1])
         const upload = await cloudinary.v2.uploader.upload(req.body.profile_picture, {
           folder: "mattar"
         })
         req.body.profile_picture = upload.secure_url
       }
-      const oldId = req.body.oldId
-      delete req.body.oldId
+      if (req.body.oldId) {
+        const oldId = req.body.oldId
+        delete req.body.oldId
+      }
       const profile = await prisma.user.update({
         where: {
-          id: oldId
+          id: userId
         },
         data: req.body,
       })

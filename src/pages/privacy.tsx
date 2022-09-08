@@ -12,7 +12,7 @@ export default function Privacy() {
       <Header />
       <article className="pt-10 mb-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
         <h1 className="text-4xl font-bold mb-3">プライバシーポリシー</h1>
-        <details className="my-3 prose lg:prose-md">
+        <details className="my-3 prose lg:prose-md dark:prose-invert">
           <summary>プライバシーポリシー本文</summary>
           <p>
             Mattar（以下、「当団体」といいます。）は、本ウェブサイト上で提供するサービス「mattar.li」（以下、「本サービス」といいます。）における、ユーザーの個人情報の取扱いについて、以下のとおりプライバシーポリシー（以下、「本ポリシー」といいます。）を定めます。

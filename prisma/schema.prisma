@@ -12,6 +12,11 @@ datasource db {
   referentialIntegrity = "prisma"
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+  output = "./prisma/ERD.svg"
+}
+
 model Mattar {
   id          String    @id @default(cuid())
   message     String
@@ -21,7 +26,8 @@ model Mattar {
   user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
   isRemattar  Boolean
   favorites   Favorite[]
-  remattar    Remattar[]
+  remattar    Remattar[]  @relation("Remattars")
+  remattarParent Remattar[] @relation("Mattars")
   createdAt   DateTime    @default(now())
 }
 
@@ -29,8 +35,12 @@ model Remattar {
   id              String    @id @default(cuid())
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId          String
-  mattar          Mattar    @relation(fields: [mattarId], references: [id], onDelete: Cascade)
+  // リツイート参照元
+  mattar          Mattar    @relation("Mattars", fields: [mattarId], references: [id], onDelete: Cascade)
   mattarId        String
+  // リツイート
+  remattar        Mattar    @relation("Remattars", fields: [remattarId], references: [id], onDelete: Cascade)
+  remattarId      String
 }
 
 model Favorite {
@@ -48,6 +58,9 @@ model User {
   location        String?
   website         String?
   profile_picture String?
+  birthday        String?
+  lang            String?
+  twofactor       String?
   hash            String
   salt            String
   email           String    @unique

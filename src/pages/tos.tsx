@@ -11,7 +11,7 @@ export default function TOS() {
       <Header />
       <article className="pt-10 mb-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
         <h1 className="text-4xl font-bold mb-3">利用規約</h1>
-        <details className="my-3 prose lg:prose-md">
+        <details className="my-3 prose lg:prose-md dark:prose-invert">
           <summary>利用規約本文</summary>
           <p>
             この利用規約（以下、「本規約」といいます。）は、Mattar（以下、「当団体」といいます。）がこのウェブサイト上で提供するサービス「mattar.li」（以下、「本サービス」といいます。）の利用条件を定めるものです。登録ユーザーの皆さま（以下、「ユーザー」といいます。）には、本規約に従って、本サービスをご利用いただきます。

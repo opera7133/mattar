@@ -9,6 +9,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { method } = req
+  const query = req.query
+  const { api_token, api_secret } = query
   const genSalt = () => {
     const S = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     return Array.from(crypto.randomFillSync(new Uint32Array(24)))
@@ -17,6 +19,12 @@ export default async function handler(
   }
   switch (method) {
     case 'POST':
+      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+        if (!api_token || !api_secret) {
+          res.status(403).json({ error: "You don\'t have permission" })
+          break
+        }
+      }
       const badUserName = ["about", "tos", "signup", "signin", "search", "settings", "privacy", "media", "faq"]
       if (badUserName.includes(req.body.id)) {
         res.status(400).json({ error: "You can\'t use that id" })
