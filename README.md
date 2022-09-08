@@ -1,4 +1,6 @@
 
+![Mattar Banner](https://res.cloudinary.com/mattarli/image/upload/v1662654095/soozl0kurhq5nz1lvwxl.png)
+
 Microblogging platform with minimal functionality.
 ## Features
 

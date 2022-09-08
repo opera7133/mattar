@@ -12,7 +12,13 @@ function Footer() {
           <Link href="/faq">FAQ</Link>
         </li>
         <li>
-          <Link href="/blog">ブログ</Link>
+          <a
+            href="https://blog.mattar.li"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            ブログ
+          </a>
         </li>
         <li>
           <Link href="/tos">利用規約</Link>
