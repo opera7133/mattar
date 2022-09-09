@@ -31,7 +31,7 @@ export default function About() {
             </a>
           </div>
         </div>
-        <h2 className="text-2xl font-bold mb-3">システム</h2>
+        <h2 className="text-2xl font-bold my-3">システム</h2>
         <a
           href="https://github.com/opera7133/mattar"
           rel="noopener noreferrer"
