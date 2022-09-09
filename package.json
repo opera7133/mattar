@@ -1,9 +1,8 @@
 {
   "name": "mattar",
-  "version": "1.0.0",
-  "homepage": "https://mattar.li",
+  "version": "0.0.2",
+  "homepage": "https://mattar-li.vercel.app",
   "author": "wamo <ainznino@pm.me> (https://wmsci.com)",
-  "private": true,
   "license": "BSD-3-Clause-Clear",
   "scripts": {
     "dev": "next dev",

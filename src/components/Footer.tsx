@@ -13,7 +13,7 @@ function Footer() {
         </li>
         <li>
           <a
-            href="https://blog.mattar.li"
+            href="https://blog-mattar.vercel.app"
             target="_blank"
             rel="noopener noreferrer"
           >

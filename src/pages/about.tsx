@@ -31,6 +31,14 @@ export default function About() {
             </a>
           </div>
         </div>
+        <h2 className="text-2xl font-bold mb-3">システム</h2>
+        <a
+          href="https://github.com/opera7133/mattar"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          バージョン：<span className="font-mono">0.0.2</span>
+        </a>
       </article>
       <Footer />
     </div>

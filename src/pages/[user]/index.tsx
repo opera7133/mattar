@@ -451,7 +451,7 @@ const Profile = (props: Props) => {
                       .map(function (i: any) {
                         return i.userId
                       })
-                      .includes(props.user?.id)
+                      .includes(props.pUser.id)
                   ) {
                     return <Mattars item={item} props={props} key={item.id} />
                   }

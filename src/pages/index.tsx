@@ -39,7 +39,7 @@ const Home = (props: Props) => {
   const { data: session } = useSession()
   const router = useRouter()
   const page = router.query.page || 'home'
-  const [state, setState] = useState(page)
+  const [state, setState] = useState(page || 'home')
   const refreshData = () => {
     router.replace(router.asPath)
   }
