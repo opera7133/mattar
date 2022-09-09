@@ -443,7 +443,7 @@ const Profile = (props: Props) => {
             <hr className="my-3" />
             <div className="flex flex-col gap-1">
               {props.mattars.map((item) => {
-                if (state === 'mattars') {
+                if (state === 'mattars' && item.userId === props.pUser.id) {
                   return <Mattars item={item} props={props} key={item.id} />
                 } else if (state === 'fav') {
                   if (
@@ -455,7 +455,10 @@ const Profile = (props: Props) => {
                   ) {
                     return <Mattars item={item} props={props} key={item.id} />
                   }
-                } else if (state === 'remattars') {
+                } else if (
+                  state === 'remattars' &&
+                  item.userId === props.pUser.id
+                ) {
                   if (item.isRemattar) {
                     return <Mattars item={item} props={props} key={item.id} />
                   }
@@ -784,9 +787,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          where: {
-            userId: qUser,
-          },
           include: { user: true, favorites: true },
           orderBy: {
             createdAt: 'desc',
@@ -836,9 +836,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          where: {
-            userId: qUser,
-          },
           include: { user: true, favorites: true },
           orderBy: {
             createdAt: 'desc',
