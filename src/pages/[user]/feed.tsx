@@ -6,8 +6,8 @@ async function generateFeedXml(user: string) {
   const feed = new RSS({
     title: user + ' /  mattar.li',
     description: 'マターリ',
-    site_url: process.env.NEXTAUTH_URL,
-    feed_url: `${process.env.NEXTAUTH_URL}/${user}/feed`,
+    site_url: process.env.NEXT_PUBLIC_BASE_URL,
+    feed_url: `${process.env.NEXT_PUBLIC_BASE_URL}/${user}/feed`,
     language: 'ja',
   })
 
@@ -25,7 +25,7 @@ async function generateFeedXml(user: string) {
       title: mattar.message,
       description: mattar.message,
       date: new Date(mattar.createdAt),
-      url: `${process.env.NEXTAUTH_URL}/${user}/status/${mattar.id}`,
+      url: `${process.env.NEXT_PUBLIC_BASE_URL}/${user}/status/${mattar.id}`,
     })
   })
 

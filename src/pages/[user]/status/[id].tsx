@@ -210,11 +210,7 @@ const Mattar = (props: Props) => {
                       className="duration-200 hover:text-sky-400"
                       onClick={() =>
                         navigator.clipboard.writeText(
-                          `${window.location.protocol}://${
-                            window.location.hostname === 'localhost'
-                              ? 'localhost:3000'
-                              : window.location.hostname
-                          }/${user}/status/${id}`
+                          `${process.env.NEXT_PUBLIC_BASE_URL}/${user}/status/${id}`
                         )
                       }
                     >
