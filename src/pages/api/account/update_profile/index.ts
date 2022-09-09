@@ -11,7 +11,7 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { api_token, api_secret } = query
+  const { api_token } = query
   switch (method) {
     case 'POST':
       const token = await checkToken(req)
@@ -37,24 +37,21 @@ export default async function handler(
         res.status(400).json({ error: "Description is too long" })
         break
       }
-      let userId = req.body.oldId || req.body.id || ""
-      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
-        const tokenId = await prisma.token.findUnique({
-          where: {
-            token: query.api_token
-          },
-          select: {
-            userId: true
-          }
-        })
-        userId = tokenId?.userId
-      }
+      const tokenId = await prisma.token.findUnique({
+        where: {
+          token: api_token
+        },
+        select: {
+          userId: true
+        }
+      })
+      let userId = tokenId?.userId
       const check = await prisma.user.findUnique({
         where: {
           id: userId
         }
       })
-      if (check && req.body.oldId && (req.body.oldId !== req.body.id)) {
+      if (check && userId && (userId !== req.body.id)) {
         res.status(400).json({ error: "ID is already taken" })
         break
       }
@@ -72,10 +69,6 @@ export default async function handler(
           folder: "mattar"
         })
         req.body.profile_picture = upload.secure_url
-      }
-      if (req.body.oldId) {
-        const oldId = req.body.oldId
-        delete req.body.oldId
       }
       const profile = await prisma.user.update({
         where: {

@@ -40,14 +40,17 @@ const Mattar = (props: Props) => {
     router.replace(router.asPath)
   }
   const deleteMattar = async (id: string) => {
-    await fetch('/api/statuses/destroy/' + id, {
-      method: 'POST',
-    })
+    await fetch(
+      `/api/statuses/destroy/${id}?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+      {
+        method: 'POST',
+      }
+    )
     refreshData()
   }
   const reMattar = async (id: string) => {
     const res = await fetch(
-      `/api/statuses/remattar?user_id=${props.user.id}&mattar_id=${id}&source=Mattar Web Client`,
+      `/api/statuses/remattar?user_id=${props.user.id}&mattar_id=${id}&source=Mattar Web Client&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
       {
         method: 'POST',
       }
@@ -55,7 +58,7 @@ const Mattar = (props: Props) => {
   }
   const favMattar = async (id: string) => {
     await fetch(
-      `/api/favorites/create?user_id=${props.user.id}&mattar_id=${id}`,
+      `/api/favorites/create?user_id=${props.user.id}&mattar_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
       {
         method: 'POST',
       }
@@ -64,7 +67,7 @@ const Mattar = (props: Props) => {
   }
   const disfavMattar = async (id: string) => {
     await fetch(
-      `/api/favorites/destroy?user_id=${props.user.id}&mattar_id=${id}`,
+      `/api/favorites/destroy?user_id=${props.user.id}&mattar_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
       {
         method: 'POST',
       }
@@ -373,6 +376,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           },
           include: {
             favorites: true,
+            apiCredentials: true,
           },
         })
       )

@@ -77,11 +77,11 @@ const Profile = (props: Props) => {
         .includes(props.pUser.id)
     ) {
       const res = await fetch(
-        `/api/friendships/destroy?user_id=${props.user?.id}&unfollow_user_id=${id}`
+        `/api/friendships/destroy?user_id=${props.user?.id}&unfollow_user_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`
       )
     } else {
       const ref = await fetch(
-        `/api/friendships/create?user_id=${props.user?.id}&follow_user_id=${id}`
+        `/api/friendships/create?user_id=${props.user?.id}&follow_user_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`
       )
     }
     refreshData()
@@ -110,21 +110,24 @@ const Profile = (props: Props) => {
   }
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    const res = await fetch('/api/account/update_profile', {
-      body: JSON.stringify({
-        oldId: props.user?.id,
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        location: data.location,
-        website: data.website,
-        profile_picture: img,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-    })
+    const res = await fetch(
+      '/api/account/update_profile&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}',
+      {
+        body: JSON.stringify({
+          oldId: props.user?.id,
+          id: data.id,
+          name: data.name,
+          description: data.description,
+          location: data.location,
+          website: data.website,
+          profile_picture: img,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      }
+    )
     const { error } = await res.json()
     if (error) {
       console.log(error)
@@ -803,6 +806,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           include: {
             favorites: true,
             following: true,
+            apiCredentials: true,
           },
         })
       )

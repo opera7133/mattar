@@ -9,7 +9,7 @@ export default async function handler(
   res: NextApiResponseServerIO
 ) {
   const { method } = req
-  const { id, api_token } = req.query
+  const { mattar_id, api_token } = req.query
   switch (method) {
     case 'POST':
       const token = await checkToken(req)
@@ -17,35 +17,33 @@ export default async function handler(
         res.status(400).json({ error: "You don\'t have permission" })
         break
       }
-      if (!id) {
+      if (!mattar_id) {
         res.status(400).json({ error: "Provide Mattar ID" })
         break
       }
       const getMattar = await prisma.mattar.findUnique({
         where: {
-          id: id
+          id: mattar_id
         },
       })
       if (!getMattar) {
         res.status(404).json({ error: "Mattar Not Found" })
         break
       }
-      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
-        const tokenId = await prisma.token.findUnique({
-          where: {
-            token: api_token
-          },
-          select: {
-            userId: true
-          }
-        })
-        if (getMattar.userId !== tokenId?.userId) {
-          res.status(403).json({ error: "You don\'t have permission" })
+      const tokenId = await prisma.token.findUnique({
+        where: {
+          token: api_token
+        },
+        select: {
+          userId: true
         }
+      })
+      if (getMattar.userId !== tokenId?.userId) {
+        res.status(403).json({ error: "You don\'t have permission" })
       }
       const deleteMattar = await prisma.mattar.delete({
         where: {
-          id: id
+          id: mattar_id
         },
       })
       const decrementCount = await prisma.user.update({

@@ -10,7 +10,7 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { user_id, follow_user_id } = query
+  const { follow_user_id } = query
   switch (method) {
     case 'GET':
       const token = await checkToken(req)
@@ -19,18 +19,15 @@ export default async function handler(
         break
       }
       if (follow_user_id) {
-        let userId = user_id || ""
-        if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
-          const tokenId = await prisma.token.findUnique({
-            where: {
-              token: query.api_token
-            },
-            select: {
-              userId: true
-            }
-          })
-          userId = tokenId?.userId
-        }
+        const tokenId = await prisma.token.findUnique({
+          where: {
+            token: query.api_token
+          },
+          select: {
+            userId: true
+          }
+        })
+        const userId = tokenId?.userId
         const fupdate = await prisma.user.update({
           where: {
             id: follow_user_id

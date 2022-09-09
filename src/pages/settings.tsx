@@ -65,19 +65,22 @@ const Settings = (props: Props) => {
   }
 
   const onInfoSubmit: SubmitHandler<InfoInputs> = async (data) => {
-    const res = await fetch('/api/account/update_profile', {
-      body: JSON.stringify({
-        id: props.user.id,
-        email: data.email,
-        birthday: data.bday,
-        lang: data.lang,
-        verified: false,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-    })
+    const res = await fetch(
+      '/api/account/update_profile?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}',
+      {
+        body: JSON.stringify({
+          id: props.user.id,
+          email: data.email,
+          birthday: data.bday,
+          lang: data.lang,
+          verified: false,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      }
+    )
     const { error } = await res.json()
     if (error) {
       console.log(error)

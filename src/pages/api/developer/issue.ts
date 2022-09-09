@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
 import crypto from "crypto"
-import { getToken } from 'next-auth/jwt'
+import { unstable_getServerSession } from "next-auth/next"
+import { authOptions } from '../auth/[...nextauth]'
 const prisma = new PrismaClient()
 
 export default async function handler(
@@ -11,7 +12,7 @@ export default async function handler(
   const { method } = req
   const query = req.query
   const { user_id } = query
-  const userToken = await getToken({ req })
+  const session = await unstable_getServerSession(req, res, authOptions)
   const genToken = (length: number) => {
     const S = 'abcdefgijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     return Array.from(crypto.randomFillSync(new Uint32Array(length)))
@@ -20,7 +21,7 @@ export default async function handler(
   }
   switch (method) {
     case 'GET':
-      if (userToken && !req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+      if (!session) {
         res.status(403).json({ error: "You don\'t have permission" })
         break
       }
@@ -35,9 +36,6 @@ export default async function handler(
       })
       if (!user) {
         res.status(404).json({ error: "User Not Found" })
-        break
-      } else if (!user.verified) {
-        res.status(400).json({ error: "User Must Be Verified" })
         break
       }
       const check = await prisma.token.findUnique({

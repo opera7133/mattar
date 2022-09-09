@@ -11,11 +11,11 @@ export default async function handler(
   const { method } = req
   const clientIp = requestIp.getClientIp(req) || 'IP_NOT_FOUND'
   const query = req.query
-  const { mattar_id, user_id, source, message } = query
+  const { mattar_id, source, message } = query
   switch (method) {
     case 'POST':
       const token = await checkToken(req)
-      if (!checkToken(req)) {
+      if (!token) {
         res.status(403).json({ error: "You don\'t have permission" })
         break
       }
@@ -23,18 +23,15 @@ export default async function handler(
         res.status(400).json({ error: "Provide Mattar ID and User ID" })
         break
       }
-      let userId = user_id || ""
-      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
-        const tokenId = await prisma.token.findUnique({
-          where: {
-            token: query.api_token
-          },
-          select: {
-            userId: true
-          }
-        })
-        userId = tokenId?.userId
-      }
+      const tokenId = await prisma.token.findUnique({
+        where: {
+          token: query.api_token
+        },
+        select: {
+          userId: true
+        }
+      })
+      const userId = tokenId?.userId
       const from = await prisma.mattar.findUnique({
         where: {
           id: mattar_id
@@ -44,20 +41,20 @@ export default async function handler(
         res.status(404).json({ error: "Mattar not found" })
         break
       }
-      const message = "RT @" + from?.userId + ": " + from?.message
+      const nmessage = message + "RT @" + from?.userId + ": " + from?.message
       const sendby = source || "Mattar API"
       const remattar = await prisma.mattar.create({
         data: {
           userId: userId,
           isRemattar: true,
-          message: message,
+          message: nmessage,
           source: sendby,
           ip: clientIp
         }
       })
       const update = await prisma.user.update({
         where: {
-          id: user_id
+          id: userId
         },
         data: {
           mattar_count: {

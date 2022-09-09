@@ -65,7 +65,7 @@ const Mattars: React.FC<Props> = ({ item, props }) => {
   }
   const reMattar = async (id: string) => {
     const res = await fetch(
-      `/api/statuses/remattar?user_id=${props.user?.id}&mattar_id=${id}&source=Mattar Web Client`,
+      `/api/statuses/remattar?user_id=${props.user?.id}&mattar_id=${id}&source=Mattar Web Client&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
       {
         method: 'POST',
       }
@@ -74,7 +74,7 @@ const Mattars: React.FC<Props> = ({ item, props }) => {
   }
   const favMattar = async (id: string) => {
     await fetch(
-      `/api/favorites/create?user_id=${props.user?.id}&mattar_id=${id}`,
+      `/api/favorites/create?user_id=${props.user?.id}&mattar_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
       {
         method: 'POST',
       }
@@ -83,7 +83,7 @@ const Mattars: React.FC<Props> = ({ item, props }) => {
   }
   const disfavMattar = async (id: string) => {
     await fetch(
-      `/api/favorites/destroy?user_id=${props.user?.id}&mattar_id=${id}`,
+      `/api/favorites/destroy?user_id=${props.user?.id}&mattar_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
       {
         method: 'POST',
       }
@@ -91,9 +91,12 @@ const Mattars: React.FC<Props> = ({ item, props }) => {
     refreshData()
   }
   const deleteMattar = async (id: string) => {
-    await fetch('/api/statuses/destroy/' + id, {
-      method: 'POST',
-    })
+    await fetch(
+      `/api/statuses/destroy/${id}?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+      {
+        method: 'POST',
+      }
+    )
     refreshData()
   }
   return (

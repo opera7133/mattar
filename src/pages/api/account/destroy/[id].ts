@@ -10,11 +10,11 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { id, api_token, api_secret } = query
+  const { id } = query
   const session = await unstable_getServerSession(req, res, authOptions)
   switch (method) {
     case 'POST':
-      if (!session || !req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+      if (!session) {
         res.status(403).json({ error: "You don\'t have permission" })
         break
       }

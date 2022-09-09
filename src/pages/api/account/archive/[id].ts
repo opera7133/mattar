@@ -9,7 +9,6 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { id } = query
   switch (method) {
     case 'GET':
       const token = await checkToken(req)
@@ -17,18 +16,15 @@ export default async function handler(
         res.status(400).json({ error: "You don\'t have permission" })
         break
       }
-      let userId = id || ""
-      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
-        const tokenId = await prisma.token.findUnique({
-          where: {
-            token: query.api_token
-          },
-          select: {
-            userId: true
-          }
-        })
-        userId = tokenId?.userId
-      }
+      const tokenId = await prisma.token.findUnique({
+        where: {
+          token: query.api_token
+        },
+        select: {
+          userId: true
+        }
+      })
+      const userId = tokenId?.userId
       if (userId) {
         const user = await prisma.user.findUnique({
           where: {
@@ -80,7 +76,7 @@ export default async function handler(
           res.status(404).json({ error: "User not found" })
           break
         }
-        res.setHeader('Content-disposition', `attachment; filename=${id}_data.json`)
+        res.setHeader('Content-disposition', `attachment; filename=${userId}_data.json`)
         res.setHeader('Content-Type', 'application/json')
         res.send(user)
         res.status(200)

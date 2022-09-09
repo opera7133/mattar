@@ -22,7 +22,7 @@ export default async function handler(
   }
   switch (method) {
     case 'POST':
-      if (!session || !req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+      if (!session) {
         res.status(403).json({ error: "You don\'t have permission" })
         break
       }

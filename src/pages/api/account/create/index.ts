@@ -17,6 +17,12 @@ export default async function handler(
       .map((v) => S[v % S.length])
       .join('');
   }
+  const genToken = (length: number) => {
+    const S = 'abcdefgijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return Array.from(crypto.randomFillSync(new Uint32Array(length)))
+      .map((v) => S[v % S.length])
+      .join('');
+  }
   switch (method) {
     case 'POST':
       if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
@@ -50,6 +56,8 @@ export default async function handler(
         res.status(403).json({ error: "Invite Code is not valid" })
         break
       }
+      const newToken = genToken(43)
+      const newSecret = genToken(43)
       const pepper = process.env.PEPPER
       const salt = genSalt()
       const hash = await argon2.hash(pepper + req.body.password + salt)
@@ -61,6 +69,13 @@ export default async function handler(
       delete req.body.invite
       const newUser = await prisma.user.create({
         data: req.body,
+      })
+      const create = await prisma.token.create({
+        data: {
+          userId: req.body.id,
+          token: newToken,
+          secret: newSecret
+        }
       })
       res.status(200).json(newUser)
       break

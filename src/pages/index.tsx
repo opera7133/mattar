@@ -49,18 +49,21 @@ const Home = (props: Props) => {
   }
   const postMattar = async () => {
     setText('')
-    await fetch('/api/statuses/update', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: text,
-        source: 'Mattar Web Client',
-        userId: props.user?.id,
-        isRemattar: false,
-      }),
-    })
+    await fetch(
+      `/api/statuses/update?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: text,
+          source: 'Mattar Web Client',
+          userId: props.user?.id,
+          isRemattar: false,
+        }),
+      }
+    )
     refreshData()
   }
   const setPage = (name: string) => {
@@ -77,11 +80,11 @@ const Home = (props: Props) => {
         .includes(id)
     ) {
       const res = await fetch(
-        `/api/friendships/destroy?user_id=${props.user?.id}&unfollow_user_id=${id}`
+        `/api/friendships/destroy?user_id=${props.user?.id}&unfollow_user_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`
       )
     } else {
       const ref = await fetch(
-        `/api/friendships/create?user_id=${props.user?.id}&follow_user_id=${id}`
+        `/api/friendships/create?user_id=${props.user?.id}&follow_user_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`
       )
     }
     refreshData()
@@ -548,6 +551,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
             favorites: true,
             following: true,
             follower: true,
+            apiCredentials: true,
           },
         })
       )
