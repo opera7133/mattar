@@ -30,6 +30,7 @@ export default async function handler(
       })
       if (!from) {
         res.status(404).json({ error: "Mattar not found" })
+        break
       }
       const message = "RT @" + from?.userId + ": " + from?.message
       const sendby = source || "Mattar API"

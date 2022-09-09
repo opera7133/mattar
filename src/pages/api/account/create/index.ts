@@ -44,6 +44,11 @@ export default async function handler(
       })
       if (check) {
         res.status(400).json({ error: "ID is already taken" })
+        break
+      }
+      if (req.body.invite !== process.env.INVITE_CODE) {
+        res.status(403).json({ error: "Invite Code is not valid" })
+        break
       }
       const pepper = process.env.PEPPER
       const salt = genSalt()
@@ -53,6 +58,7 @@ export default async function handler(
       req.body.verified = false
       req.body.mattar_count = 0
       delete req.body.password
+      delete req.body.invite
       const newUser = await prisma.user.create({
         data: req.body,
       })

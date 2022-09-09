@@ -19,6 +19,7 @@ export default async function handler(
       }
       if (!id) {
         res.status(400).json({ error: "Provide Mattar ID" })
+        break
       }
       const getMattar = await prisma.mattar.findUnique({
         where: {
@@ -27,6 +28,7 @@ export default async function handler(
       })
       if (!getMattar) {
         res.status(404).json({ error: "Mattar Not Found" })
+        break
       }
       const deleteMattar = await prisma.mattar.delete({
         where: {

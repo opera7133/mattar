@@ -127,52 +127,56 @@ const Mattars: React.FC<Props> = ({ item, props }) => {
           <span title={item.createdAt.toString()}>
             {getElapsedTime(item.createdAt)}
           </span>
-          <span
-            className={`ml-3 duration-200 ${
-              !props.user.favorites
-                .map(function (i: any) {
-                  return i.mattarId
-                })
-                .includes(item.id) && 'lg:opacity-0 lg:group-hover:opacity-100'
-            }`}
-          >
-            <button
-              className={`duration-200 ${
-                props.user.favorites
+          {props.user && (
+            <span
+              className={`ml-3 duration-200 ${
+                props.user &&
+                !props.user.favorites
                   .map(function (i: any) {
                     return i.mattarId
                   })
-                  .includes(item.id)
-                  ? 'text-orange-400'
-                  : 'hover:text-orange-400'
+                  .includes(item.id) &&
+                'lg:opacity-0 lg:group-hover:opacity-100'
               }`}
-              onClick={() => {
-                if (
+            >
+              <button
+                className={`duration-200 ${
                   props.user.favorites
                     .map(function (i: any) {
                       return i.mattarId
                     })
                     .includes(item.id)
-                ) {
-                  disfavMattar(item.id)
-                } else {
-                  favMattar(item.id)
-                }
-              }}
-            >
-              {props.user.favorites
-                .map(function (i: any) {
-                  return i.mattarId
-                })
-                .includes(item.id) ? (
-                <BsStarFill className="inline-block mb-1" />
-              ) : (
-                <BsStar className="inline-block mb-1" />
-              )}
-              お気に入り
-            </button>
-          </span>
-          {!item.isRemattar && (
+                    ? 'text-orange-400'
+                    : 'hover:text-orange-400'
+                }`}
+                onClick={() => {
+                  if (
+                    props.user.favorites
+                      .map(function (i: any) {
+                        return i.mattarId
+                      })
+                      .includes(item.id)
+                  ) {
+                    disfavMattar(item.id)
+                  } else {
+                    favMattar(item.id)
+                  }
+                }}
+              >
+                {props.user.favorites
+                  .map(function (i: any) {
+                    return i.mattarId
+                  })
+                  .includes(item.id) ? (
+                  <BsStarFill className="inline-block mb-1" />
+                ) : (
+                  <BsStar className="inline-block mb-1" />
+                )}
+                お気に入り
+              </button>
+            </span>
+          )}
+          {props.user && !item.isRemattar && (
             <span className="ml-2 duration-200 lg:opacity-0 lg:group-hover:opacity-100">
               <button
                 className="duration-200 hover:text-green-400"

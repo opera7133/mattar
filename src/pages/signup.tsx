@@ -23,6 +23,7 @@ export default function SignUp() {
     name: string
     email: string
     password: string
+    invite: string
     agree: boolean
   }
 
@@ -47,6 +48,7 @@ export default function SignUp() {
         id: data.id,
         name: data.name,
         email: data.email,
+        invite: data.invite,
         password: data.password,
         profile_picture: '/img/default.png',
       }),
@@ -233,6 +235,23 @@ export default function SignUp() {
                 </div>
               </div>
 
+              <div className="inline-flex flex-col">
+                <label className="text-lg" htmlFor="name">
+                  招待コード
+                </label>
+                <input
+                  className={classNames(
+                    errors.invite ? 'bg-red-200' : '',
+                    'bg-gray-200 border-none rounded-md text-lg px-5 py-3 duration-200 text-black focus:ring-0 focus:bg-gray-100'
+                  )}
+                  type="text"
+                  {...register('invite', {
+                    required: true,
+                  })}
+                  id="invite"
+                />
+              </div>
+
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -244,17 +263,21 @@ export default function SignUp() {
                   {...register('agree', { required: true })}
                 />
                 <label className="text-lg" htmlFor="privacy">
-                  <Link href="/privacy">
-                    <a className="text-sky-500 duration-200 hover:text-sky-800">
-                      <span className="ml-2">プライバシーポリシー</span>
-                    </a>
-                  </Link>
+                  <a
+                    href="/privacy"
+                    target="_blank"
+                    className="text-sky-500 duration-200 hover:text-sky-800"
+                  >
+                    <span className="ml-2">プライバシーポリシー</span>
+                  </a>
                   および
-                  <Link href="/tos">
-                    <a className="text-sky-500 duration-200 hover:text-sky-800">
-                      <span>利用規約</span>
-                    </a>
-                  </Link>
+                  <a
+                    href="/tos"
+                    target="_blank"
+                    className="text-sky-500 duration-200 hover:text-sky-800"
+                  >
+                    <span>利用規約</span>
+                  </a>
                   をよく読み、同意しました。
                 </label>
               </div>

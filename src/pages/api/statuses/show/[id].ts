@@ -13,6 +13,7 @@ export default async function handler(
     case 'GET':
       if (!id) {
         res.status(400).json({ error: "Provide Mattar ID" })
+        break
       }
       const mattar = await prisma.mattar.findUnique({
         where: {
@@ -21,6 +22,7 @@ export default async function handler(
       })
       if (!mattar) {
         res.status(404).json({ error: "Mattar Not Found" })
+        break
       }
       res.status(200).json(mattar)
       break

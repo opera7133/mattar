@@ -17,6 +17,7 @@ export default async function handler(
       }
       if (!id) {
         res.status(400).json({ error: "Provide User ID" })
+        break
       }
       const deleteUser = await prisma.user.delete({
         where: {

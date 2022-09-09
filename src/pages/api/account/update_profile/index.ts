@@ -35,6 +35,7 @@ export default async function handler(
       }
       if (stringWidth(req.body.description) > 80) {
         res.status(400).json({ error: "Description is too long" })
+        break
       }
       const userId = req.body.oldId || req.body.id
       const check = await prisma.user.findUnique({

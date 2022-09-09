@@ -32,6 +32,7 @@ export default async function handler(
       if (!user) {
         res.status(404).json({ error: "User Not Found" })
         break
+        break
       }
       if (!req.body.oldPassword && req.body.newPassword) {
         res.status(400).json({ error: "Not entered old password" })

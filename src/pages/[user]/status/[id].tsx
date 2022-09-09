@@ -250,91 +250,98 @@ const Mattar = (props: Props) => {
           </div>
         </div>
         <div className="col-span-1 py-4">
-          <div className="px-3 flex gap-3 items-center">
-            <img src={props.mattar.user.profile_picture} className="w-12" />
+          {session && (
             <div>
-              <p className="font-bold">{props.user.name}</p>
-              <p>
-                {props.user.mattar_count}
-                のつぶやき
-              </p>
+              <div className="px-3 flex gap-3 items-center">
+                <img src={props.mattar.user.profile_picture} className="w-12" />
+                <div>
+                  <p className="font-bold">{props.user.name}</p>
+                  <p>
+                    {props.user.mattar_count}
+                    のつぶやき
+                  </p>
+                </div>
+              </div>
+              <table className="my-3 border-separate border-spacing-x-2.5">
+                <tbody>
+                  <tr>
+                    <td>
+                      <Link href="/?page=following">
+                        <a>
+                          <p className="font-bold">
+                            {props.user.following
+                              ? props.user.following.length
+                              : '0'}
+                          </p>
+                          <p>フォロー中</p>
+                        </a>
+                      </Link>
+                    </td>
+                    <td>
+                      <Link href="/?page=follower">
+                        <a>
+                          <p className="font-bold">
+                            {props.user.follower
+                              ? props.user.follower.length
+                              : '0'}
+                          </p>
+                          <p>フォロワー</p>
+                        </a>
+                      </Link>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div className="flex flex-col">
+                <Link href="/">
+                  <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
+                    ホーム
+                  </a>
+                </Link>
+                <Link href="/?page=at">
+                  <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
+                    @{props.user.id}
+                  </a>
+                </Link>
+                <Link href="/msg">
+                  <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
+                    メッセージ
+                  </a>
+                </Link>
+                <Link href="/fav">
+                  <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
+                    お気に入り
+                  </a>
+                </Link>
+                <Link href="/rtw">
+                  <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
+                    リツイート
+                  </a>
+                </Link>
+              </div>
+              <div className="my-4 px-3 flex">
+                <input
+                  placeholder="検索"
+                  type="text"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                      router.push(`/search?query=${searchText}`)
+                    }
+                  }}
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  className="text-black w-full h-9 rounded-md rounded-r-none focus:ring-0 focus:border-gray-500 border-r-0"
+                />
+                <Button
+                  className="bg-primary px-3 h-9 border border-primary rounded-md rounded-l-none hover:opacity-80 duration-300"
+                  onClick={() => router.push(`/search?query=${searchText}`)}
+                >
+                  <BsSearch className="fill-white" size={18} />
+                </Button>
+              </div>
             </div>
-          </div>
-          <table className="my-3 border-separate border-spacing-x-2.5">
-            <tbody>
-              <tr>
-                <td>
-                  <Link href="/?page=following">
-                    <a>
-                      <p className="font-bold">
-                        {props.user.following
-                          ? props.user.following.length
-                          : '0'}
-                      </p>
-                      <p>フォロー中</p>
-                    </a>
-                  </Link>
-                </td>
-                <td>
-                  <Link href="/?page=follower">
-                    <a>
-                      <p className="font-bold">
-                        {props.user.follower ? props.user.follower.length : '0'}
-                      </p>
-                      <p>フォロワー</p>
-                    </a>
-                  </Link>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div className="flex flex-col">
-            <Link href="/">
-              <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
-                ホーム
-              </a>
-            </Link>
-            <Link href="/?page=at">
-              <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
-                @{props.user.id}
-              </a>
-            </Link>
-            <Link href="/msg">
-              <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
-                メッセージ
-              </a>
-            </Link>
-            <Link href="/fav">
-              <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
-                お気に入り
-              </a>
-            </Link>
-            <Link href="/rtw">
-              <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
-                リツイート
-              </a>
-            </Link>
-          </div>
-          <div className="my-4 px-3 flex">
-            <input
-              placeholder="検索"
-              type="text"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-                  router.push(`/search?query=${searchText}`)
-                }
-              }}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="text-black w-full h-9 rounded-md rounded-r-none focus:ring-0 focus:border-gray-500 border-r-0"
-            />
-            <Button
-              className="bg-primary px-3 h-9 border border-primary rounded-md rounded-l-none hover:opacity-80 duration-300"
-              onClick={() => router.push(`/search?query=${searchText}`)}
-            >
-              <BsSearch className="fill-white" size={18} />
-            </Button>
-          </div>
+          )}
           <Footer />
         </div>
       </main>

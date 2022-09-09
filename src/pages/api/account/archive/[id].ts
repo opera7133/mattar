@@ -66,6 +66,7 @@ export default async function handler(
         })
         if (!user) {
           res.status(404).json({ error: "User not found" })
+          break
         }
         res.setHeader('Content-disposition', `attachment; filename=${id}_data.json`)
         res.setHeader('Content-Type', 'application/json')
