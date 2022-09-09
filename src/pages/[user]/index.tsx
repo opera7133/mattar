@@ -486,18 +486,20 @@ const Profile = (props: Props) => {
                         </a>
                       </Link>
                       <div>
-                        <Button
-                          className="absolute top-2 right-20 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
-                          onClick={() => followState()}
-                        >
-                          {props.user?.following
-                            .map(function (i: any) {
-                              return i.id
-                            })
-                            .includes(item.id)
-                            ? 'フォロー中'
-                            : 'フォロー'}
-                        </Button>
+                        {session && (
+                          <Button
+                            className="absolute top-2 right-20 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
+                            onClick={() => followState()}
+                          >
+                            {props.user?.following
+                              .map(function (i: any) {
+                                return i.id
+                              })
+                              .includes(item.id)
+                              ? 'フォロー中'
+                              : 'フォロー'}
+                          </Button>
+                        )}
                         <Menu as="div" className="inline-block text-left">
                           <div>
                             <Menu.Button className="absolute top-2 right-5 bg-primary text-white px-3.5 py-3 shadow-md duration-200 hover:shadow-sm rounded-md">
@@ -514,22 +516,24 @@ const Profile = (props: Props) => {
                             leaveTo="transform opacity-0 scale-95"
                           >
                             <Menu.Items className="absolute right-5 top-14 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                              <div className="flex flex-col">
-                                <Menu.Item>
-                                  {({ active }) => (
-                                    <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
-                                      ミュート
-                                    </button>
-                                  )}
-                                </Menu.Item>
-                                <Menu.Item>
-                                  {({ active }) => (
-                                    <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
-                                      ブロック
-                                    </button>
-                                  )}
-                                </Menu.Item>
-                              </div>
+                              {session && (
+                                <div className="flex flex-col">
+                                  <Menu.Item>
+                                    {({ active }) => (
+                                      <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                        ミュート
+                                      </button>
+                                    )}
+                                  </Menu.Item>
+                                  <Menu.Item>
+                                    {({ active }) => (
+                                      <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                        ブロック
+                                      </button>
+                                    )}
+                                  </Menu.Item>
+                                </div>
+                              )}
                               <div className="flex flex-col">
                                 <Menu.Item>
                                   {({ active }) => (
@@ -580,18 +584,20 @@ const Profile = (props: Props) => {
                         </a>
                       </Link>
                       <div>
-                        <Button
-                          className="absolute top-2 right-20 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
-                          onClick={() => followState()}
-                        >
-                          {props.user?.following
-                            .map(function (i: any) {
-                              return i.id
-                            })
-                            .includes(item.id)
-                            ? 'フォロー中'
-                            : 'フォロー'}
-                        </Button>
+                        {session && (
+                          <Button
+                            className="absolute top-2 right-20 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
+                            onClick={() => followState()}
+                          >
+                            {props.user?.following
+                              .map(function (i: any) {
+                                return i.id
+                              })
+                              .includes(item.id)
+                              ? 'フォロー中'
+                              : 'フォロー'}
+                          </Button>
+                        )}
                         <Menu as="div" className="inline-block text-left">
                           <div>
                             <Menu.Button className="absolute top-2 right-5 bg-primary text-white px-3.5 py-3 shadow-md duration-200 hover:shadow-sm rounded-md">
@@ -608,22 +614,24 @@ const Profile = (props: Props) => {
                             leaveTo="transform opacity-0 scale-95"
                           >
                             <Menu.Items className="absolute right-5 top-14 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                              <div className="flex flex-col">
-                                <Menu.Item>
-                                  {({ active }) => (
-                                    <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
-                                      ミュート
-                                    </button>
-                                  )}
-                                </Menu.Item>
-                                <Menu.Item>
-                                  {({ active }) => (
-                                    <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
-                                      ブロック
-                                    </button>
-                                  )}
-                                </Menu.Item>
-                              </div>
+                              {session && (
+                                <div className="flex flex-col">
+                                  <Menu.Item>
+                                    {({ active }) => (
+                                      <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                        ミュート
+                                      </button>
+                                    )}
+                                  </Menu.Item>
+                                  <Menu.Item>
+                                    {({ active }) => (
+                                      <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                        ブロック
+                                      </button>
+                                    )}
+                                  </Menu.Item>
+                                </div>
+                              )}
                               <div className="flex flex-col">
                                 <Menu.Item>
                                   {({ active }) => (
