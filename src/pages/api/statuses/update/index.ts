@@ -50,7 +50,8 @@ export default async function handler(
           }
         },
       })
-      res.socket.server.io.emit("post", req.body.message)
+      delete req.body.ip
+      res.socket.server.io.emit("post", req.body)
       res.status(200).json(mattar)
       break
 
