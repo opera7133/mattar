@@ -7,8 +7,8 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 export default async function handler(req: NextApiRequest, res: NextApiResponseServerIO) {
-  const api_token = req.headers.["x-api-key"]
-  const api_secret = req.headers.["x-api-secret"]
+  const api_token = req.headers["x-api-key"]
+  const api_secret = req.headers["x-api-secret"]
   if (!api_token || !api_secret) {
     res.status(403).json({ error: "Access Denied" })
     res.end();
