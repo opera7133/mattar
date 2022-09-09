@@ -139,7 +139,7 @@ const Profile = (props: Props) => {
 
   useEffect((): any => {
     const socket = io(process.env.NEXT_PUBLIC_BASE_URL, {
-      path: '/api/statuses/filter?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}',
+      path: `/api/statuses/filter?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
     })
     socket.on('connect', () => {})
     socket.on(`message`, (message: string) => {
