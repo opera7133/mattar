@@ -68,7 +68,7 @@ const Profile = (props: Props) => {
     router.push(router)
   }
 
-  const followState = async () => {
+  const followState = async (id: string) => {
     if (
       props.user?.following
         .map(function (i: any) {
@@ -77,11 +77,11 @@ const Profile = (props: Props) => {
         .includes(props.pUser.id)
     ) {
       const res = await fetch(
-        `/api/friendships/destroy?user_id=${props.user?.id}&unfollow_user_id=${props.pUser.id}`
+        `/api/friendships/destroy?user_id=${props.user?.id}&unfollow_user_id=${id}`
       )
     } else {
       const ref = await fetch(
-        `/api/friendships/create?user_id=${props.user?.id}&follow_user_id=${props.pUser.id}`
+        `/api/friendships/create?user_id=${props.user?.id}&follow_user_id=${id}`
       )
     }
     refreshData()
@@ -494,7 +494,7 @@ const Profile = (props: Props) => {
                         {session && (
                           <Button
                             className="absolute top-2 right-20 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
-                            onClick={() => followState()}
+                            onClick={() => followState(item.id)}
                           >
                             {props.user?.following
                               .map(function (i: any) {
@@ -592,7 +592,7 @@ const Profile = (props: Props) => {
                         {session && (
                           <Button
                             className="absolute top-2 right-20 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
-                            onClick={() => followState()}
+                            onClick={() => followState(item.id)}
                           >
                             {props.user?.following
                               .map(function (i: any) {
