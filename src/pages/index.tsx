@@ -68,7 +68,7 @@ const Home = (props: Props) => {
     router.query.page = name
     router.push(router)
   }
-  const followState = async (id) => {
+  const followState = async (id: string) => {
     if (
       props.user.following
         .map(function (i: any) {
