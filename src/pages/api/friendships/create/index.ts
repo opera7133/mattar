@@ -14,7 +14,6 @@ export default async function handler(
   switch (method) {
     case 'GET':
       const token = await checkToken(req)
-      const token = await checkToken(req)
       if (!token) {
         res.status(400).json({ error: "You don\'t have permission" })
         break
