@@ -13,7 +13,6 @@ export default async function handler(
   const { method } = req
   const clientIp = requestIp.getClientIp(req) || 'IP_NOT_FOUND'
   const query = req.query
-  const { api_token, api_secret } = query
   switch (method) {
     case 'POST':
       if (!checkToken(req)) {
@@ -39,7 +38,7 @@ export default async function handler(
           }
         },
       })
-      res.socket.server.io.emit("message", req.body.message)
+      res.socket.server.io.emit("post", req.body.message)
       res.status(200).json(mattar)
       break
 

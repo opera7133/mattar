@@ -51,52 +51,6 @@ const Profile = (props: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [searchText, setSearchText] = useState('')
   const [img, setImg] = useState(props.user?.profile_picture)
-  const deleteMattar = async (id: string) => {
-    await fetch('/api/statuses/destroy/' + id, {
-      method: 'DELETE',
-    })
-  }
-  const linkifyOptions = {
-    className: function (_href: string, type: string) {
-      return 'text-sky-500'
-    },
-    formatHref: {
-      hashtag: (href: string) => 'search?query=' + href.substring(1),
-      mention: (href: string) => href,
-    },
-    target: {
-      url: '_blank',
-    },
-    nl2br: true,
-    defaultProtocol: 'https',
-  }
-  const getElapsedTime = (date: Date | string) => {
-    const newDate = typeof date === 'string' ? new Date(date) : date
-    const today = new Date()
-    const diff = today.getTime() - newDate.getTime()
-    const elapsed = new Date(diff)
-    if (
-      elapsed.getUTCFullYear() &&
-      newDate.getFullYear() !== today.getFullYear()
-    ) {
-      return (
-        newDate.getFullYear() +
-        '年' +
-        (newDate.getMonth() + 1) +
-        '月' +
-        newDate.getDate() +
-        '日'
-      )
-    } else if (elapsed.getUTCDate() - 1) {
-      return newDate.getMonth() + 1 + '月' + newDate.getDate() + '日'
-    } else if (elapsed.getUTCHours()) {
-      return elapsed.getUTCHours() + '時間前'
-    } else if (elapsed.getUTCMinutes()) {
-      return elapsed.getUTCMinutes() + '分前'
-    } else {
-      return 'たった今'
-    }
-  }
   const {
     register,
     handleSubmit,
@@ -153,33 +107,6 @@ const Profile = (props: Props) => {
       }
       reader.readAsDataURL(file)
     }
-  }
-  const reMattar = async (id: string) => {
-    const res = await fetch(
-      `/api/statuses/remattar?user_id=${props.user.id}&mattar_id=${id}&source=Mattar Web Client`,
-      {
-        method: 'POST',
-      }
-    )
-    refreshData()
-  }
-  const favMattar = async (id: string) => {
-    await fetch(
-      `/api/favorites/create?user_id=${props.user.id}&mattar_id=${id}`,
-      {
-        method: 'POST',
-      }
-    )
-    refreshData()
-  }
-  const disfavMattar = async (id: string) => {
-    await fetch(
-      `/api/favorites/destroy?user_id=${props.user.id}&mattar_id=${id}`,
-      {
-        method: 'POST',
-      }
-    )
-    refreshData()
   }
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
@@ -284,6 +211,7 @@ const Profile = (props: Props) => {
                 </div>
                 {props.user?.id === props.pUser.id ? (
                   <Button
+                    id="edit"
                     className="absolute top-2 right-5 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
                     onClick={() => showModal()}
                   >
@@ -291,18 +219,20 @@ const Profile = (props: Props) => {
                   </Button>
                 ) : (
                   <div>
-                    <Button
-                      className="absolute top-2 right-20 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
-                      onClick={() => followState()}
-                    >
-                      {props.user?.following
-                        .map(function (i: any) {
-                          return i.id
-                        })
-                        .includes(props.pUser.id)
-                        ? 'フォロー中'
-                        : 'フォロー'}
-                    </Button>
+                    {session && (
+                      <Button
+                        className="absolute top-2 right-20 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
+                        onClick={() => followState()}
+                      >
+                        {props.user?.following
+                          .map(function (i: any) {
+                            return i.id
+                          })
+                          .includes(props.pUser.id)
+                          ? 'フォロー中'
+                          : 'フォロー'}
+                      </Button>
+                    )}
                     <Menu as="div" className="inline-block text-left">
                       <div>
                         <Menu.Button className="absolute top-2 right-5 bg-primary text-white px-3.5 py-3 shadow-md duration-200 hover:shadow-sm rounded-md">
@@ -319,22 +249,24 @@ const Profile = (props: Props) => {
                         leaveTo="transform opacity-0 scale-95"
                       >
                         <Menu.Items className="absolute right-5 top-14 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                          <div className="flex flex-col">
-                            <Menu.Item>
-                              {({ active }) => (
-                                <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
-                                  ミュート
-                                </button>
-                              )}
-                            </Menu.Item>
-                            <Menu.Item>
-                              {({ active }) => (
-                                <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
-                                  ブロック
-                                </button>
-                              )}
-                            </Menu.Item>
-                          </div>
+                          {session && (
+                            <div className="flex flex-col">
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                    ミュート
+                                  </button>
+                                )}
+                              </Menu.Item>
+                              <Menu.Item>
+                                {({ active }) => (
+                                  <button className="duration-200 px-4 py-2 text-sm text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800">
+                                    ブロック
+                                  </button>
+                                )}
+                              </Menu.Item>
+                            </div>
+                          )}
                           <div className="flex flex-col">
                             <Menu.Item>
                               {({ active }) => (
@@ -404,7 +336,7 @@ const Profile = (props: Props) => {
                                 <label htmlFor="id">ユーザー名</label>
                                 <input
                                   type="text"
-                                  id="id"
+                                  id="userid"
                                   {...register('id', {
                                     required: true,
                                   })}
@@ -438,7 +370,9 @@ const Profile = (props: Props) => {
                                   <div className="ml-3 inline-flex gap-3 flex-col">
                                     <label className="cursor-pointer text-center bg-primary text-white px-4 py-2 block rounded-md duration-200 shadow-md hover:shadow-sm">
                                       <input
+                                        id="avatar"
                                         type="file"
+                                        accept="image/apng, image/avif, image/bmp, image/gif, image/png, image/jpeg, image/svg+xml, image/webp"
                                         {...register('avatar')}
                                         onChange={(e) => onChangeInputFile(e)}
                                         className="hidden"
@@ -494,6 +428,7 @@ const Profile = (props: Props) => {
                                   キャンセル
                                 </Button>
                                 <input
+                                  id="update"
                                   type="submit"
                                   value="更新"
                                   className="cursor-pointer ml-3 rounded-md bg-primary text-white shadow-md duration-200 px-4 py-2 hover:shadow-sm"
@@ -849,7 +784,7 @@ const Profile = (props: Props) => {
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const qUser = ctx.query.user
   const session = await getSession(ctx)
-  if (session && session.user && session.user.id) {
+  if (session && session.user) {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({

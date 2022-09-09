@@ -1,14 +1,15 @@
 import React from 'react'
 
 interface Props {
-  className: string | undefined
+  className?: string
+  id?: string
   children?: React.ReactNode | string
   onClick: () => void
 }
 
-const Button: React.FC<Props> = ({ className, children, onClick }) => {
+const Button: React.FC<Props> = ({ id, className, children, onClick }) => {
   return (
-    <button onClick={onClick} className={className}>
+    <button onClick={onClick} className={className} id={id}>
       {children}
     </button>
   )

@@ -15,8 +15,8 @@ export default async function handler(
   switch (method) {
     case 'POST':
       const token = await checkToken(req)
-      if (!token) {
-        res.status(400).json({ error: "You don\'t have permission" })
+      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+        res.status(403).json({ error: "You don\'t have permission" })
         break
       }
       if (!mattar_id || !user_id) {
@@ -28,6 +28,9 @@ export default async function handler(
           id: mattar_id
         },
       })
+      if (!from) {
+        res.status(404).json({ error: "Mattar not found" })
+      }
       const message = "RT @" + from?.userId + ": " + from?.message
       const sendby = source || "Mattar API"
       const remattar = await prisma.mattar.create({

@@ -1,3 +1,4 @@
+import { Dialog, Transition } from '@headlessui/react'
 import Button from 'components/Button'
 import Footer from 'components/Footer'
 import Header from 'components/Header'
@@ -9,8 +10,11 @@ import { getCsrfToken, signIn, useSession } from 'next-auth/react'
 import { CtxOrReq } from 'next-auth/client/_utils'
 import { useRouter } from 'next/router'
 import { passwordStrength } from 'check-password-strength'
+import { Fragment, useState } from 'react'
 
 export default function SignUp() {
+  const [isOpen, setIsOpen] = useState(false)
+  const [errorText, setErrorText] = useState('')
   const router = useRouter()
   const { data: session } = useSession()
 
@@ -53,22 +57,29 @@ export default function SignUp() {
     })
     const { error } = await res.json()
     if (error) {
-      console.log(error)
+      setIsOpen(true)
+      setErrorText(error)
       return
-    } else {
-      await signIn<any>('credentials', {
-        redirect: true,
-        username: data.id,
-        password: data.password,
-        callbackUrl: `${window.location.origin}`,
-      }).then((res) => {
-        if (res?.error) {
-          console.error('UserId,Passwordを正しく入力してください')
-        } else {
-          router.push('/')
-        }
-      })
     }
+    const mail = await fetch(`/api/account/verify/issue?user_id=${data.id}`)
+    const { mailerror } = await mail.json()
+    if (mailerror) {
+      setIsOpen(true)
+      setErrorText(mailerror)
+      return
+    }
+    await signIn<any>('credentials', {
+      redirect: true,
+      username: data.id,
+      password: data.password,
+      callbackUrl: `${window.location.origin}`,
+    }).then((res) => {
+      if (res?.error) {
+        console.error('UserId,Passwordを正しく入力してください')
+      } else {
+        router.push('/')
+      }
+    })
   }
 
   const classNames = (...classes: any[]) => {
@@ -250,12 +261,68 @@ export default function SignUp() {
             </div>
 
             <Button
+              id="signup"
               className="px-4 text-white py-2 rounded-md bg-primary shadow-md duration-200 hover:shadow-sm"
               onClick={() => {}}
             >
               登録
             </Button>
           </form>
+          <Transition appear show={isOpen} as={Fragment}>
+            <Dialog
+              as="div"
+              className="relative z-10"
+              onClose={() => setIsOpen(false)}
+            >
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0"
+                enterTo="opacity-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100"
+                leaveTo="opacity-0"
+              >
+                <div className="fixed inset-0 bg-black bg-opacity-25" />
+              </Transition.Child>
+
+              <div className="fixed inset-0 overflow-y-auto">
+                <div className="flex min-h-full items-center justify-center p-4 text-center">
+                  <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0 scale-95"
+                    enterTo="opacity-100 scale-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100 scale-100"
+                    leaveTo="opacity-0 scale-95"
+                  >
+                    <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 p-6 text-left align-middle shadow-xl transition-all">
+                      <Dialog.Title
+                        as="h3"
+                        className="text-lg font-medium leading-6"
+                      >
+                        エラーが発生しました
+                      </Dialog.Title>
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-500">{errorText}</p>
+                      </div>
+
+                      <div className="mt-4 text-right">
+                        <button
+                          type="button"
+                          className="bg-red-600 shadow-md rounded-md text-white px-4 py-2 duration-200 hover:shadow-sm"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          OK
+                        </button>
+                      </div>
+                    </Dialog.Panel>
+                  </Transition.Child>
+                </div>
+              </div>
+            </Dialog>
+          </Transition>
         </article>
         <Footer />
       </div>

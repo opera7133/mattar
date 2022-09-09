@@ -1,13 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
 import checkToken from 'lib/checkToken'
+import { NextApiResponseServerIO } from "types/socket"
 const prisma = new PrismaClient()
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponseServerIO
 ) {
   const { method } = req
+  const { id } = req.query
   switch (method) {
     case 'POST':
       const token = await checkToken(req)
@@ -23,6 +25,9 @@ export default async function handler(
           id: id
         },
       })
+      if (!getMattar) {
+        res.status(404).json({ error: "Mattar Not Found" })
+      }
       const deleteMattar = await prisma.mattar.delete({
         where: {
           id: id
@@ -38,6 +43,7 @@ export default async function handler(
           }
         },
       })
+      res.socket.server.io.emit("delete", getMattar?.message)
       res.status(200).json(deleteMattar)
       break
 

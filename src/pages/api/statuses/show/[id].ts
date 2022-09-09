@@ -19,6 +19,9 @@ export default async function handler(
           id: id
         }
       })
+      if (!mattar) {
+        res.status(404).json({ error: "Mattar Not Found" })
+      }
       res.status(200).json(mattar)
       break
 

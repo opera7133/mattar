@@ -46,9 +46,6 @@ export default async function handler(
         res.status(400).json({ error: "ID is already taken" })
         break
       }
-      if (check?.email !== req.body.email) {
-        const issue = await fetch(`/api/account/verify/issue?user_id=${userId}`)
-      }
       if (req.body.profile_picture && req.body.profile_picture !== check?.profile_picture && req.body.profile_picture !== "/img/default.png") {
         const imgId = check?.profile_picture?.match(/https\:\/\/res\.cloudinary\.com\/mattarli\/image\/upload\/v.*\/(mattar\/.*)\..*/)
         cloudinary.v2.config({
@@ -56,11 +53,9 @@ export default async function handler(
           api_key: process.env.CLOUDINARY_API,
           api_secret: process.env.CLOUDINARY_SECRET,
         })
-        if (!imgId) {
-          res.status(400).json({ error: "Image ID is not found" })
-          break
+        if (imgId) {
+          const deleteImg = await cloudinary.v2.uploader.destroy(imgId[1])
         }
-        const deleteImg = await cloudinary.v2.uploader.destroy(imgId[1])
         const upload = await cloudinary.v2.uploader.upload(req.body.profile_picture, {
           folder: "mattar"
         })

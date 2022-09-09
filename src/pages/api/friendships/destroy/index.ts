@@ -45,6 +45,9 @@ export default async function handler(
             }
           }
         })
+        if (!fupdate) {
+          res.status(400).json({ error: "User Not Found" })
+        }
         res.status(200).json(fupdate)
         break
       } else {

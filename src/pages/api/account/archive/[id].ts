@@ -9,7 +9,7 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { user_id } = query
+  const { id } = query
   switch (method) {
     case 'GET':
       const token = await checkToken(req)
@@ -17,10 +17,10 @@ export default async function handler(
         res.status(400).json({ error: "You don\'t have permission" })
         break
       }
-      if (user_id) {
+      if (id) {
         const user = await prisma.user.findUnique({
           where: {
-            id: user_id,
+            id: id,
           },
           select: {
             id: true,
@@ -30,14 +30,47 @@ export default async function handler(
             website: true,
             birthday: true,
             profile_picture: true,
-            mattars: true,
+            mattars: {
+              select: {
+                id: true,
+                message: true,
+                source: true,
+                isRemattar: true,
+                createdAt: true,
+              }
+            },
+            follower: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                location: true,
+                website: true,
+                birthday: true,
+                profile_picture: true,
+              }
+            },
+            following: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+                location: true,
+                website: true,
+                birthday: true,
+                profile_picture: true,
+              }
+            },
             createdAt: true
           },
         })
         if (!user) {
           res.status(404).json({ error: "User not found" })
         }
-        res.status(200).json(user)
+        res.setHeader('Content-disposition', `attachment; filename=${id}_data.json`)
+        res.setHeader('Content-Type', 'application/json')
+        res.send(user)
+        res.status(200)
         break
       } else {
         res.status(400).json({ error: "Provide User ID" })

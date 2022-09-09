@@ -155,6 +155,7 @@ const Home = (props: Props) => {
                 className="rounded-md focus:ring-0 focus:border-gray-500 w-full h-auto text-black"
               ></textarea>
               <Button
+                id="post"
                 className="block ml-auto bg-primary text-white px-4 py-2 rounded-md shadow-md hover:shadow-sm duration-200"
                 onClick={() => postMattar()}
               >
@@ -536,7 +537,7 @@ const Home = (props: Props) => {
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const session = await getSession(ctx)
-  if (session && session.user && session.user.id) {
+  if (session && session.user) {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({

@@ -118,6 +118,7 @@ const Mattars: React.FC<Props> = ({ item, props }) => {
           </a>
         </Link>
         <div
+          id="msg"
           dangerouslySetInnerHTML={{
             __html: linkifyHtml(twemoji.parse(item.message), linkifyOptions),
           }}

@@ -29,7 +29,7 @@ export default async function handler(
         break
       }
       const allowedId = /^[0-9a-zA-Z]+[_]*[0-9a-zA-Z]*$/
-      if (!req.body.id.test(allowedId)) {
+      if (!allowedId.test(req.body.id)) {
         res.status(400).json({ error: "You can\'t use that symbol" })
         break
       }
@@ -56,7 +56,6 @@ export default async function handler(
       const newUser = await prisma.user.create({
         data: req.body,
       })
-      const issue = await fetch(`/api/account/verify/issue?user_id=${req.body.id}`)
       res.status(200).json(newUser)
       break
 

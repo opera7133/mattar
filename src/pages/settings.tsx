@@ -15,6 +15,7 @@ import QRCode from 'react-qr-code'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import Image from 'next/image'
 import { authenticator } from 'otplib'
+import { Dialog, Transition } from '@headlessui/react'
 
 type Props = {
   user: User
@@ -38,6 +39,7 @@ const Settings = (props: Props) => {
   const router = useRouter()
   const page = router.query.page || 'info'
   const [state, setState] = useState(page)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const [searchText, setSearchText] = useState('')
   const {
     register,
@@ -80,6 +82,16 @@ const Settings = (props: Props) => {
     if (error) {
       console.log(error)
       return
+    }
+    if (props.user.email !== data.email) {
+      const issue = await fetch(
+        `/api/account/verify/issue?user_id=${props.user.id}`
+      )
+      const { mailerror } = await issue.json()
+      if (mailerror) {
+        console.log(mailerror)
+        return
+      }
     }
     refreshData()
   }
@@ -148,6 +160,15 @@ const Settings = (props: Props) => {
       return
     }
     refreshData()
+  }
+
+  const deleteAccount = async () => {
+    const res = await fetch(`/api/account/destroy/${props.user.id}`)
+    const { error } = await res.json()
+    if (error) {
+      console.log(error)
+    }
+    setDeleteOpen(false)
   }
   if (session) {
     return (
@@ -248,12 +269,82 @@ const Settings = (props: Props) => {
                       className="cursor-pointer px-4 text-white py-2 rounded-md bg-primary shadow-md duration-200 hover:shadow-sm"
                     />
                   </form>
-                  <button className="px-4 text-white py-2 rounded-md bg-red-600 shadow-md duration-200 hover:shadow-sm">
+                  <a
+                    href={`/api/account/archive/${props.user.id}`}
+                    className="px-4 text-white py-2 rounded-md bg-red-600 shadow-md duration-200 hover:shadow-sm"
+                  >
                     データをダウンロード
-                  </button>
-                  <button className="ml-4 px-4 text-white py-2 rounded-md bg-red-600 shadow-md duration-200 hover:shadow-sm">
+                  </a>
+                  <button
+                    onClick={() => setDeleteOpen(true)}
+                    className="ml-4 px-4 text-white py-2 rounded-md bg-red-600 shadow-md duration-200 hover:shadow-sm"
+                  >
                     アカウントを削除
                   </button>
+                  <Transition appear show={deleteOpen} as={Fragment}>
+                    <Dialog
+                      as="div"
+                      className="relative z-10"
+                      onClose={() => setDeleteOpen(false)}
+                    >
+                      <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                      >
+                        <div className="fixed inset-0 bg-black bg-opacity-25" />
+                      </Transition.Child>
+
+                      <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                          <Transition.Child
+                            as={Fragment}
+                            enter="ease-out duration-300"
+                            enterFrom="opacity-0 scale-95"
+                            enterTo="opacity-100 scale-100"
+                            leave="ease-in duration-200"
+                            leaveFrom="opacity-100 scale-100"
+                            leaveTo="opacity-0 scale-95"
+                          >
+                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 p-6 text-left align-middle shadow-xl transition-all">
+                              <Dialog.Title
+                                as="h3"
+                                className="text-lg font-medium leading-6"
+                              >
+                                本当にアカウントを削除しますか？
+                              </Dialog.Title>
+                              <div className="mt-2">
+                                <p className="text-sm text-gray-500">
+                                  アカウントを削除すると、投稿などのアカウントに関するデータは削除され、復元できません。
+                                </p>
+                              </div>
+
+                              <div className="mt-4 text-right">
+                                <button
+                                  type="button"
+                                  className="mr-2 bg-primary shadow-md rounded-md text-white px-4 py-2 duration-200 hover:shadow-sm"
+                                  onClick={() => setDeleteOpen(false)}
+                                >
+                                  キャンセル
+                                </button>
+                                <button
+                                  type="button"
+                                  className="bg-red-600 shadow-md rounded-md text-white px-4 py-2 duration-200 hover:shadow-sm"
+                                  onClick={() => deleteAccount()}
+                                >
+                                  OK
+                                </button>
+                              </div>
+                            </Dialog.Panel>
+                          </Transition.Child>
+                        </div>
+                      </div>
+                    </Dialog>
+                  </Transition>
                 </div>
               )}
               {state === 'security' && (

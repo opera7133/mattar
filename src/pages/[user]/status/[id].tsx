@@ -346,7 +346,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const qUser = ctx.query.user
   const id = ctx.query.id
   const session = await getSession(ctx)
-  if (session && session.user && session.user.id) {
+  if (session && session.user) {
     const mattar = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findUnique({

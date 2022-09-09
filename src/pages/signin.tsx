@@ -109,6 +109,7 @@ export default function SignIn({ csrfToken }: { csrfToken: string }) {
             <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
 
             <Button
+              id="signin"
               className="px-4 text-white py-2 rounded-md bg-primary shadow-md duration-200 hover:shadow-sm"
               onClick={() => {}}
             >

@@ -36,7 +36,9 @@ export default async function handler(
             }
           }
         })
-
+        if (!user) {
+          return res.status(404).json({ error: "User Not Found" })
+        }
         res.status(200).json(user)
         break
       } else {
