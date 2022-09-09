@@ -452,11 +452,13 @@ const Profile = (props: Props) => {
                         return i.userId
                       })
                       .includes(props.user?.id)
-                  )
+                  ) {
                     return <Mattars item={item} props={props} key={item.id} />
+                  }
                 } else if (state === 'remattars') {
-                  if (item.isRemattar)
+                  if (item.isRemattar) {
                     return <Mattars item={item} props={props} key={item.id} />
+                  }
                 }
               })}
               {state === 'following' &&
