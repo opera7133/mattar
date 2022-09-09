@@ -3,11 +3,27 @@ import { Server as NetServer, Socket } from "net"
 import { Server as ServerIO } from "socket.io"
 import { NextApiResponseServerIO } from "types/socket"
 import checkToken from 'lib/checkToken'
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
 
 export default async function handler(req: NextApiRequest, res: NextApiResponseServerIO) {
-  const token = await checkToken(req)
+  const api_token = req.headers.["x-api-key"]
+  const api_secret = req.headers.["x-api-secret"]
+  if (!api_token || !api_secret) {
+    res.status(403).json({ error: "Access Denied" })
+    res.end();
+  }
+  const token = await prisma.token.findUnique({
+    where: {
+      token: api_token
+    }
+  })
   if (!token) {
-    res.status(400).json({ error: "You don\'t have permission" })
+    res.status(403).json({ error: "Access Denied" })
+    res.end();
+  } else if (token.secret !== api_secret) {
+    res.status(403).json({ error: "Access Denied" })
+    res.end();
   }
 
   if (!res.socket.server.io) {
