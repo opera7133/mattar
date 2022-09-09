@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
-import cloudinary from "cloudinary"
-import stringWidth from 'string-width'
+import { unstable_getServerSession } from "next-auth/next"
+import { authOptions } from 'pages/api/auth/[...nextauth]'
+
 const prisma = new PrismaClient()
 
 export default async function handler(
@@ -11,9 +12,10 @@ export default async function handler(
   const { method } = req
   const query = req.query
   const { user_id, token } = query
+  const session = await unstable_getServerSession(req, res, authOptions)
   switch (method) {
     case 'GET':
-      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+      if (!session && !req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
         res.status(403).json({ error: "You don\'t have permission" })
         break
       }

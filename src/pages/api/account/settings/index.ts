@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client'
 import { authenticator } from 'otplib'
 import argon2 from "argon2"
 import crypto from "crypto"
+import { unstable_getServerSession } from "next-auth/next"
+import { authOptions } from 'pages/api/auth/[...nextauth]'
 const prisma = new PrismaClient()
 
 export default async function handler(
@@ -11,7 +13,7 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { api_token, api_secret } = query
+  const session = await unstable_getServerSession(req, res, authOptions)
   const genSalt = () => {
     const S = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     return Array.from(crypto.randomFillSync(new Uint32Array(24)))
@@ -20,7 +22,7 @@ export default async function handler(
   }
   switch (method) {
     case 'POST':
-      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+      if (!session || !req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
         res.status(403).json({ error: "You don\'t have permission" })
         break
       }

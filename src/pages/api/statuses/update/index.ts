@@ -15,7 +15,7 @@ export default async function handler(
   const query = req.query
   switch (method) {
     case 'POST':
-      if (!checkToken(req)) {
+      if (!checkToken(req, res)) {
         res.status(400).json({ error: "You don\'t have permission" })
         break
       }

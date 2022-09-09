@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-import { NextApiRequest } from 'next'
+import { NextApiRequest, NextApiResponse } from 'next'
+import NextCors from 'nextjs-cors'
 const prisma = new PrismaClient()
 
-const checkToken = async (req: NextApiRequest) => {
+const checkToken = async (req: NextApiRequest, res: NextApiResponse) => {
   const query = req.query
   const { api_token, api_secret } = query
   if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
@@ -12,14 +13,18 @@ const checkToken = async (req: NextApiRequest) => {
   } else {
     return true
   }
-  const res = await prisma.token.findUnique({
+  await NextCors(req, res, {
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    origin: process.env.NEXTAUTH_URL,
+  })
+  const token = await prisma.token.findUnique({
     where: {
       token: api_token
     }
   })
-  if (!res) {
+  if (!token) {
     return false
   }
-  return res.secret === api_secret
+  return token.secret === api_secret
 }
 export default checkToken

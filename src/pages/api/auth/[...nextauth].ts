@@ -2,7 +2,6 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import argon2 from "argon2"
 import prisma from "lib/prisma"
-import type { Session, User } from "next-auth"
 
 const findUserByCredentials = async (credentials: Record<"username" | "password", string> | undefined) => {
   if (credentials?.username && credentials.password) {
@@ -25,7 +24,7 @@ const findUserByCredentials = async (credentials: Record<"username" | "password"
   return null
 }
 
-export default NextAuth({
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Username or Email",
@@ -49,7 +48,7 @@ export default NextAuth({
           email: session.user.email
         },
       })
-      session.user.id = userInfo.id
+      session.user.id = userInfo?.id
       return session
     },
   },
@@ -57,4 +56,6 @@ export default NextAuth({
     signIn: '/signin',
     newUser: '/'
   }
-})
+}
+
+export default NextAuth(authOptions)
