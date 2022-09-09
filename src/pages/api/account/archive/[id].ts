@@ -17,10 +17,22 @@ export default async function handler(
         res.status(400).json({ error: "You don\'t have permission" })
         break
       }
-      if (id) {
+      let userId = id || ""
+      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+        const tokenId = await prisma.token.findUnique({
+          where: {
+            token: query.api_token
+          },
+          select: {
+            userId: true
+          }
+        })
+        userId = tokenId?.userId
+      }
+      if (userId) {
         const user = await prisma.user.findUnique({
           where: {
-            id: id,
+            id: userId,
           },
           select: {
             id: true,

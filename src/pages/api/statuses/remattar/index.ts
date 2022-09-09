@@ -11,17 +11,29 @@ export default async function handler(
   const { method } = req
   const clientIp = requestIp.getClientIp(req) || 'IP_NOT_FOUND'
   const query = req.query
-  const { mattar_id, user_id, source } = query
+  const { mattar_id, user_id, source, message } = query
   switch (method) {
     case 'POST':
       const token = await checkToken(req)
-      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+      if (!checkToken(req)) {
         res.status(403).json({ error: "You don\'t have permission" })
         break
       }
-      if (!mattar_id || !user_id) {
+      if (!mattar_id) {
         res.status(400).json({ error: "Provide Mattar ID and User ID" })
         break
+      }
+      let userId = user_id || ""
+      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+        const tokenId = await prisma.token.findUnique({
+          where: {
+            token: query.api_token
+          },
+          select: {
+            userId: true
+          }
+        })
+        userId = tokenId?.userId
       }
       const from = await prisma.mattar.findUnique({
         where: {
@@ -36,7 +48,7 @@ export default async function handler(
       const sendby = source || "Mattar API"
       const remattar = await prisma.mattar.create({
         data: {
-          userId: user_id,
+          userId: userId,
           isRemattar: true,
           message: message,
           source: sendby,

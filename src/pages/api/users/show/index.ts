@@ -28,7 +28,6 @@ export default async function handler(
             description: true,
             location: true,
             website: true,
-            birthday: true,
             profile_picture: true,
             mattars: true,
             createdAt: true

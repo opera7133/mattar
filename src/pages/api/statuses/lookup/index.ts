@@ -11,7 +11,17 @@ export default async function handler(
   switch (method) {
     case 'GET':
       const mattars = await prisma.mattar.findMany({
-        take: 100
+        take: 100,
+        select: {
+          id: true,
+          message: true,
+          source: true,
+          isRemattar: true,
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
       })
       res.status(200).json(mattars)
       break

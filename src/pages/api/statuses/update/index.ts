@@ -19,6 +19,18 @@ export default async function handler(
         res.status(400).json({ error: "You don\'t have permission" })
         break
       }
+      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+        delete req.body.isRemattar
+        const tokenId = await prisma.token.findUnique({
+          where: {
+            token: query.api_token
+          },
+          select: {
+            userId: true
+          }
+        })
+        req.body.userId = tokenId?.userId
+      }
       if (stringWidth(req.body.message.replace(/\n/g, '')) > 60) {
         res.status(400).json({ error: "Your message is too long" })
         break

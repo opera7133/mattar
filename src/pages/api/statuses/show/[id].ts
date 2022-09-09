@@ -18,6 +18,24 @@ export default async function handler(
       const mattar = await prisma.mattar.findUnique({
         where: {
           id: id
+        },
+        select: {
+          id: true,
+          message: true,
+          source: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              location: true,
+              website: true,
+              profile_picture: true,
+              createdAt: true
+            }
+          },
+          isRemattar: true,
+          createdAt: true,
         }
       })
       if (!mattar) {

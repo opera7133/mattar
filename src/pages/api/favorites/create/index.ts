@@ -21,9 +21,21 @@ export default async function handler(
         res.status(400).json({ error: "Provide Mattar ID and User ID" })
         break
       }
+      let userid = user_id || ""
+      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+        const tokenId = await prisma.token.findUnique({
+          where: {
+            token: query.api_token
+          },
+          select: {
+            userId: true
+          }
+        })
+        userId = tokenId?.userId
+      }
       const fav = await prisma.favorite.create({
         data: {
-          userId: user_id,
+          userId: userId,
           mattarId: mattar_id
         }
       })

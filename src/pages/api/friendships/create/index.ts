@@ -18,7 +18,19 @@ export default async function handler(
         res.status(400).json({ error: "You don\'t have permission" })
         break
       }
-      if (user_id && follow_user_id) {
+      if (follow_user_id) {
+        let userId = user_id || ""
+        if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+          const tokenId = await prisma.token.findUnique({
+            where: {
+              token: query.api_token
+            },
+            select: {
+              userId: true
+            }
+          })
+          userId = tokenId?.userId
+        }
         const fupdate = await prisma.user.update({
           where: {
             id: follow_user_id
@@ -26,7 +38,7 @@ export default async function handler(
           data: {
             follower: {
               connect: {
-                id: user_id
+                id: userId
               }
             }
           },

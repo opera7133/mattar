@@ -9,7 +9,7 @@ export default async function handler(
   res: NextApiResponseServerIO
 ) {
   const { method } = req
-  const { id } = req.query
+  const { id, api_token } = req.query
   switch (method) {
     case 'POST':
       const token = await checkToken(req)
@@ -29,6 +29,19 @@ export default async function handler(
       if (!getMattar) {
         res.status(404).json({ error: "Mattar Not Found" })
         break
+      }
+      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+        const tokenId = await prisma.token.findUnique({
+          where: {
+            token: api_token
+          },
+          select: {
+            userId: true
+          }
+        })
+        if (getMattar.userId !== tokenId?.userId) {
+          res.status(403).json({ error: "You don\'t have permission" })
+        }
       }
       const deleteMattar = await prisma.mattar.delete({
         where: {

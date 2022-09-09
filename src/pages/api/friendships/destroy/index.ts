@@ -19,6 +19,18 @@ export default async function handler(
         break
       }
       if (user_id && unfollow_user_id) {
+        let userId = user_id || ""
+        if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
+          const tokenId = await prisma.token.findUnique({
+            where: {
+              token: query.api_token
+            },
+            select: {
+              userId: true
+            }
+          })
+          userId = tokenId?.userId
+        }
         const fupdate = await prisma.user.update({
           where: {
             id: unfollow_user_id
@@ -26,7 +38,7 @@ export default async function handler(
           data: {
             follower: {
               disconnect: {
-                id: user_id
+                id: userId
               }
             }
           },
