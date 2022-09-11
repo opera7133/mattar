@@ -4,25 +4,14 @@ import Link from 'next/link'
 import Header from 'components/Header'
 import Footer from 'components/Footer'
 import Button from 'components/Button'
-import {
-  BsSearch,
-  BsThreeDots,
-  BsStar,
-  BsReply,
-  BsStarFill,
-} from 'react-icons/bs'
+import { BsSearch, BsThreeDots } from 'react-icons/bs'
 import { useState, Fragment, useEffect } from 'react'
 import stringWidth from 'string-width'
-import twemoji from 'twemoji'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
 import type { Mattar, User } from '@prisma/client'
 import Image from 'next/image'
 import { io } from 'socket.io-client'
-import * as linkify from 'linkifyjs'
-import linkifyHtml from 'linkify-html'
-import 'linkify-plugin-mention'
-import 'linkify-plugin-hashtag'
 import { useSession, getSession, getCsrfToken } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import Mattars from 'components/Mattar'
@@ -50,7 +39,7 @@ const Home = (props: Props) => {
   const postMattar = async () => {
     setText('')
     await fetch(
-      `/api/statuses/update?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+      `/api/statuses/update?api_token=${props.user?.apiCredentials.token}&api_secret=${props.user?.apiCredentials.secret}`,
       {
         method: 'POST',
         headers: {
@@ -73,7 +62,7 @@ const Home = (props: Props) => {
   }
   const followState = async (id: string) => {
     if (
-      props.user.following
+      props.user?.following
         .map(function (i: any) {
           return i.id
         })
@@ -90,19 +79,21 @@ const Home = (props: Props) => {
     refreshData()
   }
   useEffect((): any => {
-    const socket = io(process.env.NEXT_PUBLIC_BASE_URL, {
-      path: '/api/statuses/filter',
-      extraHeaders: {
-        'x-api-key': `${props.user.apiCredentials.token}`,
-        'x-api-secret': `${props.user.apiCredentials.secret}`,
-      },
-    })
-    socket.on('connect', () => {})
-    socket.on(`message`, (message: string) => {
-      refreshData()
-    })
-    if (socket) return () => socket.disconnect()
-  }, [refreshData])
+    if (props.user && props.user.apiCredentials) {
+      const socket = io(process.env.NEXT_PUBLIC_BASE_URL, {
+        path: '/api/statuses/filter',
+        extraHeaders: {
+          'x-api-key': `${props.user.apiCredentials.token}`,
+          'x-api-secret': `${props.user.apiCredentials.secret}`,
+        },
+      })
+      socket.on('connect', () => {})
+      socket.on(`message`, (message: string) => {
+        refreshData()
+      })
+      if (socket) return () => socket.disconnect()
+    }
+  }, [props.user, refreshData])
   return (
     <div className="dark:bg-zinc-800 dark:text-white h-screen">
       <Head>
