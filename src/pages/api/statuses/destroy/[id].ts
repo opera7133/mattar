@@ -4,6 +4,11 @@ import checkToken from 'lib/checkToken'
 import { NextApiResponseServerIO } from "types/socket"
 const prisma = new PrismaClient()
 
+import { LimitChecker } from 'lib/limitChecker'
+import requestIp from "request-ip"
+
+const limitChecker = LimitChecker()
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponseServerIO
@@ -19,6 +24,17 @@ export default async function handler(
       }
       if (!mattar_id) {
         res.status(400).json({ error: "Provide Mattar ID" })
+        break
+      }
+      const clientIp = requestIp.getClientIp(req) || "IP_NOT_FOUND"
+      try {
+        await limitChecker.check(res, 150, clientIp)
+      } catch (error) {
+        console.log(error)
+        res.status(429).json({
+          text: `Rate Limited`,
+          clientIp: clientIp,
+        })
         break
       }
       const getMattar = await prisma.mattar.findUnique({

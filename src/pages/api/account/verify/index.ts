@@ -2,6 +2,10 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
 import { unstable_getServerSession } from "next-auth/next"
 import { authOptions } from 'pages/api/auth/[...nextauth]'
+import { LimitChecker } from 'lib/limitChecker'
+import requestIp from "request-ip"
+
+const limitChecker = LimitChecker()
 
 const prisma = new PrismaClient()
 
@@ -24,6 +28,17 @@ export default async function handler(
         break
       } else if (!token) {
         res.status(400).json({ error: "" })
+        break
+      }
+      const clientIp = requestIp.getClientIp(req) || "IP_NOT_FOUND"
+      try {
+        await limitChecker.check(res, 10, clientIp)
+      } catch (error) {
+        console.log(error)
+        res.status(429).json({
+          text: `Rate Limited`,
+          clientIp: clientIp,
+        })
         break
       }
       const user = await prisma.user.findUnique({

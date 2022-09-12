@@ -1,10 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import requestIp from 'request-ip'
 import stringWidth from 'string-width'
 import { PrismaClient } from '@prisma/client'
 import { NextApiResponseServerIO } from "types/socket"
 import checkToken from 'lib/checkToken'
 const prisma = new PrismaClient()
+
+import { LimitChecker } from 'lib/limitChecker'
+import requestIp from "request-ip"
+
+const limitChecker = LimitChecker()
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,6 +21,16 @@ export default async function handler(
     case 'POST':
       if (!await checkToken(req)) {
         res.status(400).json({ error: "You don\'t have permission" })
+        break
+      }
+      try {
+        await limitChecker.check(res, 300, clientIp)
+      } catch (error) {
+        console.log(error)
+        res.status(429).json({
+          text: `Rate Limited`,
+          clientIp: clientIp,
+        })
         break
       }
       req.body.isRemattar = false

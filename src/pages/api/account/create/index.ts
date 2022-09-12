@@ -3,14 +3,17 @@ import { PrismaClient } from '@prisma/client'
 import argon2 from "argon2"
 import crypto from "crypto"
 const prisma = new PrismaClient()
+import { LimitChecker } from 'lib/limitChecker'
+import requestIp from "request-ip"
+
+const limitChecker = LimitChecker()
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   const { method } = req
-  const query = req.query
-  const { api_token, api_secret } = query
+  const clientIp = requestIp.getClientIp(req) || "IP_NOT_FOUND";
   const genSalt = () => {
     const S = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     return Array.from(crypto.randomFillSync(new Uint32Array(24)))
@@ -25,8 +28,15 @@ export default async function handler(
   }
   switch (method) {
     case 'POST':
-      if (!req.headers.referer?.startsWith(process.env.NEXTAUTH_URL)) {
-        res.status(403).json({ error: "You don\'t have permission" })
+      const clientIp = requestIp.getClientIp(req) || "IP_NOT_FOUND"
+      try {
+        await limitChecker.check(res, 1, clientIp)
+      } catch (error) {
+        console.log(error)
+        res.status(429).json({
+          text: `Rate Limited`,
+          clientIp: clientIp,
+        })
         break
       }
       const badUserName = ["about", "tos", "signup", "signin", "search", "settings", "privacy", "media", "faq"]

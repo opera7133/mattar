@@ -1,7 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import requestIp from 'request-ip'
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
+
+import { LimitChecker } from 'lib/limitChecker'
+import requestIp from "request-ip"
+
+const limitChecker = LimitChecker()
 
 export default async function handler(
   req: NextApiRequest,
@@ -10,6 +14,17 @@ export default async function handler(
   const { method } = req
   switch (method) {
     case 'GET':
+      const clientIp = requestIp.getClientIp(req) || "IP_NOT_FOUND"
+      try {
+        await limitChecker.check(res, 80, clientIp)
+      } catch (error) {
+        console.log(error)
+        res.status(429).json({
+          text: `Rate Limited`,
+          clientIp: clientIp,
+        })
+        break
+      }
       const mattars = await prisma.mattar.findMany({
         take: 100,
         select: {

@@ -1,7 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
 import checkToken from 'lib/checkToken'
+import { LimitChecker } from 'lib/limitChecker'
+import requestIp from "request-ip"
 const prisma = new PrismaClient()
+
+const limitChecker = LimitChecker()
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,6 +18,17 @@ export default async function handler(
       const token = await checkToken(req)
       if (!token) {
         res.status(400).json({ error: "You don\'t have permission" })
+        break
+      }
+      const clientIp = requestIp.getClientIp(req) || "IP_NOT_FOUND"
+      try {
+        await limitChecker.check(res, 1, clientIp)
+      } catch (error) {
+        console.log(error)
+        res.status(429).json({
+          text: `Rate Limited`,
+          clientIp: clientIp,
+        })
         break
       }
       const tokenId = await prisma.token.findUnique({

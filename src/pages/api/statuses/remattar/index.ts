@@ -1,8 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
-import requestIp from 'request-ip'
 import checkToken from 'lib/checkToken'
 const prisma = new PrismaClient()
+
+import { LimitChecker } from 'lib/limitChecker'
+import requestIp from "request-ip"
+
+const limitChecker = LimitChecker()
 
 export default async function handler(
   req: NextApiRequest,
@@ -21,6 +25,17 @@ export default async function handler(
       }
       if (!mattar_id) {
         res.status(400).json({ error: "Provide Mattar ID and User ID" })
+        break
+      }
+      const clientIp = requestIp.getClientIp(req) || "IP_NOT_FOUND"
+      try {
+        await limitChecker.check(res, 300, clientIp)
+      } catch (error) {
+        console.log(error)
+        res.status(429).json({
+          text: `Rate Limited`,
+          clientIp: clientIp,
+        })
         break
       }
       const tokenId = await prisma.token.findUnique({
