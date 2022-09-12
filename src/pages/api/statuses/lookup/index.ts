@@ -37,6 +37,9 @@ export default async function handler(
         orderBy: {
           createdAt: 'desc',
         },
+        include: {
+          user: true, 
+        }
       })
       res.status(200).json(mattars)
       break
