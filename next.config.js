@@ -14,19 +14,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: 'https://mattar-li.vercel.app',
-          },
-        ],
-      },
-    ]
-  },
 }
 
 module.exports = nextConfig
