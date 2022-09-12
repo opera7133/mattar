@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
+import argon2 from "argon2"
 const prisma = new PrismaClient()
 
 import { LimitChecker } from 'lib/limitChecker'
@@ -30,7 +31,7 @@ export default async function handler(
           id: req.body.id
         }
       })
-      if (user) {
+      if (user && await argon2.verify(user.hash, req.body.password)) {
         const api = await prisma.token.findUnique({
           where: {
             userId: user.id
