@@ -31,7 +31,7 @@ export default async function handler(
           id: req.body.username
         }
       })
-      if (user && await argon2.verify(user.hash, req.body.password)) {
+      if (user && await argon2.verify(user.hash, process.env.PEPPER + req.body.password + user.salt)) {
         const api = await prisma.token.findUnique({
           where: {
             userId: user.id
