@@ -32,6 +32,7 @@ export default async function handler(
         break
       }
       res.status(200).json({ success: "Valid Token" })
+      break
 
     default:
       res.setHeader('Allow', ['GET'])
