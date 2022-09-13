@@ -14,7 +14,7 @@ export default async function handler(
   res: NextApiResponseServerIO
 ) {
   const { method } = req
-  const { mattar_id, api_token } = req.query
+  const { id, mattar_id, api_token } = req.query
   switch (method) {
     case 'POST':
       const token = await checkToken(req)
@@ -22,7 +22,7 @@ export default async function handler(
         res.status(400).json({ error: "You don\'t have permission" })
         break
       }
-      if (!mattar_id) {
+      if (!id) {
         res.status(400).json({ error: "Provide Mattar ID" })
         break
       }
@@ -39,7 +39,7 @@ export default async function handler(
       }
       const getMattar = await prisma.mattar.findUnique({
         where: {
-          id: mattar_id
+          id: id
         },
       })
       if (!getMattar) {
@@ -59,7 +59,7 @@ export default async function handler(
       }
       const deleteMattar = await prisma.mattar.delete({
         where: {
-          id: mattar_id
+          id: id
         },
       })
       const decrementCount = await prisma.user.update({
