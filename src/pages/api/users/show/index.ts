@@ -18,7 +18,7 @@ export default async function handler(
     case 'GET':
       const clientIp = requestIp.getClientIp(req) || "IP_NOT_FOUND"
       try {
-        await limitChecker.check(res, 100, clientIp)
+        await limitChecker.check(res, 800, clientIp)
       } catch (error) {
         console.log(error)
         res.status(429).json({

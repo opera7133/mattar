@@ -55,7 +55,7 @@ export default async function handler(
         res.status(400).json({ error: "Not entered old password" })
         break
       } else if (req.body.oldPassword && req.body.newPassword) {
-        const passValid = await argon2.verify(user.hash, req.body.oldPassword)
+        const passValid = await argon2.verify(user.hash, process.env.PEPPER + req.body.oldPassword + user.salt)
         if (!passValid) {
           res.status(400).json({ error: "Password doesn\'t match" })
           break

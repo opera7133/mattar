@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
-import argon2 from "argon2"
+import checkToken from 'lib/checkToken'
 const prisma = new PrismaClient()
 
 import { LimitChecker } from 'lib/limitChecker'
@@ -26,28 +26,13 @@ export default async function handler(
         })
         break
       }
-      const user = await prisma.user.findUnique({
-        where: {
-          id: req.body.username
-        }
-      })
-      if (user && await argon2.verify(user.hash, process.env.PEPPER + req.body.password + user.salt)) {
-        const api = await prisma.token.findUnique({
-          where: {
-            userId: user.id
-          }
-        })
-        if (api) {
-          res.status(200).json(api)
-          break
-        } else {
-          res.status(500).json({ error: "API Token Not Found" })
-          break
-        }
-      } else {
-        res.status(400).json({ error: "Invalid Credentials" })
+      const token = await checkToken(req)
+      if (!token) {
+        res.status(404).json({ error: "API Credentials Invalid" })
         break
       }
+      res.status(200).json({ success: "Valid Token" })
+      break
 
     default:
       res.setHeader('Allow', ['POST'])

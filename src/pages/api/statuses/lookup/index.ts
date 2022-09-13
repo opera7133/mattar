@@ -33,6 +33,13 @@ export default async function handler(
           source: true,
           isRemattar: true,
           createdAt: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              profile_picture: true
+            }
+          }
         },
         orderBy: {
           createdAt: 'desc',
