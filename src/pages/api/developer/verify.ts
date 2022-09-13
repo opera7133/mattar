@@ -39,8 +39,10 @@ export default async function handler(
         })
         if (api) {
           res.status(200).json(api)
+          break
         } else {
           res.status(500).json({ error: "API Token Not Found" })
+          break
         }
       } else {
         res.status(400).json({ error: "Invalid Credentials" })
