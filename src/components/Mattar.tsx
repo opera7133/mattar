@@ -2,7 +2,7 @@ import { Menu, Transition } from '@headlessui/react'
 import Image from 'next/image'
 import twemoji from 'twemoji'
 import { BsThreeDots, BsStar, BsStarFill } from 'react-icons/bs'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import * as linkify from 'linkifyjs'
 import linkifyHtml from 'linkify-html'
 import 'linkify-plugin-mention'
@@ -107,9 +107,8 @@ const Mattars: React.FC<Props> = ({ item, props }) => {
             <Image
               src={item.user.profile_picture || '/img/default.png'}
               alt={`${item.user.id}\'s Avatar`}
-              layout="fill"
-              objectFit="cover"
-              className="shrink-0"
+              fill={true}
+              className="shrink-0 object-cover"
             />
           </div>
         </a>

@@ -138,18 +138,20 @@ const Profile = (props: Props) => {
   }
 
   useEffect((): any => {
-    const socket = io(process.env.NEXT_PUBLIC_BASE_URL, {
-      path: `/api/statuses/filter`,
-      extraHeaders: {
-        'x-api-key': `${props.user.apiCredentials.token}`,
-        'x-api-secret': `${props.user.apiCredentials.secret}`,
-      },
-    })
-    socket.on('connect', () => {})
-    socket.on(`message`, (message: string) => {
-      refreshData()
-    })
-    if (socket) return () => socket.disconnect()
+    if (props.user && props.user.apiCredentials) {
+      const socket = io(process.env.NEXT_PUBLIC_BASE_URL, {
+        path: `/api/statuses/filter`,
+        extraHeaders: {
+          'x-api-key': `${props.user.apiCredentials.token}`,
+          'x-api-secret': `${props.user.apiCredentials.secret}`,
+        },
+      })
+      socket.on('connect', () => {})
+      socket.on(`message`, (message: string) => {
+        refreshData()
+      })
+      if (socket) return () => socket.disconnect()
+    }
   }, [refreshData])
 
   return (
