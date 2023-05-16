@@ -166,10 +166,11 @@ const Home = (props: Props) => {
                 <h1 className="text-2xl font-bold">mattar.liへようこそ</h1>
                 <p className="my-2">平穏なインターネットを体感しよう。</p>
               </div>
-              <Link href="/signup">
-                <a className="bg-primary text-white px-4 py-2 rounded-md shadow-md hover:shadow-sm duration-200">
-                  登録
-                </a>
+              <Link
+                href="/signup"
+                className="bg-primary text-white px-4 py-2 rounded-md shadow-md hover:shadow-sm duration-200"
+              >
+                登録
               </Link>
             </div>
           )}
@@ -222,14 +223,12 @@ const Home = (props: Props) => {
                         />
                       </div>
                       <Link href={`/${item.id}`}>
-                        <a>
-                          <div>
-                            <span className="font-bold text-lg block">
-                              {item.name}
-                            </span>
-                            <span className="text-md">@{item.id}</span>
-                          </div>
-                        </a>
+                        <div>
+                          <span className="font-bold text-lg block">
+                            {item.name}
+                          </span>
+                          <span className="text-md">@{item.id}</span>
+                        </div>
                       </Link>
                       <div>
                         <Button
@@ -316,14 +315,12 @@ const Home = (props: Props) => {
                         />
                       </div>
                       <Link href={`/${item.id}`}>
-                        <a>
-                          <div>
-                            <span className="font-bold text-lg block">
-                              {item.name}
-                            </span>
-                            <span className="text-md">@{item.id}</span>
-                          </div>
-                        </a>
+                        <div>
+                          <span className="font-bold text-lg block">
+                            {item.name}
+                          </span>
+                          <span className="text-md">@{item.id}</span>
+                        </div>
                       </Link>
                       <div>
                         <Button
@@ -400,25 +397,23 @@ const Home = (props: Props) => {
           {session && (
             <div>
               <Link href={`/${props.user?.id}`}>
-                <a>
-                  <div className="px-3 flex gap-3 items-center">
-                    <div className="w-16 h-16 relative">
-                      <Image
-                        src={props.user.profile_picture || '/img/default.png'}
-                        layout="fill"
-                        objectFit="cover"
-                        alt={`${props.user.name}\'s Avatar`}
-                      />
-                    </div>
-                    <div>
-                      <p className="font-bold">{props.user.name}</p>
-                      <p>
-                        {props.user.mattar_count}
-                        のつぶやき
-                      </p>
-                    </div>
+                <div className="px-3 flex gap-3 items-center">
+                  <div className="w-16 h-16 relative">
+                    <Image
+                      src={props.user.profile_picture || '/img/default.png'}
+                      layout="fill"
+                      objectFit="cover"
+                      alt={`${props.user.name}\'s Avatar`}
+                    />
                   </div>
-                </a>
+                  <div>
+                    <p className="font-bold">{props.user.name}</p>
+                    <p>
+                      {props.user.mattar_count}
+                      のつぶやき
+                    </p>
+                  </div>
+                </div>
               </Link>
               <table className="my-3 border-separate border-spacing-x-2.5">
                 <tbody>

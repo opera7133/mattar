@@ -58,10 +58,11 @@ export default function SignIn({ csrfToken }: { csrfToken: string }) {
           <h1 className="text-2xl font-bold mb-3">ログイン</h1>
           <p>
             アカウントがありませんか？
-            <Link href="/signup">
-              <a className="text-sky-500 duration-200 hover:text-sky-800">
-                新規登録
-              </a>
+            <Link
+              href="/signup"
+              className="text-sky-500 duration-200 hover:text-sky-800"
+            >
+              新規登録
             </Link>
           </p>
           <form onSubmit={handleSubmit(onSubmit)}>

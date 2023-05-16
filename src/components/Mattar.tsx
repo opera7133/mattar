@@ -102,22 +102,18 @@ const Mattars: React.FC<Props> = ({ item, props }) => {
   return (
     <article className="relative flex gap-3 group">
       <Link href={`/${item.user.id}`}>
-        <a>
-          <div className="mt-2 w-14 h-14 relative">
-            <Image
-              src={item.user.profile_picture || '/img/default.png'}
-              alt={`${item.user.id}\'s Avatar`}
-              fill={true}
-              className="shrink-0 object-cover"
-            />
-          </div>
-        </a>
+        <div className="mt-2 w-14 h-14 relative">
+          <Image
+            src={item.user.profile_picture || '/img/default.png'}
+            alt={`${item.user.id}\'s Avatar`}
+            fill={true}
+            className="shrink-0 object-cover"
+          />
+        </div>
       </Link>
       <div>
         <Link href={`/${item.user.id}`}>
-          <a>
-            <span className="font-bold">{item.user.name}</span>
-          </a>
+          <span className="font-bold">{item.user.name}</span>
         </Link>
         <div
           id="msg"

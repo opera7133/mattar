@@ -100,10 +100,11 @@ export default function SignUp() {
           <h1 className="text-2xl font-bold mb-3">新規登録</h1>
           <p>
             アカウントをお持ちですか？
-            <Link href="/signin">
-              <a className="text-sky-500 duration-200 hover:text-sky-800">
-                ログイン
-              </a>
+            <Link
+              href="/signin"
+              className="text-sky-500 duration-200 hover:text-sky-800"
+            >
+              ログイン
             </Link>
           </p>
           <form onSubmit={handleSubmit(onSubmit)}>

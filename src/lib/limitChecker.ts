@@ -1,4 +1,4 @@
-import LRU from "lru-cache";
+import { LRUCache } from 'lru-cache'
 
 import type { NextApiResponse } from "next";
 
@@ -6,9 +6,9 @@ type CheckLimitFunc = () => {
   check: (res: NextApiResponse, limit: number, ipAddress: string) => Promise<void>;
 };
 export const LimitChecker: CheckLimitFunc = () => {
-  const tokenCache = new LRU<string, number>({
+  const tokenCache = new LRUCache<string, number>({
     max: 500, // Max 500 users per interval
-    maxAge: 1000 * 60 * 5, // 5分,
+    ttl: 1000 * 60 * 5, // 5分,
   });
 
   return {
