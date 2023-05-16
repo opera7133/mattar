@@ -122,7 +122,7 @@ const Profile = (props: Props) => {
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     if (props.user && props.user.apiCredentials) {
       const res = await fetch(
-        `/api/account/update_profile&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+        `/api/account/update_profile?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
         {
           body: JSON.stringify({
             oldId: props.user?.id,
