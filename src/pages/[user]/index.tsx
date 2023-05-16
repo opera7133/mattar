@@ -15,7 +15,7 @@ import { useState, Fragment, useEffect } from 'react'
 import twemoji from 'twemoji'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
-import type { Mattar, User } from '@prisma/client'
+import type { Mattar, User, Prisma } from '@prisma/client'
 import { io } from 'socket.io-client'
 import * as linkify from 'linkifyjs'
 import linkifyHtml from 'linkify-html'
@@ -28,10 +28,18 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import Image from 'next/image'
 import Mattars from 'components/Mattar'
 
+type UserWithToken = Prisma.UserGetPayload<{
+  include: {
+    apiCredentials: true
+    follower: true
+    following: true
+  }
+}>
+
 type Props = {
   mattars: Mattar[]
-  user?: User | undefined
-  pUser: User
+  user?: UserWithToken | undefined
+  pUser: UserWithToken
 }
 
 type Inputs = {
@@ -69,22 +77,24 @@ const Profile = (props: Props) => {
   }
 
   const followState = async (id: string) => {
-    if (
-      props.user?.following
-        .map(function (i: any) {
-          return i.id
-        })
-        .includes(props.pUser.id)
-    ) {
-      const res = await fetch(
-        `/api/friendships/destroy?user_id=${props.user?.id}&unfollow_user_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`
-      )
-    } else {
-      const ref = await fetch(
-        `/api/friendships/create?user_id=${props.user?.id}&follow_user_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`
-      )
+    if (props.user && props.user.apiCredentials) {
+      if (
+        props.user?.following
+          .map(function (i: any) {
+            return i.id
+          })
+          .includes(props.pUser.id)
+      ) {
+        const res = await fetch(
+          `/api/friendships/destroy?user_id=${props.user?.id}&unfollow_user_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`
+        )
+      } else {
+        const ref = await fetch(
+          `/api/friendships/create?user_id=${props.user?.id}&follow_user_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`
+        )
+      }
+      refreshData()
     }
-    refreshData()
   }
 
   const showModal = (e?: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,31 +120,33 @@ const Profile = (props: Props) => {
   }
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    const res = await fetch(
-      '/api/account/update_profile&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}',
-      {
-        body: JSON.stringify({
-          oldId: props.user?.id,
-          id: data.id,
-          name: data.name,
-          description: data.description,
-          location: data.location,
-          website: data.website,
-          profile_picture: img,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
+    if (props.user && props.user.apiCredentials) {
+      const res = await fetch(
+        `/api/account/update_profile&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+        {
+          body: JSON.stringify({
+            oldId: props.user?.id,
+            id: data.id,
+            name: data.name,
+            description: data.description,
+            location: data.location,
+            website: data.website,
+            profile_picture: img,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }
+      )
+      const { error } = await res.json()
+      if (error) {
+        console.log(error)
+        return
       }
-    )
-    const { error } = await res.json()
-    if (error) {
-      console.log(error)
-      return
+      setIsModalOpen(false)
+      refreshData()
     }
-    setIsModalOpen(false)
-    refreshData()
   }
 
   useEffect((): any => {
