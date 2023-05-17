@@ -1,7 +1,6 @@
 import { Dialog, Transition } from '@headlessui/react'
 import Button from 'components/Button'
 import Footer from 'components/Footer'
-import Header from 'components/Header'
 import Head from 'next/head'
 import Link from 'next/link'
 import { BsEyeFill, BsEyeSlashFill } from 'react-icons/bs'
@@ -11,10 +10,10 @@ import { CtxOrReq } from 'next-auth/client/_utils'
 import { useRouter } from 'next/router'
 import { passwordStrength } from 'check-password-strength'
 import { Fragment, useState } from 'react'
+import { Layout } from 'components/Layout'
+import toast from 'react-hot-toast'
 
 export default function SignUp() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [errorText, setErrorText] = useState('')
   const router = useRouter()
   const { data: session } = useSession()
 
@@ -43,6 +42,7 @@ export default function SignUp() {
     /*if (ignoreDomains.includes(emailDomain)) {
       return
     }*/
+    const wait = toast.loading('登録中です...')
     const res = await fetch('/api/account/create', {
       body: JSON.stringify({
         id: data.id,
@@ -59,17 +59,18 @@ export default function SignUp() {
     })
     const { error } = await res.json()
     if (error) {
-      setIsOpen(true)
-      setErrorText(error)
+      toast.error(error)
       return
     }
     const mail = await fetch(`/api/account/verify/issue?user_id=${data.id}`)
     const { mailerror } = await mail.json()
     if (mailerror) {
-      setIsOpen(true)
-      setErrorText(mailerror)
+      toast.error(mailerror)
       return
     }
+    toast.success('登録が完了しました！', {
+      id: wait,
+    })
     await signIn<any>('credentials', {
       redirect: true,
       username: data.id,
@@ -77,7 +78,7 @@ export default function SignUp() {
       callbackUrl: `${window.location.origin}`,
     }).then((res) => {
       if (res?.error) {
-        console.error('UserId,Passwordを正しく入力してください')
+        toast.error('ユーザーID、パスワードを正しく入力してください')
       } else {
         router.push('/')
       }
@@ -91,11 +92,10 @@ export default function SignUp() {
     router.push('/')
   } else {
     return (
-      <div className="">
+      <Layout>
         <Head>
           <title>新規登録 | mattar.li</title>
         </Head>
-        <Header />
         <article className="pt-10 mb-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
           <h1 className="text-2xl font-bold mb-3">新規登録</h1>
           <p>
@@ -292,64 +292,9 @@ export default function SignUp() {
               登録
             </Button>
           </form>
-          <Transition appear show={isOpen} as={Fragment}>
-            <Dialog
-              as="div"
-              className="relative z-10"
-              onClose={() => setIsOpen(false)}
-            >
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
-              >
-                <div className="fixed inset-0 bg-black bg-opacity-25" />
-              </Transition.Child>
-
-              <div className="fixed inset-0 overflow-y-auto">
-                <div className="flex min-h-full items-center justify-center p-4 text-center">
-                  <Transition.Child
-                    as={Fragment}
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0 scale-95"
-                    enterTo="opacity-100 scale-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100 scale-100"
-                    leaveTo="opacity-0 scale-95"
-                  >
-                    <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 p-6 text-left align-middle shadow-xl transition-all">
-                      <Dialog.Title
-                        as="h3"
-                        className="text-lg font-medium leading-6"
-                      >
-                        エラーが発生しました
-                      </Dialog.Title>
-                      <div className="mt-2">
-                        <p className="text-sm text-gray-500">{errorText}</p>
-                      </div>
-
-                      <div className="mt-4 text-right">
-                        <button
-                          type="button"
-                          className="bg-red-600 shadow-md rounded-md text-white px-4 py-2 duration-200 hover:shadow-sm"
-                          onClick={() => setIsOpen(false)}
-                        >
-                          OK
-                        </button>
-                      </div>
-                    </Dialog.Panel>
-                  </Transition.Child>
-                </div>
-              </div>
-            </Dialog>
-          </Transition>
         </article>
         <Footer />
-      </div>
+      </Layout>
     )
   }
 }

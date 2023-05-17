@@ -8,17 +8,45 @@ import linkifyHtml from 'linkify-html'
 import 'linkify-plugin-mention'
 import 'linkify-plugin-hashtag'
 import { useRouter } from 'next/router'
-import { Mattar } from 'lib/prisma'
+import { Mattar, Prisma } from 'lib/prisma'
 import Link from 'next/link'
 
-interface Props {
-  item: any
-  props: any
+type MattarWithFav = Prisma.MattarGetPayload<{
+  include: {
+    favorites: true
+    user: true
+  }
+}>
+
+type UserWithToken = Prisma.UserGetPayload<{
+  include: {
+    apiCredentials: true
+    follower: true
+    following: true
+    favorites: true
+  }
+}>
+
+type Props = {
+  mattars: Mattar[]
+  user?: UserWithToken | undefined
+}
+
+interface MattarProps {
+  item: MattarWithFav
+  props: Props
   key: string
 }
 
-const Mattars: React.FC<Props> = ({ item, props }) => {
+const Mattars: React.FC<MattarProps> = ({ item, props }) => {
   const router = useRouter()
+  const [faved, setFaved] = useState(
+    props.user?.favorites
+      .map(function (i: any) {
+        return i.mattarId
+      })
+      .includes(item.id)
+  )
   const refreshData = () => {
     router.replace(router.asPath)
   }
@@ -64,40 +92,52 @@ const Mattars: React.FC<Props> = ({ item, props }) => {
     defaultProtocol: 'https',
   }
   const reMattar = async (id: string) => {
-    const res = await fetch(
-      `/api/statuses/remattar?user_id=${props.user?.id}&mattar_id=${id}&source=Mattar Web Client&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
-      {
-        method: 'POST',
-      }
-    )
-    refreshData()
+    if (props.user && props.user.apiCredentials) {
+      const res = await fetch(
+        `/api/statuses/remattar?user_id=${props.user?.id}&mattar_id=${id}&source=Mattar Web Client&api_token=${props.user?.apiCredentials?.token}&api_secret=${props.user?.apiCredentials?.secret}`,
+        {
+          method: 'POST',
+        }
+      )
+      refreshData()
+    }
   }
   const favMattar = async (id: string) => {
-    await fetch(
-      `/api/favorites/create?user_id=${props.user?.id}&mattar_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
-      {
-        method: 'POST',
+    setFaved(!faved)
+    if (props.user && props.user.apiCredentials) {
+      if (
+        props.user?.favorites
+          .map(function (i: any) {
+            return i.mattarId
+          })
+          .includes(item.id)
+      ) {
+        await fetch(
+          `/api/favorites/destroy?user_id=${props.user?.id}&mattar_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+          {
+            method: 'POST',
+          }
+        )
+      } else {
+        await fetch(
+          `/api/favorites/create?user_id=${props.user?.id}&mattar_id=${id}&api_token=${props.user?.apiCredentials?.token}&api_secret=${props.user?.apiCredentials?.secret}`,
+          {
+            method: 'POST',
+          }
+        )
       }
-    )
-    refreshData()
-  }
-  const disfavMattar = async (id: string) => {
-    await fetch(
-      `/api/favorites/destroy?user_id=${props.user?.id}&mattar_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
-      {
-        method: 'POST',
-      }
-    )
-    refreshData()
+    }
   }
   const deleteMattar = async (id: string) => {
-    await fetch(
-      `/api/statuses/destroy/${id}?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
-      {
-        method: 'POST',
-      }
-    )
-    refreshData()
+    if (props.user && props.user.apiCredentials) {
+      await fetch(
+        `/api/statuses/destroy/${id}?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+        {
+          method: 'POST',
+        }
+      )
+      refreshData()
+    }
   }
   return (
     <article className="relative flex gap-3 group">
@@ -128,44 +168,16 @@ const Mattars: React.FC<Props> = ({ item, props }) => {
           {props.user && (
             <span
               className={`ml-3 duration-200 ${
-                props.user &&
-                !props.user.favorites
-                  .map(function (i: any) {
-                    return i.mattarId
-                  })
-                  .includes(item.id) &&
-                'lg:opacity-0 lg:group-hover:opacity-100'
+                !faved && 'lg:opacity-0 lg:group-hover:opacity-100'
               }`}
             >
               <button
                 className={`duration-200 ${
-                  props.user.favorites
-                    .map(function (i: any) {
-                      return i.mattarId
-                    })
-                    .includes(item.id)
-                    ? 'text-orange-400'
-                    : 'hover:text-orange-400'
+                  faved ? 'text-orange-400' : 'hover:text-orange-400'
                 }`}
-                onClick={() => {
-                  if (
-                    props.user.favorites
-                      .map(function (i: any) {
-                        return i.mattarId
-                      })
-                      .includes(item.id)
-                  ) {
-                    disfavMattar(item.id)
-                  } else {
-                    favMattar(item.id)
-                  }
-                }}
+                onClick={() => favMattar(item.id)}
               >
-                {props.user.favorites
-                  .map(function (i: any) {
-                    return i.mattarId
-                  })
-                  .includes(item.id) ? (
+                {faved ? (
                   <BsStarFill className="inline-block mb-1" />
                 ) : (
                   <BsStar className="inline-block mb-1" />

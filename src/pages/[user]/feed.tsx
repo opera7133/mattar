@@ -1,4 +1,4 @@
-import prisma from 'lib/prisma'
+import prisma, { Mattar } from 'lib/prisma'
 import { GetServerSidePropsContext } from 'next'
 import RSS from 'rss'
 
@@ -6,12 +6,12 @@ async function generateFeedXml(user: string) {
   const feed = new RSS({
     title: user + ' /  mattar.li',
     description: 'マターリ',
-    site_url: process.env.NEXT_PUBLIC_BASE_URL,
+    site_url: process.env.NEXT_PUBLIC_BASE_URL || '',
     feed_url: `${process.env.NEXT_PUBLIC_BASE_URL}/${user}/feed`,
     language: 'ja',
   })
 
-  const mattars = JSON.parse(
+  const mattars: Mattar[] = JSON.parse(
     JSON.stringify(
       await prisma.mattar.findMany({
         where: {
@@ -37,7 +37,7 @@ export const getServerSideProps = async ({
   query,
 }: GetServerSidePropsContext) => {
   const id = query.user
-  const xml = await generateFeedXml(id)
+  const xml = await generateFeedXml(id?.toString() || '')
   if (!id) {
     return {
       notFound: true,

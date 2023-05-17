@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import Header from 'components/Header'
 import Footer from 'components/Footer'
 import Button from 'components/Button'
 import {
@@ -12,26 +11,61 @@ import {
   BsStarFill,
   BsTrash,
 } from 'react-icons/bs'
-import { useState, Fragment } from 'react'
+import { useState } from 'react'
 import twemoji from 'twemoji'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
-import type { Mattar, User } from '@prisma/client'
+import type { Mattar, Prisma } from '@prisma/client'
 import * as linkify from 'linkifyjs'
 import linkifyHtml from 'linkify-html'
 import 'linkify-plugin-mention'
 import 'linkify-plugin-hashtag'
+import Image from 'next/image'
 import { useSession, getSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { format } from 'date-fns'
 import { enUS, ja } from 'date-fns/locale'
+import { Layout } from 'components/Layout'
+
+type UserWithToken = Prisma.UserGetPayload<{
+  include: {
+    apiCredentials: true
+    follower: {
+      include: {
+        follower: true
+        following: true
+      }
+    }
+    following: {
+      include: {
+        follower: true
+        following: true
+      }
+    }
+    favorites: true
+  }
+}>
+
+type MattarWithFav = Prisma.MattarGetPayload<{
+  include: {
+    favorites: true
+    user: true
+  }
+}>
 
 type Props = {
-  mattar: Mattar
-  user: User | undefined
+  mattar: MattarWithFav
+  user: UserWithToken | undefined
 }
 
 const Mattar = (props: Props) => {
+  const [faved, setFaved] = useState(
+    props.user?.favorites
+      .map(function (i: any) {
+        return i.mattarId
+      })
+      .includes(props.mattar.id)
+  )
   const [searchText, setSearchText] = useState('')
   const { data: session } = useSession()
   const router = useRouter()
@@ -40,39 +74,46 @@ const Mattar = (props: Props) => {
     router.replace(router.asPath)
   }
   const deleteMattar = async (id: string) => {
-    await fetch(
-      `/api/statuses/destroy/${id}?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
-      {
-        method: 'POST',
-      }
-    )
-    refreshData()
+    if (props.user && props.user.apiCredentials) {
+      await fetch(
+        `/api/statuses/destroy/${id}?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+        {
+          method: 'POST',
+        }
+      )
+      refreshData()
+    }
   }
   const reMattar = async (id: string) => {
-    const res = await fetch(
-      `/api/statuses/remattar?user_id=${props.user.id}&mattar_id=${id}&source=Mattar Web Client&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
-      {
-        method: 'POST',
-      }
-    )
+    if (props.user && props.user.apiCredentials) {
+      const res = await fetch(
+        `/api/statuses/remattar?user_id=${props.user.id}&mattar_id=${id}&source=Mattar Web Client&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+        {
+          method: 'POST',
+        }
+      )
+    }
   }
   const favMattar = async (id: string) => {
-    await fetch(
-      `/api/favorites/create?user_id=${props.user.id}&mattar_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
-      {
-        method: 'POST',
+    if (props.user && props.user.apiCredentials) {
+      setFaved(!faved)
+      if (!faved) {
+        await fetch(
+          `/api/favorites/create?user_id=${props.user.id}&mattar_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+          {
+            method: 'POST',
+          }
+        )
+      } else {
+        await fetch(
+          `/api/favorites/destroy?user_id=${props.user.id}&mattar_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+          {
+            method: 'POST',
+          }
+        )
       }
-    )
-    refreshData()
-  }
-  const disfavMattar = async (id: string) => {
-    await fetch(
-      `/api/favorites/destroy?user_id=${props.user.id}&mattar_id=${id}&api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
-      {
-        method: 'POST',
-      }
-    )
-    refreshData()
+      refreshData()
+    }
   }
   const linkifyOptions = {
     className: function (_href: string, type: string) {
@@ -89,42 +130,10 @@ const Mattar = (props: Props) => {
     defaultProtocol: 'https',
   }
   return (
-    <div className="dark:bg-zinc-800 dark:text-white h-screen">
+    <Layout>
       <Head>
         <title>{`${props.mattar.user.name} on mattar.li: ${props.mattar.message} / mattar.li`}</title>
-        <meta
-          property="og:title"
-          content={`${props.mattar.user.name} on mattar.li`}
-        />
-        <meta property="og:description" content={`“${props.mattar.message}”`} />
-        <meta name="description" content={`“${props.mattar.message}”`} />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/img/favicon/apple-touch-icon.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/img/favicon/favicon-32x32.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/img/favicon/favicon-16x16.png"
-        />
-        <link rel="manifest" href="/site.webmanifest" />
-        <link
-          rel="mask-icon"
-          href="/img/favicon/safari-pinned-tab.svg"
-          color="#5bbad5"
-        />
-        <meta name="msapplication-TileColor" content="#2b5797" />
-        <meta name="theme-color" content="#ffffff" />
       </Head>
-      <Header />
       <main className="px-4 mx-auto max-w-6xl grid grid-cols-3 gap-6">
         <div className="col-span-2 py-4">
           <div className="my-2">
@@ -151,33 +160,11 @@ const Mattar = (props: Props) => {
                   <span>
                     <button
                       className={`duration-200 ${
-                        props.user.favorites
-                          .map(function (i: any) {
-                            return i.mattarId
-                          })
-                          .includes(props.mattar.id)
-                          ? 'text-orange-400'
-                          : 'hover:text-orange-400'
+                        faved ? 'text-orange-400' : 'hover:text-orange-400'
                       }`}
-                      onClick={() => {
-                        if (
-                          props.user.favorites
-                            .map(function (i: any) {
-                              return i.mattarId
-                            })
-                            .includes(props.mattar.id)
-                        ) {
-                          disfavMattar(props.mattar.id)
-                        } else {
-                          favMattar(props.mattar.id)
-                        }
-                      }}
+                      onClick={() => favMattar(props.mattar.id)}
                     >
-                      {props.user.favorites
-                        .map(function (i: any) {
-                          return i.mattarId
-                        })
-                        .includes(props.mattar.id) ? (
+                      {faved ? (
                         <BsStarFill className="inline-block mb-1" />
                       ) : (
                         <BsStar className="inline-block mb-1" />
@@ -226,11 +213,11 @@ const Mattar = (props: Props) => {
                       コピー
                     </button>
                   </span>
-                  {user === props.user.id && (
+                  {user === props.user?.id && (
                     <span className="ml-2">
                       <button
                         className="duration-200 hover:text-red-500"
-                        onClick={() => deleteMattar(id)}
+                        onClick={() => deleteMattar(id?.toString() || '')}
                       >
                         <BsTrash className="inline-block mb-0.5" size={15} />
                         削除
@@ -243,11 +230,14 @@ const Mattar = (props: Props) => {
             <hr className="my-3" />
             <div>
               <img
-                src={props.mattar.user.profile_picture}
+                src={props.mattar.user.profile_picture || ''}
                 className="w-14 float-left mr-5"
               />
-              <Link href={`/${props.mattar.userId}`}>
-                <a className="text-2xl text-sky-500">{props.mattar.userId}</a>
+              <Link
+                href={`/${props.mattar.userId}`}
+                className="text-2xl text-sky-500"
+              >
+                {props.mattar.userId}
               </Link>
               <div>{props.mattar.user.name}</div>
             </div>
@@ -257,11 +247,18 @@ const Mattar = (props: Props) => {
           {session && (
             <div>
               <div className="px-3 flex gap-3 items-center">
-                <img src={props.mattar.user.profile_picture} className="w-12" />
+                <div className="w-16 h-16 relative">
+                  <Image
+                    src={props.user?.profile_picture || '/img/default.png'}
+                    fill={true}
+                    alt={`${props.user?.name}\'s Avatar`}
+                    className="object-cover"
+                  />
+                </div>
                 <div>
-                  <p className="font-bold">{props.user.name}</p>
+                  <p className="font-bold">{props.user?.name}</p>
                   <p>
-                    {props.user.mattar_count}
+                    {props.user?.mattar_count}
                     のつぶやき
                   </p>
                 </div>
@@ -271,26 +268,22 @@ const Mattar = (props: Props) => {
                   <tr>
                     <td>
                       <Link href="/?page=following">
-                        <a>
-                          <p className="font-bold">
-                            {props.user.following
-                              ? props.user.following.length
-                              : '0'}
-                          </p>
-                          <p>フォロー中</p>
-                        </a>
+                        <p className="font-bold">
+                          {props.user?.following
+                            ? props.user.following.length
+                            : '0'}
+                        </p>
+                        <p>フォロー中</p>
                       </Link>
                     </td>
                     <td>
                       <Link href="/?page=follower">
-                        <a>
-                          <p className="font-bold">
-                            {props.user.follower
-                              ? props.user.follower.length
-                              : '0'}
-                          </p>
-                          <p>フォロワー</p>
-                        </a>
+                        <p className="font-bold">
+                          {props.user?.follower
+                            ? props.user.follower.length
+                            : '0'}
+                        </p>
+                        <p>フォロワー</p>
                       </Link>
                     </td>
                   </tr>
@@ -298,30 +291,29 @@ const Mattar = (props: Props) => {
               </table>
 
               <div className="flex flex-col">
-                <Link href="/">
-                  <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
-                    ホーム
-                  </a>
+                <Link
+                  href="/"
+                  className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500"
+                >
+                  ホーム
                 </Link>
-                <Link href="/?page=at">
-                  <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
-                    @{props.user.id}
-                  </a>
+                <Link
+                  href="/?page=at"
+                  className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500"
+                >
+                  @{props.user?.id}
                 </Link>
-                <Link href="/msg">
-                  <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
-                    メッセージ
-                  </a>
+                <Link
+                  href="/?page=fav"
+                  className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500"
+                >
+                  お気に入り
                 </Link>
-                <Link href="/fav">
-                  <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
-                    お気に入り
-                  </a>
-                </Link>
-                <Link href="/rtw">
-                  <a className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500">
-                    リツイート
-                  </a>
+                <Link
+                  href="/?page=remattars"
+                  className="px-3 py-1 duration-300 hover:bg-gray-200 dark:hover:bg-zinc-500"
+                >
+                  リツイート
                 </Link>
               </div>
               <div className="my-4 px-3 flex">
@@ -349,7 +341,7 @@ const Mattar = (props: Props) => {
           <Footer />
         </div>
       </main>
-    </div>
+    </Layout>
   )
 }
 
@@ -362,7 +354,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       JSON.stringify(
         await prisma.mattar.findUnique({
           where: {
-            id: id,
+            id: id?.toString(),
           },
           include: { user: true },
         })
@@ -397,7 +389,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       JSON.stringify(
         await prisma.mattar.findUnique({
           where: {
-            id: id,
+            id: id?.toString(),
           },
           include: { user: true },
         })

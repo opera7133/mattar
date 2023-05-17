@@ -1,15 +1,14 @@
 import Footer from 'components/Footer'
-import Header from 'components/Header'
+import { Layout } from 'components/Layout'
 import Head from 'next/head'
 import Image from 'next/image'
 
 export default function Media() {
   return (
-    <div>
+    <Layout>
       <Head>
         <title>メディア | mattar.li</title>
       </Head>
-      <Header />
       <article className="pt-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
         <h1 className="text-4xl font-bold mb-3">メディア</h1>
         <p className="text-lg mb-5">Mattarのブランドに関するページです。</p>
@@ -108,6 +107,6 @@ export default function Media() {
         </div>
       </article>
       <Footer />
-    </div>
+    </Layout>
   )
 }

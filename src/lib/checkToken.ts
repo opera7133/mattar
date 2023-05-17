@@ -10,7 +10,7 @@ const checkToken = async (req: NextApiRequest) => {
   }
   const token = await prisma.token.findUnique({
     where: {
-      token: api_token
+      token: api_token.toString()
     }
   })
   if (!token) {

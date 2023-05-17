@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import Header from 'components/Header'
 import Footer from 'components/Footer'
 import Button from 'components/Button'
 import { BsSearch } from 'react-icons/bs'
@@ -8,7 +7,7 @@ import { useState, Fragment } from 'react'
 import twemoji from 'twemoji'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
-import type { Mattar, User } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 import { useSession, getSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import QRCode from 'react-qr-code'
@@ -16,9 +15,29 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import Image from 'next/image'
 import { authenticator } from 'otplib'
 import { Dialog, Transition } from '@headlessui/react'
+import { Layout } from 'components/Layout'
+import { toast } from 'react-hot-toast'
+
+type UserWithToken = Prisma.UserGetPayload<{
+  include: {
+    apiCredentials: true
+    follower: {
+      include: {
+        follower: true
+        following: true
+      }
+    }
+    following: {
+      include: {
+        follower: true
+        following: true
+      }
+    }
+  }
+}>
 
 type Props = {
-  user: User
+  user: UserWithToken
 }
 
 type InfoInputs = {
@@ -65,44 +84,55 @@ const Settings = (props: Props) => {
   }
 
   const onInfoSubmit: SubmitHandler<InfoInputs> = async (data) => {
-    const res = await fetch(
-      '/api/account/update_profile?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}',
-      {
-        body: JSON.stringify({
-          id: props.user.id,
-          email: data.email,
-          birthday: data.bday,
-          lang: data.lang,
-          verified: false,
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-      }
-    )
-    const { error } = await res.json()
-    if (error) {
-      console.log(error)
-      return
-    }
-    if (props.user.email !== data.email) {
-      const issue = await fetch(
-        `/api/account/verify/issue?user_id=${props.user.id}`
+    if (props.user && props.user.apiCredentials) {
+      const wait = toast.loading('更新中です...')
+      const res = await fetch(
+        `/api/account/update_profile?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+        {
+          body: JSON.stringify({
+            id: props.user.id,
+            email: data.email,
+            birthday: data.bday,
+            lang: data.lang,
+            verified: false,
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+        }
       )
-      const { mailerror } = await issue.json()
-      if (mailerror) {
-        console.log(mailerror)
+      const { error } = await res.json()
+      if (error) {
+        toast.error(error, {
+          id: wait,
+        })
         return
       }
+      if (props.user.email !== data.email) {
+        const issue = await fetch(
+          `/api/account/verify/issue?user_id=${props.user.id}`
+        )
+        const { mailerror } = await issue.json()
+        if (mailerror) {
+          toast.error(mailerror, {
+            id: wait,
+          })
+          return
+        }
+      }
+      toast.success('ユーザー情報を更新しました！', {
+        id: wait,
+      })
+      refreshData()
     }
-    refreshData()
   }
 
   const secret = authenticator.generateSecret()
   const otpauth = authenticator.keyuri(props.user.email, 'mattar.li', secret)
 
   const onSecuritySubmit: SubmitHandler<SecurityInputs> = async (data) => {
+    const wait = toast.loading('更新中です...')
     const res = await fetch('/api/account/settings', {
       body: JSON.stringify({
         id: props.user.id,
@@ -119,8 +149,14 @@ const Settings = (props: Props) => {
     const { error } = await res.json()
     if (error) {
       console.log(error)
+      toast.error(error, {
+        id: wait,
+      })
       return
     }
+    toast.success('セキュリティ情報を更新しました！', {
+      id: wait,
+    })
     refreshData()
   }
 
@@ -145,37 +181,56 @@ const Settings = (props: Props) => {
   }
 
   const issueToken = async () => {
+    const wait = toast.loading('メールを送信中です...')
     const res = await fetch(
       `/api/account/verify/issue?user_id=${props.user.id}`
     )
     const { error } = await res.json()
     if (error) {
       console.log(error)
+      toast.error(error, {
+        id: wait,
+      })
       return
     }
+    toast.success('メールを送信しました！')
   }
 
   const issueAPI = async () => {
+    const wait = toast.loading('APIトークンを作成中です...')
     const res = await fetch(`/api/developer/issue?user_id=${props.user.id}`)
     const { error } = await res.json()
     if (error) {
       console.log(error)
+      toast.error(error, {
+        id: wait,
+      })
       return
     }
+    toast.success('APIトークンを作成しました！', {
+      id: wait,
+    })
     refreshData()
   }
 
   const deleteAccount = async () => {
+    const wait = toast.loading('アカウントを削除中です...')
     const res = await fetch(`/api/account/destroy/${props.user.id}`)
     const { error } = await res.json()
     if (error) {
+      toast.error(error, {
+        id: wait,
+      })
       console.log(error)
     }
+    toast.success('アカウントを削除しました', {
+      id: wait,
+    })
     setDeleteOpen(false)
   }
   if (session) {
     return (
-      <div className="dark:bg-zinc-800 dark:text-white h-screen">
+      <Layout>
         <Head>
           <title>アカウント / mattar.li</title>
           <meta name="description" content="Generated by create next app" />
@@ -205,7 +260,6 @@ const Settings = (props: Props) => {
           <meta name="msapplication-TileColor" content="#2b5797" />
           <meta name="theme-color" content="#ffffff" />
         </Head>
-        <Header />
         <main className="px-4 mx-auto max-w-6xl grid grid-cols-3 gap-6">
           <div className="col-span-3 lg:col-span-2 py-4">
             <div className="my-6">
@@ -250,7 +304,7 @@ const Settings = (props: Props) => {
                         id="bday"
                         type="date"
                         pattern="\d{4}-\d{2}-\d{2}"
-                        defaultValue={props.user.birthday}
+                        defaultValue={props.user.birthday || ''}
                         {...register('bday')}
                         className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       />
@@ -258,7 +312,7 @@ const Settings = (props: Props) => {
                     <div className="flex flex-col mb-4">
                       <label htmlFor="lang">言語</label>
                       <select
-                        defaultValue={props.user.lang}
+                        defaultValue={props.user.lang || ''}
                         {...register('lang', { required: true })}
                         className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       >
@@ -464,9 +518,9 @@ const Settings = (props: Props) => {
                         id="token"
                         type="text"
                         value={
-                          props.user.apiCredentials
+                          props.user.verified && props.user.apiCredentials
                             ? props.user.apiCredentials.token
-                            : ''
+                            : '非表示'
                         }
                         readOnly
                         className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
@@ -478,9 +532,9 @@ const Settings = (props: Props) => {
                         id="secret"
                         type="text"
                         value={
-                          props.user.apiCredentials
+                          props.user.verified && props.user.apiCredentials
                             ? props.user.apiCredentials.secret
-                            : ''
+                            : '非表示'
                         }
                         readOnly
                         className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
@@ -500,52 +554,45 @@ const Settings = (props: Props) => {
           <div className="col-span-3 lg:col-span-1 py-4">
             <div>
               <Link href={`/${props.user?.id}`}>
-                <a>
-                  <div className="px-3 flex gap-3 items-center">
-                    <div className="mt-2 w-16 h-16 relative">
-                      <Image
-                        src={props.user.profile_picture || '/img/default.png'}
-                        layout="fill"
-                        alt={`${props.user.profile_picture}\'s Avatar`}
-                        objectFit="cover"
-                        className="shrink-0"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-bold">{props.user.name}</p>
-                      <p>
-                        {props.user.mattar_count}
-                        のつぶやき
-                      </p>
-                    </div>
+                <div className="px-3 flex gap-3 items-center">
+                  <div className="mt-2 w-16 h-16 relative">
+                    <Image
+                      src={props.user.profile_picture || '/img/default.png'}
+                      fill={true}
+                      alt={`${props.user.profile_picture}\'s Avatar`}
+                      className="object-cover shrink-0"
+                    />
                   </div>
-                </a>
+                  <div>
+                    <p className="font-bold">{props.user.name}</p>
+                    <p>
+                      {props.user.mattar_count}
+                      のつぶやき
+                    </p>
+                  </div>
+                </div>
               </Link>
               <table className="my-3 border-separate border-spacing-x-2.5">
                 <tbody>
                   <tr>
                     <td>
                       <Link href="/?page=following">
-                        <a>
-                          <p className="font-bold">
-                            {props.user.following
-                              ? props.user.following.length
-                              : '0'}
-                          </p>
-                          <p>フォロー中</p>
-                        </a>
+                        <p className="font-bold">
+                          {props.user.following
+                            ? props.user.following.length
+                            : '0'}
+                        </p>
+                        <p>フォロー中</p>
                       </Link>
                     </td>
                     <td>
                       <Link href="/?page=follower">
-                        <a>
-                          <p className="font-bold">
-                            {props.user.follower
-                              ? props.user.follower.length
-                              : '0'}
-                          </p>
-                          <p>フォロワー</p>
-                        </a>
+                        <p className="font-bold">
+                          {props.user.follower
+                            ? props.user.follower.length
+                            : '0'}
+                        </p>
+                        <p>フォロワー</p>
                       </Link>
                     </td>
                   </tr>
@@ -607,7 +654,7 @@ const Settings = (props: Props) => {
             <Footer />
           </div>
         </main>
-      </div>
+      </Layout>
     )
   }
 }

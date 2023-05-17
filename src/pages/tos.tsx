@@ -1,14 +1,13 @@
 import Footer from 'components/Footer'
-import Header from 'components/Header'
+import { Layout } from 'components/Layout'
 import Head from 'next/head'
 
 export default function TOS() {
   return (
-    <div className="">
+    <Layout>
       <Head>
         <title>利用規約 | mattar.li</title>
       </Head>
-      <Header />
       <article className="pt-10 mb-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
         <h1 className="text-4xl font-bold mb-3">利用規約</h1>
         <details className="my-3 prose lg:prose-md dark:prose-invert">
@@ -258,6 +257,6 @@ export default function TOS() {
         </ul>
       </article>
       <Footer />
-    </div>
+    </Layout>
   )
 }

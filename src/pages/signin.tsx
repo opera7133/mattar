@@ -8,6 +8,8 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { getCsrfToken, signIn, useSession } from 'next-auth/react'
 import { CtxOrReq } from 'next-auth/client/_utils'
 import { useRouter } from 'next/router'
+import { Layout } from 'components/Layout'
+import { toast } from 'react-hot-toast'
 
 export default function SignIn({ csrfToken }: { csrfToken: string }) {
   const router = useRouter()
@@ -28,6 +30,7 @@ export default function SignIn({ csrfToken }: { csrfToken: string }) {
   const watchPassword = watch('password', '')
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    const wait = toast.loading('ログイン中です...')
     await signIn<any>('credentials', {
       redirect: true,
       username: data.id,
@@ -35,8 +38,13 @@ export default function SignIn({ csrfToken }: { csrfToken: string }) {
       callbackUrl: `${window.location.origin}`,
     }).then((res) => {
       if (res?.error) {
-        console.error('UserId,Passwordを正しく入力してください')
+        toast.error('ユーザーID、パスワードを正しく入力してください', {
+          id: wait,
+        })
       } else {
+        toast.success('ログインしました！', {
+          id: wait,
+        })
         router.push('/')
       }
     })
@@ -49,11 +57,10 @@ export default function SignIn({ csrfToken }: { csrfToken: string }) {
     router.push('/')
   } else {
     return (
-      <div className="">
+      <Layout>
         <Head>
           <title>ログイン | mattar.li</title>
         </Head>
-        <Header />
         <article className="pt-10 mb-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
           <h1 className="text-2xl font-bold mb-3">ログイン</h1>
           <p>
@@ -119,7 +126,7 @@ export default function SignIn({ csrfToken }: { csrfToken: string }) {
           </form>
         </article>
         <Footer />
-      </div>
+      </Layout>
     )
   }
 }

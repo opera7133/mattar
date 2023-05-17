@@ -1,14 +1,14 @@
 import Footer from 'components/Footer'
 import Header from 'components/Header'
+import { Layout } from 'components/Layout'
 import Head from 'next/head'
 
 export default function About() {
   return (
-    <div>
+    <Layout>
       <Head>
         <title>mattar.liについて | mattar.li</title>
       </Head>
-      <Header />
       <article className="pt-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
         <h1 className="text-4xl font-bold mb-3">mattar.liについて</h1>
         <p className="text-lg mb-5">
@@ -37,10 +37,10 @@ export default function About() {
           rel="noopener noreferrer"
           target="_blank"
         >
-          バージョン：<span className="font-mono">0.0.2</span>
+          バージョン：<span className="font-mono">0.0.3</span>
         </a>
       </article>
       <Footer />
-    </div>
+    </Layout>
   )
 }

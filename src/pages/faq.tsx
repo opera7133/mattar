@@ -1,14 +1,13 @@
 import Footer from 'components/Footer'
-import Header from 'components/Header'
+import { Layout } from 'components/Layout'
 import Head from 'next/head'
 
 export default function FAQ() {
   return (
-    <div>
+    <Layout>
       <Head>
         <title>FAQ | mattar.li</title>
       </Head>
-      <Header />
       <article className="pt-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
         <h1 className="text-4xl font-bold mb-4">FAQ</h1>
         <details>
@@ -30,6 +29,6 @@ export default function FAQ() {
         </details>
       </article>
       <Footer />
-    </div>
+    </Layout>
   )
 }
