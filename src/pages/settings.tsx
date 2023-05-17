@@ -193,7 +193,9 @@ const Settings = (props: Props) => {
       })
       return
     }
-    toast.success('メールを送信しました！')
+    toast.success('メールを送信しました！', {
+      id: wait,
+    })
   }
 
   const issueAPI = async () => {
