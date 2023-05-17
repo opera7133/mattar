@@ -62,7 +62,7 @@ export default async function handler(
         res.status(400).json({ error: "ID is already taken" })
         break
       }
-      if (req.body.invite !== process.env.INVITE_CODE) {
+      if (process.env.NEXT_PUBLIC_INVITE && req.body.invite !== process.env.INVITE_CODE) {
         res.status(403).json({ error: "Invite Code is not valid" })
         break
       }

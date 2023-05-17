@@ -236,22 +236,24 @@ export default function SignUp() {
                 </div>
               </div>
 
-              <div className="inline-flex flex-col">
-                <label className="text-lg" htmlFor="name">
-                  招待コード
-                </label>
-                <input
-                  className={classNames(
-                    errors.invite ? 'bg-red-200' : '',
-                    'bg-gray-200 border-none rounded-md text-lg px-5 py-3 duration-200 text-black focus:ring-0 focus:bg-gray-100'
-                  )}
-                  type="text"
-                  {...register('invite', {
-                    required: true,
-                  })}
-                  id="invite"
-                />
-              </div>
+              {process.env.NEXT_PUBLIC_INVITE && (
+                <div className="inline-flex flex-col">
+                  <label className="text-lg" htmlFor="name">
+                    招待コード
+                  </label>
+                  <input
+                    className={classNames(
+                      errors.invite ? 'bg-red-200' : '',
+                      'bg-gray-200 border-none rounded-md text-lg px-5 py-3 duration-200 text-black focus:ring-0 focus:bg-gray-100'
+                    )}
+                    type="text"
+                    {...register('invite', {
+                      required: true,
+                    })}
+                    id="invite"
+                  />
+                </div>
+              )}
 
               <div className="flex items-center">
                 <input
