@@ -22,7 +22,7 @@ export default async function handler(
       }
       const clientIp = requestIp.getClientIp(req) || "IP_NOT_FOUND"
       try {
-        await limitChecker.check(res, 1, clientIp)
+        await limitChecker.check(res, 3, clientIp)
       } catch (error) {
         console.log(error)
         res.status(429).json({
@@ -33,7 +33,7 @@ export default async function handler(
       }
       const tokenId = await prisma.token.findUnique({
         where: {
-          token: query.api_token
+          token: query.api_token?.toString()
         },
         select: {
           userId: true
