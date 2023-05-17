@@ -328,12 +328,14 @@ const Settings = (props: Props) => {
                       className="cursor-pointer px-4 text-white py-2 rounded-md bg-primary shadow-md duration-200 hover:shadow-sm"
                     />
                   </form>
-                  <a
-                    href={`/api/account/archive/${props.user.id}`}
-                    className="px-4 text-white py-2 rounded-md bg-red-600 shadow-md duration-200 hover:shadow-sm"
-                  >
-                    データをダウンロード
-                  </a>
+                  {props.user.verified && (
+                    <a
+                      href={`/api/account/archive/${props.user.id}?api_token=${props.user.apiCredentials?.token}&api_secret=${props.user.apiCredentials?.secret}`}
+                      className="px-4 text-white py-2 rounded-md bg-red-600 shadow-md duration-200 hover:shadow-sm"
+                    >
+                      データをダウンロード
+                    </a>
+                  )}
                   <button
                     onClick={() => setDeleteOpen(true)}
                     className="ml-4 px-4 text-white py-2 rounded-md bg-red-600 shadow-md duration-200 hover:shadow-sm"
