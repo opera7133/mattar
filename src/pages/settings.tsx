@@ -94,7 +94,7 @@ const Settings = (props: Props) => {
             email: data.email,
             birthday: data.bday,
             lang: data.lang,
-            verified: false,
+            verified: props.user.email !== data.email,
           }),
           headers: {
             'Content-Type': 'application/json',
