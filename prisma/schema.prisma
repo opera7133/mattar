@@ -7,31 +7,31 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model Mattar {
-  id          String    @id @default(cuid())
-  message     String
-  source      String
-  ip          String
-  userId      String
-  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  isRemattar  Boolean
-  favorites   Favorite[]
-  createdAt   DateTime    @default(now())
+  id         String     @id @default(cuid())
+  message    String
+  source     String
+  ip         String
+  userId     String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isRemattar Boolean
+  favorites  Favorite[]
+  createdAt  DateTime   @default(now())
 }
 
 model Favorite {
-  id              String    @id @default(cuid())
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId          String
-  mattar          Mattar    @relation(fields: [mattarId], references: [id], onDelete: Cascade)
-  mattarId        String
+  id       String @id @default(cuid())
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  mattar   Mattar @relation(fields: [mattarId], references: [id], onDelete: Cascade)
+  mattarId String
 }
 
 model User {
-  id              String    @id
+  id              String     @id
   name            String
   description     String?
   location        String?
@@ -42,22 +42,24 @@ model User {
   twofactor       String?
   hash            String
   salt            String
-  email           String    @unique
+  email           String     @unique
   mattar_count    Int
   verified        Boolean
   verifyToken     String?
+  admin           Boolean    @default(false)
+  moderator       Boolean    @default(false)
   mattars         Mattar[]
   favorites       Favorite[]
-  follower        User[]    @relation("UserFollows")
-  following       User[]    @relation("UserFollows")
+  follower        User[]     @relation("UserFollows")
+  following       User[]     @relation("UserFollows")
   apiCredentials  Token?
-  createdAt       DateTime  @default(now())
+  createdAt       DateTime   @default(now())
 }
 
 model Token {
-  id        String  @id @default(cuid())
-  userId    String  @unique
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     String  @unique
-  secret    String  @unique
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token  String @unique
+  secret String @unique
 }
