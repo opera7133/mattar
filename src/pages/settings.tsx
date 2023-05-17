@@ -673,6 +673,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           include: {
             favorites: true,
             following: true,
+            follower: true,
             apiCredentials: true,
           },
         })
