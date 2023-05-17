@@ -113,9 +113,9 @@ const Settings = (props: Props) => {
         const issue = await fetch(
           `/api/account/verify/issue?user_id=${props.user.id}`
         )
-        const { mailerror } = await issue.json()
-        if (mailerror) {
-          toast.error(mailerror, {
+        const mailres = await issue.json()
+        if (mailres.error) {
+          toast.error(mailres.error, {
             id: wait,
           })
           return
