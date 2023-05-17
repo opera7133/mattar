@@ -65,7 +65,9 @@ export default function SignUp() {
     const mail = await fetch(`/api/account/verify/issue?user_id=${data.id}`)
     const mailres = await mail.json()
     if (mailres.error) {
-      toast.error(mailres.error)
+      toast.error(mailres.error, {
+        id: wait,
+      })
       return
     }
     toast.success('登録が完了しました！', {
