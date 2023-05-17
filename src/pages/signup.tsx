@@ -238,7 +238,7 @@ export default function SignUp() {
                 </div>
               </div>
 
-              {process.env.NEXT_PUBLIC_INVITE && (
+              {process.env.NEXT_PUBLIC_INVITE === 'true' && (
                 <div className="inline-flex flex-col">
                   <label className="text-lg" htmlFor="name">
                     招待コード

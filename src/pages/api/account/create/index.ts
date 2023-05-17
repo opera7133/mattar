@@ -76,7 +76,9 @@ export default async function handler(
       req.body.verified = false
       req.body.mattar_count = 0
       delete req.body.password
-      delete req.body.invite
+      if (req.body.invite) {
+        delete req.body.invite
+      }
       const newUser = await prisma.user.create({
         data: req.body,
       })
