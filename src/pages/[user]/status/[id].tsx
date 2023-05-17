@@ -26,6 +26,7 @@ import { useRouter } from 'next/router'
 import { format } from 'date-fns'
 import { enUS, ja } from 'date-fns/locale'
 import { Layout } from 'components/Layout'
+import { toast } from 'react-hot-toast'
 
 type UserWithToken = Prisma.UserGetPayload<{
   include: {
@@ -203,11 +204,12 @@ const Mattar = (props: Props) => {
                   <span className="ml-2">
                     <button
                       className="duration-200 hover:text-sky-400"
-                      onClick={() =>
+                      onClick={() => {
+                        toast.success('URLをコピーしました！')
                         navigator.clipboard.writeText(
                           `${process.env.NEXT_PUBLIC_BASE_URL}/${user}/status/${id}`
                         )
-                      }
+                      }}
                     >
                       <BsLink className="inline-block mb-1" size={15} />
                       コピー
