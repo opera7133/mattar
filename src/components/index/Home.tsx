@@ -59,7 +59,7 @@ export const IndexHome = ({
         } else if (state === 'home') {
           return <Mattars item={item} props={props} key={item.id} />
         } else if (state === 'remattars') {
-          if (item.isRemattar) {
+          if (item.isRemattar && item.userId === props.user?.id) {
             return <Mattars item={item} props={props} key={item.id} />
           }
         }

@@ -12,6 +12,7 @@ import { passwordStrength } from 'check-password-strength'
 import { Fragment, useState } from 'react'
 import { Layout } from 'components/Layout'
 import toast from 'react-hot-toast'
+import { PWStrength } from 'components/PWStrength'
 
 export default function SignUp() {
   const router = useRouter()
@@ -186,56 +187,7 @@ export default function SignUp() {
                   })}
                   id="password"
                 />
-                <div className="flex my-3">
-                  <div className="w-1/4 px-1">
-                    <div
-                      className={classNames(
-                        'h-2 rounded-xl transition-colors bg-gray-200',
-                        passwordStrength(watchPassword).value === 'Too weak' &&
-                          'bg-red-500',
-                        passwordStrength(watchPassword).value === 'Weak' &&
-                          'bg-orange-500',
-                        passwordStrength(watchPassword).value === 'Medium' &&
-                          'bg-yellow-400',
-                        passwordStrength(watchPassword).value === 'Strong' &&
-                          'bg-green-500'
-                      )}
-                    ></div>
-                  </div>
-                  <div className="w-1/4 px-1">
-                    <div
-                      className={classNames(
-                        'h-2 rounded-xl transition-colors bg-gray-200',
-                        passwordStrength(watchPassword).value === 'Weak' &&
-                          'bg-orange-500',
-                        passwordStrength(watchPassword).value === 'Medium' &&
-                          'bg-yellow-400',
-                        passwordStrength(watchPassword).value === 'Strong' &&
-                          'bg-green-500'
-                      )}
-                    ></div>
-                  </div>
-                  <div className="w-1/4 px-1">
-                    <div
-                      className={classNames(
-                        'h-2 rounded-xl transition-colors bg-gray-200',
-                        passwordStrength(watchPassword).value === 'Medium' &&
-                          'bg-yellow-400',
-                        passwordStrength(watchPassword).value === 'Strong' &&
-                          'bg-green-500'
-                      )}
-                    ></div>
-                  </div>
-                  <div className="w-1/4 px-1">
-                    <div
-                      className={classNames(
-                        'h-2 rounded-xl transition-colors bg-gray-200',
-                        passwordStrength(watchPassword).value === 'Strong' &&
-                          'bg-green-500'
-                      )}
-                    ></div>
-                  </div>
-                </div>
+                <PWStrength password={watchPassword} />
               </div>
 
               {process.env.NEXT_PUBLIC_INVITE === 'true' && (

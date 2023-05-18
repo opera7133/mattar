@@ -87,6 +87,8 @@ const Home = (props: Props) => {
       if (res.error) {
         if (res.error === 'Your message is too long') {
           toast.error('ツイートが長すぎます！')
+        } else if (res.error === 'The message must have some text') {
+          toast.error('テキストを入力してください！')
         } else {
           toast.error(res.error)
         }
@@ -116,6 +118,8 @@ const Home = (props: Props) => {
         refreshData()
       })
       if (socket) return () => socket.disconnect()
+    } else {
+      setPage('home')
     }
   }, [props.user, refreshData])
 
@@ -225,7 +229,7 @@ const Home = (props: Props) => {
                     <td>
                       <Button
                         className="text-left"
-                        onClick={() => setState('following')}
+                        onClick={() => setPage('following')}
                       >
                         <div>
                           <p className="font-bold">
@@ -238,7 +242,7 @@ const Home = (props: Props) => {
                     <td>
                       <Button
                         className="text-left"
-                        onClick={() => setState('follower')}
+                        onClick={() => setPage('follower')}
                       >
                         <div>
                           <p className="font-bold">

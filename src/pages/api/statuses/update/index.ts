@@ -47,8 +47,20 @@ export default async function handler(
         res.status(400).json({ error: "Your message is too long" })
         break
       }
+      if (!/\S/.test(req.body.message)) {
+        res.status(400).json({ error: "The message must have some text" })
+        break
+      }
+      const urlRegex = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/g
+      const urls = req.body.message.match(urlRegex)
+      if (urls) {
+        urls.map((url: string) => {
+          req.body.message.replace(url, encodeURI(url))
+        })
+      }
       req.body.ip = clientIp
-      req.body.message = req.body.message.replace("<", "&lt;").replace(">", "&gt;")
+
+      req.body.message = req.body.message.replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;")
       const mattar = await prisma.mattar.create({
         data: req.body,
       })

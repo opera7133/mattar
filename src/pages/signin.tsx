@@ -124,6 +124,15 @@ export default function SignIn({ csrfToken }: { csrfToken: string }) {
               ログイン
             </Button>
           </form>
+          <p className="my-4">
+            パスワードをお忘れですか？
+            <Link
+              href="/reset"
+              className="text-sky-500 duration-200 hover:text-sky-800"
+            >
+              パスワードをリセット
+            </Link>
+          </p>
         </article>
         <Footer />
       </Layout>

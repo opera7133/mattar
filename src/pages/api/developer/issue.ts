@@ -47,7 +47,7 @@ export default async function handler(
       }
       const user = await prisma.user.findUnique({
         where: {
-          id: user_id
+          id: user_id.toString()
         }
       })
       if (!user) {
@@ -56,7 +56,7 @@ export default async function handler(
       }
       const check = await prisma.token.findUnique({
         where: {
-          userId: user_id
+          userId: user_id.toString()
         }
       })
       const newToken = genToken(43)
@@ -64,7 +64,7 @@ export default async function handler(
       if (check) {
         const update = await prisma.token.update({
           where: {
-            userId: user_id
+            userId: user_id.toString()
           },
           data: {
             token: newToken,
@@ -76,7 +76,7 @@ export default async function handler(
       } else {
         const create = await prisma.token.create({
           data: {
-            userId: user_id,
+            userId: user_id.toString(),
             token: newToken,
             secret: newSecret
           }
