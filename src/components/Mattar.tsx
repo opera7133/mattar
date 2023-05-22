@@ -139,6 +139,78 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
       refreshData()
     }
   }
+
+  const youtubeReg =
+    /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/
+  const niconicoReg =
+    /http(?:s?):\/\/(?:www\.)?nico(?:video\.jp\/watch|\.ms)\/(sm[A-Za-z0-9]+)/
+  const bilibiliReg =
+    /http(?:s?):\/\/(?:www\.bilibili\.com\/video|b23\.tv)\/(BV[A-Za-z0-9]+)/
+  const spotifyReg = /http(?:s?):\/\/open.spotify.com\/track\/([a-zA-Z0-9]+)/
+  const videoReg = new RegExp(
+    youtubeReg.source +
+      '|' +
+      niconicoReg.source +
+      '|' +
+      bilibiliReg.source +
+      '|' +
+      spotifyReg.source,
+    'g'
+  )
+
+  let embed
+
+  if (videoReg.test(item.message)) {
+    const matches = item.message.match(videoReg)
+    if (matches && matches[matches?.length - 1]) {
+      const embedUrl = matches[matches?.length - 1]
+      if (youtubeReg.test(embedUrl)) {
+        const embedId = embedUrl.match(youtubeReg) || ''
+        embed = (
+          <iframe
+            src={`https://www.youtube.com/embed/${embedId[1]}`}
+            className="block w-full aspect-video my-3"
+            title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          ></iframe>
+        )
+      } else if (niconicoReg.test(embedUrl)) {
+        const embedId = embedUrl.match(niconicoReg) || ''
+        embed = (
+          <iframe
+            allowFullScreen
+            allow="autoplay"
+            className="block w-full aspect-video my-3"
+            src={`https://embed.nicovideo.jp/watch/${embedId[1]}?persistence=1&amp;from=0&amp;allowProgrammaticFullScreen=1`}
+          ></iframe>
+        )
+      } else if (bilibiliReg.test(embedUrl)) {
+        const embedId = embedUrl.match(bilibiliReg) || ''
+        embed = (
+          <iframe
+            src={`//player.bilibili.com/player.html?bvid=${embedId[1]}&page=1`}
+            className="block w-full aspect-video my-3"
+            allowFullScreen
+          ></iframe>
+        )
+      } else {
+        const embedId = embedUrl.match(spotifyReg) || ''
+        embed = (
+          <iframe
+            src={`https://open.spotify.com/embed/track/${embedId[1]}?utm_source=generator`}
+            width="100%"
+            height="152"
+            allowFullScreen
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            loading="lazy"
+            className="block w-full rounded-md my-3"
+          ></iframe>
+        )
+      }
+    }
+  }
+
   return (
     <article className="relative flex gap-3 group">
       <Link href={`/${item.user.id}`}>
@@ -151,7 +223,7 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
           />
         </div>
       </Link>
-      <div>
+      <div className="w-full">
         <Link href={`/${item.user.id}`}>
           <span className="font-bold">{item.user.name}</span>
         </Link>
@@ -161,6 +233,7 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
             __html: linkifyHtml(twemoji.parse(item.message), linkifyOptions),
           }}
         ></div>
+        {embed}
         <div className="text-xs text-gray-400">
           <span title={item.createdAt.toString()}>
             {getElapsedTime(item.createdAt)}

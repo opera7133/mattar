@@ -1,6 +1,5 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import Header from 'components/Header'
 import Footer from 'components/Footer'
 import Button from 'components/Button'
 import { BsSearch, BsThreeDots } from 'react-icons/bs'
@@ -326,7 +325,7 @@ const Home = (props: Props) => {
   )
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getSession(ctx)
   if (session && session.user) {
     const mattars = JSON.parse(
