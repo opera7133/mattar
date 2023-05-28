@@ -12,12 +12,11 @@ import {
   BsTrash,
 } from 'react-icons/bs'
 import { useState } from 'react'
-import twemoji from 'twemoji'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
 import type { Mattar, Prisma } from '@prisma/client'
-import * as linkify from 'linkifyjs'
-import linkifyHtml from 'linkify-html'
+import Twemoji from 'react-twemoji'
+import Linkify from 'linkify-react'
 import 'linkify-plugin-mention'
 import 'linkify-plugin-hashtag'
 import Image from 'next/image'
@@ -138,15 +137,11 @@ const Mattar = (props: Props) => {
       <main className="px-4 mx-auto max-w-6xl grid grid-cols-3 gap-6">
         <div className="col-span-2 py-4">
           <div className="my-2">
-            <div
-              className="text-2xl"
-              dangerouslySetInnerHTML={{
-                __html: linkifyHtml(
-                  twemoji.parse(props.mattar.message),
-                  linkifyOptions
-                ),
-              }}
-            ></div>
+            <div className="text-2xl">
+              <Linkify options={linkifyOptions}>
+                <Twemoji>{props.mattar.message}</Twemoji>
+              </Linkify>
+            </div>
             <div className="mt-2 text-xs text-gray-500 flex flex-row justify-between">
               <span>
                 {format(
@@ -347,7 +342,7 @@ const Mattar = (props: Props) => {
   )
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const qUser = ctx.query.user
   const id = ctx.query.id
   const session = await getSession(ctx)
@@ -358,7 +353,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           where: {
             id: id?.toString(),
           },
-          include: { user: true },
+          include: { user: true, attaches: true, favorites: true },
         })
       )
     )

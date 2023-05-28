@@ -1,7 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import type { NextApiRequest } from 'next'
 import { PrismaClient } from '@prisma/client'
 import checkToken from 'lib/checkToken'
 import { NextApiResponseServerIO } from "types/socket"
+import { unlink, unlinkSync } from 'fs'
 const prisma = new PrismaClient()
 
 import { LimitChecker } from 'lib/limitChecker'
@@ -39,8 +40,11 @@ export default async function handler(
       }
       const getMattar = await prisma.mattar.findUnique({
         where: {
-          id: id
+          id: id.toString()
         },
+        include: {
+          attaches: true
+        }
       })
       if (!getMattar) {
         res.status(404).json({ error: "Mattar Not Found" })
@@ -48,7 +52,7 @@ export default async function handler(
       }
       const tokenId = await prisma.token.findUnique({
         where: {
-          token: api_token
+          token: api_token?.toString()
         },
         select: {
           userId: true
@@ -57,9 +61,14 @@ export default async function handler(
       if (getMattar.userId !== tokenId?.userId) {
         res.status(403).json({ error: "You don\'t have permission" })
       }
+      if (getMattar.attaches) {
+        for (const attach of getMattar.attaches) {
+          unlinkSync(`./public/media/${attach.filename}`)
+        }
+      }
       const deleteMattar = await prisma.mattar.delete({
         where: {
-          id: id
+          id: id.toString()
         },
       })
       const decrementCount = await prisma.user.update({

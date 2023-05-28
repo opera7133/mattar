@@ -1,18 +1,20 @@
 import { Menu, Transition } from '@headlessui/react'
 import Image from 'next/image'
-import twemoji from 'twemoji'
 import { BsThreeDots, BsStar, BsStarFill } from 'react-icons/bs'
 import { Fragment, useState } from 'react'
-import * as linkify from 'linkifyjs'
-import linkifyHtml from 'linkify-html'
+import Twemoji from 'react-twemoji'
+import Linkify from 'linkify-react'
 import 'linkify-plugin-mention'
 import 'linkify-plugin-hashtag'
 import { useRouter } from 'next/router'
 import { Mattar, Prisma } from 'lib/prisma'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
+import { ImageGallery } from './mattar/ImageGallery'
 
 type MattarWithFav = Prisma.MattarGetPayload<{
   include: {
+    attaches: true
     favorites: true
     user: true
   }
@@ -79,11 +81,20 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
   }
   const linkifyOptions = {
     className: function (_href: string, type: string) {
-      return 'text-sky-500'
+      return 'text-sky-500 duration-200 hover:text-sky-600'
     },
     formatHref: {
       hashtag: (href: string) => 'search?query=' + href.substring(1),
       mention: (href: string) => href,
+    },
+    format: (value: string, type: string) => {
+      if (/^https?:\/\//.test(value)) {
+        value = value.replace(/^https?:\/\//, '')
+      }
+      if (type === 'url' && value.length > 28) {
+        value = value.slice(0, 28) + '...'
+      }
+      return value
     },
     target: {
       url: '_blank',
@@ -130,12 +141,24 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
   }
   const deleteMattar = async (id: string) => {
     if (props.user && props.user.apiCredentials) {
-      await fetch(
-        `/api/statuses/destroy/${id}?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
-        {
-          method: 'POST',
-        }
-      )
+      const load = toast.loading('削除中です...')
+      const res = await (
+        await fetch(
+          `/api/statuses/destroy/${id}?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+          {
+            method: 'POST',
+          }
+        )
+      ).json()
+      if (res.error) {
+        toast.error(res.error, {
+          id: load,
+        })
+      } else {
+        toast.success('削除しました！', {
+          id: load,
+        })
+      }
       refreshData()
     }
   }
@@ -171,6 +194,7 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
             src={`https://www.youtube.com/embed/${embedId[1]}`}
             className="block w-full aspect-video my-3"
             title="YouTube video player"
+            loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
           ></iframe>
@@ -182,6 +206,7 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
             allowFullScreen
             allow="autoplay"
             className="block w-full aspect-video my-3"
+            loading="lazy"
             src={`https://embed.nicovideo.jp/watch/${embedId[1]}?persistence=1&amp;from=0&amp;allowProgrammaticFullScreen=1`}
           ></iframe>
         )
@@ -191,6 +216,7 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
           <iframe
             src={`//player.bilibili.com/player.html?bvid=${embedId[1]}&page=1`}
             className="block w-full aspect-video my-3"
+            loading="lazy"
             allowFullScreen
           ></iframe>
         )
@@ -227,13 +253,11 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
         <Link href={`/${item.user.id}`}>
           <span className="font-bold">{item.user.name}</span>
         </Link>
-        <div
-          id="msg"
-          dangerouslySetInnerHTML={{
-            __html: linkifyHtml(twemoji.parse(item.message), linkifyOptions),
-          }}
-        ></div>
-        {embed}
+        <Linkify options={linkifyOptions}>
+          <Twemoji>{item.message}</Twemoji>
+        </Linkify>
+        {item.attaches.length !== 0 && <ImageGallery files={item.attaches} />}
+        {item.attaches.length === 0 && embed}
         <div className="text-xs text-gray-400">
           <span title={item.createdAt.toString()}>
             {getElapsedTime(item.createdAt)}
@@ -255,7 +279,7 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
                 ) : (
                   <BsStar className="inline-block mb-1" />
                 )}
-                お気に入り
+                <span className="hidden md:inline-block">お気に入り</span>
               </button>
             </span>
           )}
@@ -275,7 +299,7 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
                 >
                   <path d="M11 5.466V4H5a4 4 0 0 0-3.584 5.777.5.5 0 1 1-.896.446A5 5 0 0 1 5 3h6V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192Zm3.81.086a.5.5 0 0 1 .67.225A5 5 0 0 1 11 13H5v1.466a.25.25 0 0 1-.41.192l-2.36-1.966a.25.25 0 0 1 0-.384l2.36-1.966a.25.25 0 0 1 .41.192V12h6a4 4 0 0 0 3.585-5.777.5.5 0 0 1 .225-.67Z" />
                 </svg>
-                リツイート
+                <span className="hidden md:inline-block">リツイート</span>
               </button>
             </span>
           )}

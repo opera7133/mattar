@@ -17,6 +17,7 @@ import { IndexFollowing } from 'components/index/Following'
 import { IndexFollower } from 'components/index/Follower'
 import { Layout } from 'components/Layout'
 import { toast } from 'react-hot-toast'
+import { PostMattar } from 'components/Post'
 
 type UserWithToken = Prisma.UserGetPayload<{
   include: {
@@ -39,6 +40,7 @@ type UserWithToken = Prisma.UserGetPayload<{
 
 type MattarWithFav = Prisma.MattarGetPayload<{
   include: {
+    attaches: true
     favorites: true
     user: true
   }
@@ -59,44 +61,6 @@ const Home = (props: Props) => {
   const [state, setState] = useState(page || 'home')
   const refreshData = () => {
     router.replace(router.asPath)
-  }
-  const checkTextArea = (e: any) => {
-    const newText = e.target.value.replace(/\n/g, '')
-    setText(e.target.value)
-  }
-  const postMattar = async () => {
-    if (props.user && props.user.apiCredentials) {
-      const res = await (
-        await fetch(
-          `/api/statuses/update?api_token=${props.user?.apiCredentials.token}&api_secret=${props.user?.apiCredentials.secret}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: text,
-              source: 'Mattar Web Client',
-              userId: props.user?.id,
-              isRemattar: false,
-            }),
-          }
-        )
-      ).json()
-      if (res.error) {
-        if (res.error === 'Your message is too long') {
-          toast.error('ツイートが長すぎます！')
-        } else if (res.error === 'The message must have some text') {
-          toast.error('テキストを入力してください！')
-        } else {
-          toast.error(res.error)
-        }
-      } else {
-        toast.success('ツイートを投稿しました！')
-        setText('')
-        refreshData()
-      }
-    }
   }
   const setPage = (name: string) => {
     setState(name)
@@ -145,32 +109,7 @@ const Home = (props: Props) => {
       <main className="px-4 mx-auto max-w-6xl grid grid-cols-3 gap-6">
         <div className="col-span-3 lg:col-span-2 py-4">
           {session ? (
-            <div>
-              <div className="flex items-center justify-between">
-                <p className="text-xl my-2">いま、どうしてる？</p>
-                <p
-                  className={
-                    60 - stringWidth(text.replace(/\n/g, '')) < 0
-                      ? 'font-bold text-3xl opacity-80 text-red-500'
-                      : 'font-bold text-3xl opacity-40'
-                  }
-                >
-                  {60 - stringWidth(text.replace(/\n/g, ''))}
-                </p>
-              </div>
-              <textarea
-                onChange={checkTextArea}
-                value={text}
-                className="rounded-md focus:ring-0 focus:border-gray-500 w-full h-auto text-black"
-              ></textarea>
-              <Button
-                id="post"
-                className="block ml-auto bg-primary text-white px-4 py-2 rounded-md shadow-md hover:shadow-sm duration-200"
-                onClick={() => postMattar()}
-              >
-                つぶやく
-              </Button>
-            </div>
+            <PostMattar props={props} />
           ) : (
             <div className="flex items-center justify-between">
               <div>
@@ -331,7 +270,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true },
+          include: { user: true, favorites: true, attaches: true },
           orderBy: {
             createdAt: 'desc',
           },
@@ -364,7 +303,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true },
+          include: { user: true, favorites: true, attaches: true },
           orderBy: {
             createdAt: 'desc',
           },

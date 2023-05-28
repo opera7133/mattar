@@ -13,6 +13,7 @@ datasource db {
 model Mattar {
   id         String     @id @default(cuid())
   message    String
+  attaches   Attach[]
   source     String
   ip         String
   userId     String
@@ -20,6 +21,16 @@ model Mattar {
   isRemattar Boolean
   favorites  Favorite[]
   createdAt  DateTime   @default(now())
+}
+
+model Attach {
+  id       String @id @default(cuid())
+  filename String
+  filetype String
+  width    Int
+  height   Int
+  mattar   Mattar? @relation(fields: [mattarId], references: [id], onDelete: Cascade)
+  mattarId String?
 }
 
 model Favorite {

@@ -4,6 +4,7 @@ import { Fragment, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
+import { toast } from 'react-hot-toast'
 
 type Inputs = {
   id: string
@@ -49,6 +50,7 @@ export const UserProfile = ({
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     if (props.user && props.user.apiCredentials) {
+      const load = toast.loading('更新中です...')
       const res = await fetch(
         `/api/account/update_profile?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
         {
@@ -69,9 +71,14 @@ export const UserProfile = ({
       )
       const { error } = await res.json()
       if (error) {
-        console.log(error)
+        toast.error(error, {
+          id: load,
+        })
         return
       }
+      toast.success('プロフィールを更新しました', {
+        id: load,
+      })
       setIsModalOpen(false)
       refreshData()
     }
@@ -92,7 +99,7 @@ export const UserProfile = ({
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+          <div className="flex min-h-full items-center justify-center text-center">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -102,7 +109,7 @@ export const UserProfile = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 p-6 text-left align-middle shadow-xl transition-all">
+              <Dialog.Panel className="m-4 w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-zinc-800 p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
                   className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100"
@@ -150,7 +157,7 @@ export const UserProfile = ({
                           <input
                             id="avatar"
                             type="file"
-                            accept="image/apng, image/avif, image/bmp, image/gif, image/png, image/jpeg, image/svg+xml, image/webp"
+                            accept="image/apng, image/avif, image/bmp, image/gif, image/png, image/jpeg, image/webp"
                             {...register('avatar')}
                             onChange={(e) => onChangeInputFile(e)}
                             className="hidden"

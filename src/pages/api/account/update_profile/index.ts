@@ -52,9 +52,15 @@ export default async function handler(
         res.status(400).json({ error: "Description is too long" })
         break
       }
+      if (req.body.website) {
+        const urlRegex = /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/
+        if (!urlRegex.test(req.body.website)) {
+          res.status(400).json({ error: "website URL does not start with http" })
+        }
+      }
       const tokenId = await prisma.token.findUnique({
         where: {
-          token: api_token
+          token: api_token?.toString()
         },
         select: {
           userId: true
@@ -85,6 +91,7 @@ export default async function handler(
         })
         req.body.profile_picture = upload.secure_url
       }
+      if (req.body.oldId) delete req.body.oldId
       const profile = await prisma.user.update({
         where: {
           id: userId

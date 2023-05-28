@@ -2,28 +2,15 @@ import Head from 'next/head'
 import Link from 'next/link'
 import Footer from 'components/Footer'
 import Button from 'components/Button'
-import {
-  BsSearch,
-  BsThreeDots,
-  BsStar,
-  BsReply,
-  BsStarFill,
-  BsRssFill,
-} from 'react-icons/bs'
+import { BsSearch, BsThreeDots, BsRssFill, BsPencilFill } from 'react-icons/bs'
 import { useState, Fragment, useEffect } from 'react'
-import twemoji from 'twemoji'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
 import type { Prisma } from '@prisma/client'
 import { io } from 'socket.io-client'
-import * as linkify from 'linkifyjs'
-import linkifyHtml from 'linkify-html'
-import 'linkify-plugin-mention'
-import 'linkify-plugin-hashtag'
 import { useSession, getSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
-import { Menu, Transition, Dialog } from '@headlessui/react'
-import { useForm, SubmitHandler } from 'react-hook-form'
+import { Menu, Transition } from '@headlessui/react'
 import Image from 'next/image'
 import Mattars from 'components/Mattar'
 import { Layout } from 'components/Layout'
@@ -52,6 +39,7 @@ type UserWithToken = Prisma.UserGetPayload<{
 
 type MattarWithFav = Prisma.MattarGetPayload<{
   include: {
+    attaches: true
     favorites: true
     user: true
   }
@@ -158,7 +146,15 @@ const Profile = (props: Props) => {
                   )}
                 </h2>
                 <p>{props.pUser.description}</p>
-                <div className="absolute right-5 bottom-0">
+                <p>
+                  <a
+                    className="text-sky-500 hover:text-sky-600 duration-200"
+                    href={props.pUser.website || ''}
+                  >
+                    {props.pUser.website}
+                  </a>
+                </p>
+                <div className="absolute right-2 md:right-5 bottom-0">
                   <a target="_blank" href={`/${props.pUser.id}/feed`}>
                     <BsRssFill size={23} className="fill-orange-500" />
                   </a>
@@ -166,10 +162,11 @@ const Profile = (props: Props) => {
                 {props.user?.id === props.pUser.id ? (
                   <Button
                     id="edit"
-                    className="absolute top-2 right-5 bg-primary text-white px-4 py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
+                    className="absolute top-2 right-0 md:right-5 bg-primary text-white px-2.5 md:px-4 py-2.5 md:py-2 shadow-md duration-200 hover:shadow-sm rounded-md"
                     onClick={() => showModal()}
                   >
-                    プロフィールを編集
+                    <span className="hidden md:block">プロフィールを編集</span>
+                    <BsPencilFill className="md:hidden" />
                   </Button>
                 ) : (
                   <div>
@@ -401,7 +398,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true },
+          include: { user: true, favorites: true, attaches: true },
           orderBy: {
             createdAt: 'desc',
           },
@@ -451,7 +448,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true },
+          include: { user: true, favorites: true, attaches: true },
           orderBy: {
             createdAt: 'desc',
           },
@@ -462,7 +459,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       JSON.stringify(
         await prisma.user.findUnique({
           where: {
-            id: qUser,
+            id: qUser?.toString(),
           },
           include: {
             follower: true,

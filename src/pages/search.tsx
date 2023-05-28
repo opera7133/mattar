@@ -1,33 +1,37 @@
-import { Menu, Transition } from '@headlessui/react'
 import Head from 'next/head'
 import Link from 'next/link'
-import Header from 'components/Header'
 import Footer from 'components/Footer'
 import Button from 'components/Button'
-import {
-  BsSearch,
-  BsThreeDots,
-  BsStar,
-  BsReply,
-  BsStarFill,
-} from 'react-icons/bs'
-import { useState, Fragment } from 'react'
-import stringWidth from 'string-width'
-import twemoji from 'twemoji'
+import { BsSearch } from 'react-icons/bs'
+import { useState } from 'react'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
-import type { Mattar, User } from '@prisma/client'
-import * as linkify from 'linkifyjs'
-import linkifyHtml from 'linkify-html'
-import 'linkify-plugin-mention'
+import type { Prisma } from '@prisma/client'
 import { useSession, getSession, getCsrfToken } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import Mattars from 'components/Mattar'
 import { Layout } from 'components/Layout'
 
+type MattarWithFav = Prisma.MattarGetPayload<{
+  include: {
+    attaches: true
+    favorites: true
+    user: true
+  }
+}>
+
+type UserWithToken = Prisma.UserGetPayload<{
+  include: {
+    apiCredentials: true
+    follower: true
+    following: true
+    favorites: true
+  }
+}>
+
 type Props = {
-  mattars: Mattar[]
-  user?: User | undefined
+  mattars: MattarWithFav[]
+  user?: UserWithToken | undefined
   csrfToken: string
 }
 
@@ -95,7 +99,7 @@ const Search = (props: Props) => {
           {session && (
             <div>
               <div className="px-3 flex gap-3 items-center">
-                <img src={props.user?.profile_picture} className="w-12" />
+                <img src={props.user?.profile_picture || ''} className="w-12" />
                 <div>
                   <p className="font-bold">{props.user?.name}</p>
                   <p>
@@ -111,7 +115,7 @@ const Search = (props: Props) => {
                       <Link href="/?page=following">
                         <a>
                           <p className="font-bold">
-                            {props.user.following
+                            {props.user?.following
                               ? props.user.following.length
                               : '0'}
                           </p>
@@ -123,7 +127,7 @@ const Search = (props: Props) => {
                       <Link href="/?page=follower">
                         <a>
                           <p className="font-bold">
-                            {props.user.follower
+                            {props.user?.follower
                               ? props.user.follower.length
                               : '0'}
                           </p>
@@ -180,7 +184,7 @@ const Search = (props: Props) => {
   )
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const query = ctx.query.query
   const session = await getSession(ctx)
   if (query) {
@@ -193,7 +197,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
                 contains: query.toString(),
               },
             },
-            include: { user: true, favorites: true },
+            include: { user: true, favorites: true, attaches: true },
             orderBy: {
               createdAt: 'desc',
             },
@@ -228,7 +232,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
                 contains: query.toString(),
               },
             },
-            include: { user: true, favorites: true },
+            include: { user: true, favorites: true, attaches: true },
             orderBy: {
               createdAt: 'desc',
             },
@@ -246,7 +250,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true },
+          include: { user: true, favorites: true, attaches: true },
           orderBy: {
             createdAt: 'desc',
           },
