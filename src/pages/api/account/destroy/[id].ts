@@ -39,7 +39,7 @@ export default async function handler(
       }
       const deleteUser = await prisma.user.delete({
         where: {
-          id: id
+          id: id.toString()
         },
       })
       res.status(200).json(deleteUser)

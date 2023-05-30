@@ -3,6 +3,7 @@ import { Gallery, Item } from 'react-photoswipe-gallery'
 import Plyr from 'plyr-react'
 import 'plyr-react/plyr.css'
 import { Attach } from '@prisma/client'
+import { twMerge } from 'tailwind-merge'
 
 export const ImageGallery = ({ files }: { files: Attach[] }) => {
   return (
@@ -18,8 +19,15 @@ export const ImageGallery = ({ files }: { files: Attach[] }) => {
         </div>
       ) : (
         <Gallery>
-          <div className="flex flex-row items-center overflow-hidden rounded-2xl my-3 aspect-video border">
-            {files.map((file) => (
+          <div
+            className={twMerge(
+              'items-center overflow-hidden rounded-2xl my-3 aspect-video border',
+              files.length > 2
+                ? 'grid grid-rows-2 grid-flow-col'
+                : 'flex flex-row'
+            )}
+          >
+            {files.map((file, i) => (
               <Item
                 original={`/media/${file.filename}`}
                 thumbnail={`/media/${file.filename}`}
@@ -32,7 +40,11 @@ export const ImageGallery = ({ files }: { files: Attach[] }) => {
                     ref={ref}
                     onClick={open}
                     src={`/media/${file.filename}`}
-                    className="object-cover shrink basis-1/2 w-full h-full min-w-0"
+                    className={twMerge(
+                      'object-cover shrink w-full h-full min-w-0',
+                      files.length !== 1 && 'basis-1/2',
+                      files.length === 3 && i == 0 && 'row-span-2'
+                    )}
                   />
                 )}
               </Item>
