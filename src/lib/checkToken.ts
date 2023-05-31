@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { getServerSession } from 'next-auth'
 const prisma = new PrismaClient()
 
 const checkToken = async (req: NextApiRequest) => {
@@ -7,7 +8,6 @@ const checkToken = async (req: NextApiRequest) => {
   const headers = req.headers
   const { api_token: q_api_token, api_secret: q_api_secret } = query
   const { api_token: h_api_token, api_secret: h_api_secret } = headers
-  console.log("headers!: ", req.headers)
   if ((!q_api_token || !q_api_secret) && (!h_api_token || !h_api_secret)) {
     return false
   }

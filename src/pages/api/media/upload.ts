@@ -1,16 +1,15 @@
-import type { NextApiRequest } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next'
 import formidable from "formidable";
 import { PrismaClient } from '@prisma/client'
-import { NextApiResponseServerIO } from "types/socket"
 import checkToken from 'lib/checkToken'
 import { createId } from '@paralleldrive/cuid2';
-import { readFileSync, writeFileSync } from "fs";
 import sizeOf from "image-size"
 import cloudinary from "cloudinary"
 const prisma = new PrismaClient()
 
 import { LimitChecker } from 'lib/limitChecker'
 import requestIp from "request-ip"
+import { getServerSession } from 'next-auth';
 
 const limitChecker = LimitChecker()
 
@@ -42,16 +41,16 @@ const FileMimeType: fileMimeType = {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponseServerIO
+  res: NextApiResponse
 ) {
   const { method } = req
   const clientIp = requestIp.getClientIp(req) || 'IP_NOT_FOUND'
-  const query = req.query
+  const session = await getServerSession(req, res)
   try {
     if (method !== "POST") {
       return res.status(405).json({ error: `Method ${method} now allowed` })
     }
-    if (!await checkToken(req)) {
+    if (!await checkToken(req) && !session) {
       return res.status(400).json({ error: "You don\'t have permission" })
     }
     try {
