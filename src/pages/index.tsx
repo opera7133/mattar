@@ -2,9 +2,8 @@ import Head from 'next/head'
 import Link from 'next/link'
 import Footer from 'components/Footer'
 import Button from 'components/Button'
-import { BsSearch, BsThreeDots } from 'react-icons/bs'
+import { BsSearch } from 'react-icons/bs'
 import { useState, useEffect } from 'react'
-import stringWidth from 'string-width'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
 import type { Prisma } from '@prisma/client'
@@ -16,7 +15,6 @@ import { IndexHome } from 'components/index/Home'
 import { IndexFollowing } from 'components/index/Following'
 import { IndexFollower } from 'components/index/Follower'
 import { Layout } from 'components/Layout'
-import { toast } from 'react-hot-toast'
 import { PostMattar } from 'components/Post'
 
 type UserWithToken = Prisma.UserGetPayload<{
@@ -84,7 +82,7 @@ const Home = (props: Props) => {
     } else {
       setPage('home')
     }
-  }, [props.user, refreshData])
+  }, [])
 
   interface Titles {
     [key: string]: string

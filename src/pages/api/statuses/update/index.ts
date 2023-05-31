@@ -89,11 +89,17 @@ export default async function handler(
           data: req.body,
         })
 
+        const attachTypes = mediaIds.map((attach: {id: string, filetype: string}) => {
+          return attach["filetype"]
+        })
+        if (attachTypes.length > 1 && attachTypes.includes("video")) {
+          return res.status(400).json({status: "error", error: "Video and images cannot be attached at the same time"})
+        }
         for (const attach of mediaIds) {
           try {
             await prisma.attach.update({
               where: {
-                id: attach
+                id: attach.id
               },
               data: {
                 mattarId: mattar.id
@@ -122,7 +128,11 @@ export default async function handler(
         res.socket.server.io.emit("post", req.body)
         break
       } catch (e) {
-        throw new Error(e)
+        if (e instanceof Error) {
+          res.status(500).json({status: "error", error: e.message})
+        } else {
+          res.status(500).json({status: "error"})
+        }
       }
 
     default:

@@ -108,7 +108,7 @@ export default async function handler(
         }
       })
 
-      return res.status(200).json({ status: "success", id: uploadPrisma.id })
+      return res.status(200).json({ status: "success", id: uploadPrisma.id, filetype: uploadPrisma.filetype })
     })
   } catch (e) {
     if (e instanceof Error) {
