@@ -23,7 +23,6 @@
     "argon2": "^0.30.3",
     "check-password-strength": "^2.0.7",
     "cloudinary": "^1.37.0",
-    "cookies-next": "^2.1.1",
     "date-fns": "^2.30.0",
     "formidable": "^2.1.1",
     "image-size": "^1.0.2",
