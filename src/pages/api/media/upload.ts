@@ -6,6 +6,7 @@ import checkToken from 'lib/checkToken'
 import { createId } from '@paralleldrive/cuid2';
 import { readFileSync, writeFileSync } from "fs";
 import sizeOf from "image-size"
+import cloudinary from "cloudinary"
 const prisma = new PrismaClient()
 
 import { LimitChecker } from 'lib/limitChecker'
@@ -81,15 +82,22 @@ export default async function handler(
       if (!file) {
         return res.status(400).json({ status: "error", error: "file not found" })
       }
+      cloudinary.v2.config({
+        cloud_name: process.env.CLOUDINARY_NAME,
+        api_key: process.env.CLOUDINARY_API,
+        api_secret: process.env.CLOUDINARY_SECRET,
+      })
       //@ts-ignore
-      writeFileSync(`./public/media/${fileId}.${FileMimeType[file.mimetype]}`, readFileSync(file.filepath))
+      const upload = await cloudinary.v2.uploader.upload(file.filepath, {
+        folder: "mattar",
+        public_id: fileId
+      })
       //@ts-ignore
       const dimensions = file.mimetype.slice(0, 5) !== "video" ? sizeOf(file.filepath) : { width: 0, height: 0 }
-      const upload = await prisma.attach.create({
+      const uploadPrisma = await prisma.attach.create({
         data: {
           id: fileId,
-          //@ts-ignore
-          filename: `${fileId}.${FileMimeType[file.mimetype]}`,
+          filename: upload.secure_url,
           //@ts-ignore
           filetype: file.mimetype.slice(0, 5),
           width: dimensions.width || 0,
@@ -97,7 +105,7 @@ export default async function handler(
         }
       })
 
-      return res.status(200).json({ status: "success", id: upload.id })
+      return res.status(200).json({ status: "success", id: uploadPrisma.id })
     })
   } catch (e) {
     if (e instanceof Error) {

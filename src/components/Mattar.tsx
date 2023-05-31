@@ -246,6 +246,7 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
             alt={`${item.user.id}\'s Avatar`}
             fill={true}
             className="shrink-0 object-cover"
+            loading="lazy"
           />
         </div>
       </Link>

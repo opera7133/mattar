@@ -13,7 +13,7 @@ export const ImageGallery = ({ files }: { files: Attach[] }) => {
           <Plyr
             source={{
               type: 'video',
-              sources: [{ src: `/media/${files[0].filename}` }],
+              sources: [{ src: files[0].filename }],
             }}
           />
         </div>
@@ -29,8 +29,8 @@ export const ImageGallery = ({ files }: { files: Attach[] }) => {
           >
             {files.map((file, i) => (
               <Item
-                original={`/media/${file.filename}`}
-                thumbnail={`/media/${file.filename}`}
+                original={file.filename}
+                thumbnail={file.filename}
                 width={file.width}
                 height={file.height}
                 key={file.filename}
@@ -39,7 +39,8 @@ export const ImageGallery = ({ files }: { files: Attach[] }) => {
                   <img
                     ref={ref}
                     onClick={open}
-                    src={`/media/${file.filename}`}
+                    src={file.filename}
+                    loading="lazy"
                     className={twMerge(
                       'object-cover shrink w-full h-full min-w-0',
                       files.length !== 1 && 'basis-1/2',
