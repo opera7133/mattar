@@ -81,6 +81,10 @@ export default async function handler(
       if (!file) {
         return res.status(400).json({ status: "error", error: "file not found" })
       }
+      //@ts-ignore
+      if (file.size > 8 * 1024 * 1024) {
+        return res.status(413).json({ status: "error", error: "file size too big"})
+      }
       cloudinary.v2.config({
         cloud_name: process.env.CLOUDINARY_NAME,
         api_key: process.env.CLOUDINARY_API,
