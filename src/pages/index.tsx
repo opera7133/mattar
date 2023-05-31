@@ -74,7 +74,15 @@ const Home = (props: Props) => {
           'x-api-secret': `${props.user.apiCredentials.secret}`,
         },
       })
-      socket.on('connect', () => {})
+      socket.on('connect', () => {
+        console.log('Websocket Connected!')
+      })
+      socket.on('delete', (mattar: MattarWithFav) => {
+        refreshData()
+      })
+      socket.on('post', (mattar: MattarWithFav) => {
+        refreshData()
+      })
       socket.on(`message`, (message: string) => {
         refreshData()
       })

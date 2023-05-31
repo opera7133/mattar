@@ -86,7 +86,7 @@ export default async function handler(
           }
         },
       })
-      res.socket.server.io.emit("delete", getMattar?.message)
+      res.socket.server.io.emit("delete", getMattar)
       res.status(200).json(deleteMattar)
       break
 

@@ -3,34 +3,12 @@ import stringWidth from 'string-width'
 import { PrismaClient } from '@prisma/client'
 import { NextApiResponseServerIO } from "types/socket"
 import checkToken from 'lib/checkToken'
-import { createId } from '@paralleldrive/cuid2';
-import { writeFileSync } from "fs";
 const prisma = new PrismaClient()
 
 import { LimitChecker } from 'lib/limitChecker'
 import requestIp from "request-ip"
 
 const limitChecker = LimitChecker()
-
-interface fileMimeType {
-  [name: string]: string;
-}
-
-const FileMimeType: fileMimeType = {
-  'image/apng': "apng",
-  'image/avif': "avif",
-  'image/bmp': "bmp",
-  'image/gif': "gif",
-  'image/png': "png",
-  'image/jpeg': "jpg",
-  'image/webp': "webp",
-  'video/x-msvideo': "avi",
-  'video/x-ms-wmv': "wmv",
-  'video/mp4': "mp4",
-  'video/mpeg': "mpg",
-  'video/webm': "webm",
-  'video/quicktime': "mov",
-};
 
 export default async function handler(
   req: NextApiRequest,
