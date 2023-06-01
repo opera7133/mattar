@@ -4,6 +4,7 @@ import Plyr from 'plyr-react'
 import 'plyr-react/plyr.css'
 import { Attach } from '@prisma/client'
 import { twMerge } from 'tailwind-merge'
+import Image from 'next/image'
 
 export const ImageGallery = ({ files }: { files: Attach[] }) => {
   return (
@@ -36,17 +37,22 @@ export const ImageGallery = ({ files }: { files: Attach[] }) => {
                 key={file.filename}
               >
                 {({ ref, open }) => (
-                  <img
-                    ref={ref}
-                    onClick={open}
-                    src={file.filename}
-                    loading="lazy"
+                  <div
                     className={twMerge(
-                      'object-cover shrink w-full h-full min-w-0',
+                      'relative shrink w-full h-full min-w-0',
                       files.length !== 1 && 'basis-1/2',
                       files.length === 3 && i == 0 && 'row-span-2'
                     )}
-                  />
+                  >
+                    <Image
+                      ref={ref}
+                      onClick={open}
+                      src={file.filename}
+                      fill={true}
+                      loading="lazy"
+                      className="object-cover"
+                    />
+                  </div>
                 )}
               </Item>
             ))}
