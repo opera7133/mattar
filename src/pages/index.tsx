@@ -303,8 +303,24 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
           },
           include: {
             favorites: true,
-            following: true,
-            follower: true,
+            following: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            follower: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
             apiCredentials: true,
           },
         })

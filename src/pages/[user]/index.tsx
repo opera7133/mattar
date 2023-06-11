@@ -425,7 +425,15 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           },
           include: {
             favorites: true,
-            following: true,
+            following: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
             apiCredentials: true,
           },
         })
@@ -438,8 +446,24 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
             id: qUser?.toString(),
           },
           include: {
-            follower: true,
-            following: true,
+            follower: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            following: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
           },
         })
       )
@@ -493,8 +517,24 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
             id: qUser?.toString(),
           },
           include: {
-            follower: true,
-            following: true,
+            follower: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            following: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
           },
         })
       )
