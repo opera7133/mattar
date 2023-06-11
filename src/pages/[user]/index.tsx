@@ -398,7 +398,19 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true, attaches: true },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            favorites: true,
+            attaches: true,
+          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -437,6 +449,13 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
         notFound: true,
       }
     }
+    delete user.hash
+    delete user.salt
+    delete user.verifyToken
+    delete pUser.hash
+    delete pUser.salt
+    delete pUser.verifyToken
+    delete pUser.twofactor
     return {
       props: {
         user,
@@ -448,7 +467,19 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true, attaches: true },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            favorites: true,
+            attaches: true,
+          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -473,6 +504,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
         notFound: true,
       }
     }
+    delete pUser.hash
+    delete pUser.salt
+    delete pUser.verifyToken
     return {
       props: {
         mattars,

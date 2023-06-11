@@ -681,6 +681,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
         })
       )
     )
+    delete user.hash
+    delete user.salt
+    delete user.verifyToken
     return {
       props: {
         user,

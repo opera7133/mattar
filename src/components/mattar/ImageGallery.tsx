@@ -5,6 +5,7 @@ import 'plyr-react/plyr.css'
 import { Attach } from '@prisma/client'
 import { twMerge } from 'tailwind-merge'
 import Image from 'next/image'
+import { Ref } from 'react'
 
 export const ImageGallery = ({ files }: { files: Attach[] }) => {
   return (
@@ -45,7 +46,8 @@ export const ImageGallery = ({ files }: { files: Attach[] }) => {
                     )}
                   >
                     <Image
-                      ref={ref}
+                      ref={ref as Ref<HTMLImageElement>}
+                      alt={file.filename}
                       onClick={open}
                       src={file.filename}
                       fill={true}
