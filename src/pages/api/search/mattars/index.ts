@@ -42,6 +42,17 @@ export default async function handler(
             createdAt: 'desc',
           },
         ],
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              profile_picture: true,
+              admin: true,
+              moderator: true,
+            },
+          }
+        },
         take: 100
       })
       res.status(200).json(mattars)
