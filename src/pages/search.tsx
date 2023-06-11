@@ -234,7 +234,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       return {
         props: {
           user,
-          mattars: mattars.map((mattar: any) => delete mattar.ip),
+          mattars: mattars.map((mattar: any) => {
+            delete mattar.ip
+            return mattar
+          }),
           csrfToken: await getCsrfToken(ctx),
         },
       }
@@ -268,7 +271,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       )
       return {
         props: {
-          mattars: mattars.map((mattar: any) => delete mattar.ip),
+          mattars: mattars.map((mattar: any) => {
+            delete mattar.ip
+            return mattar
+          }),
           csrfToken: await getCsrfToken(ctx),
         },
       }
@@ -298,7 +304,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     )
     return {
       props: {
-        mattars: mattars.map((mattar: any) => delete mattar.ip),
+        mattars: mattars.map((mattar: any) => {
+          delete mattar.ip
+          return mattar
+        }),
         csrfToken: await getCsrfToken(ctx),
       },
     }

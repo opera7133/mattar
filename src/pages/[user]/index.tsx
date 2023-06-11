@@ -484,7 +484,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       props: {
         user,
         pUser,
-        mattars: mattars.map((mattar: any) => delete mattar.ip),
+        mattars: mattars.map((mattar: any) => {
+          delete mattar.ip
+          return mattar
+        }),
       },
     }
   } else {
@@ -549,7 +552,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     delete pUser.verifyToken
     return {
       props: {
-        mattars: mattars.map((mattar: any) => delete mattar.ip),
+        mattars: mattars.map((mattar: any) => {
+          delete mattar.ip
+          return mattar
+        }),
         pUser,
       },
     }

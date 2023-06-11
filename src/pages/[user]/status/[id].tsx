@@ -425,6 +425,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         notFound: true,
       }
     }
+    delete mattar.ip
     return {
       props: {
         mattar,
