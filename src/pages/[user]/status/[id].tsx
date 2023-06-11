@@ -369,6 +369,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         })
       )
     )
+    delete mattar.ip
     const user = JSON.parse(
       JSON.stringify(
         await prisma.user.findUnique({

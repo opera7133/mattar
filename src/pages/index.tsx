@@ -332,7 +332,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     return {
       props: {
         user,
-        mattars,
+        mattars: mattars.map((mattar: any) => delete mattar.ip),
         csrfToken: await getCsrfToken(ctx),
       },
     }
@@ -361,7 +361,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     )
     return {
       props: {
-        mattars,
+        mattars: mattars.map((mattar: any) => delete mattar.ip),
         csrfToken: await getCsrfToken(ctx),
       },
     }
