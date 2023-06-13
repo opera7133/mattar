@@ -32,6 +32,19 @@ export default async function handler(
         res.status(403).json({ error: "You don\'t have permission" })
         break
       }
+      const token = await prisma.token.findUnique({
+        where: {
+          token: api_token?.toString()
+        }
+      })
+      if (!token) {
+        res.status(403).json({ error: "You don\'t have permission" })
+        break
+      }
+      if (token.secret !== api_secret) {
+        res.status(403).json({ error: "You don\'t have permission" })
+        break
+      }
       if (!user_id) {
         res.status(400).json({ error: "User ID not provided" })
         break
