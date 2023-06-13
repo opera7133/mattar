@@ -89,7 +89,7 @@ export default async function handler(
           secret: newSecret
         }
       })
-      res.status(200).json(newUser)
+      res.status(200).json({ "status": "success", "user": newUser, "token": create })
       break
 
     default:
