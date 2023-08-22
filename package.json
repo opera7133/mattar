@@ -54,6 +54,7 @@
     "socket.io": "^4.7.2",
     "socket.io-client": "^4.7.2",
     "string-width": "^6.1.0",
+    "tailwind-merge": "^1.12.0",
     "twemoji": "^14.0.2"
   },
   "devDependencies": {

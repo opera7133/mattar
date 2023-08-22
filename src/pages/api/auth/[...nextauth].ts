@@ -2,14 +2,20 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import argon2 from "argon2"
 import prisma from "lib/prisma"
+import { SignJWT } from 'jose'
+import { setCookie } from 'cookies-next'
+import { nanoid } from "nanoid"
 
 const findUserByCredentials = async (credentials: Record<"username" | "password", string> | undefined) => {
   if (credentials?.username && credentials.password) {
     try {
       const user = await prisma.user.findUnique({
         where: {
-          id: credentials.username
+          id: credentials.username,
         },
+        include: {
+          apiCredentials: true
+        }
       })
       if (user) {
         const pepper = process.env.PEPPER

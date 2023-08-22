@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
-import { unstable_getServerSession } from "next-auth/next"
+import { getServerSession } from "next-auth/next"
 import { authOptions } from 'pages/api/auth/[...nextauth]'
 const prisma = new PrismaClient()
 import { LimitChecker } from 'lib/limitChecker'
@@ -15,7 +15,7 @@ export default async function handler(
   const { method } = req
   const query = req.query
   const { id } = query
-  const session = await unstable_getServerSession(req, res, authOptions)
+  const session = await getServerSession(req, res, authOptions)
   switch (method) {
     case 'POST':
       if (!session) {
@@ -39,7 +39,7 @@ export default async function handler(
       }
       const deleteUser = await prisma.user.delete({
         where: {
-          id: id
+          id: id.toString()
         },
       })
       res.status(200).json(deleteUser)

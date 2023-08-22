@@ -398,7 +398,19 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true, attaches: true },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            favorites: true,
+            attaches: true,
+          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -413,7 +425,15 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           },
           include: {
             favorites: true,
-            following: true,
+            following: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
             apiCredentials: true,
           },
         })
@@ -426,8 +446,24 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
             id: qUser?.toString(),
           },
           include: {
-            follower: true,
-            following: true,
+            follower: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            following: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
           },
         })
       )
@@ -437,18 +473,40 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
         notFound: true,
       }
     }
+    delete user.hash
+    delete user.salt
+    delete user.verifyToken
+    delete pUser.hash
+    delete pUser.salt
+    delete pUser.verifyToken
+    delete pUser.twofactor
     return {
       props: {
         user,
         pUser,
-        mattars,
+        mattars: mattars.map((mattar: any) => {
+          delete mattar.ip
+          return mattar
+        }),
       },
     }
   } else {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true, attaches: true },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            favorites: true,
+            attaches: true,
+          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -462,8 +520,24 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
             id: qUser?.toString(),
           },
           include: {
-            follower: true,
-            following: true,
+            follower: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            following: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
           },
         })
       )
@@ -473,9 +547,15 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
         notFound: true,
       }
     }
+    delete pUser.hash
+    delete pUser.salt
+    delete pUser.verifyToken
     return {
       props: {
-        mattars,
+        mattars: mattars.map((mattar: any) => {
+          delete mattar.ip
+          return mattar
+        }),
         pUser,
       },
     }

@@ -2,7 +2,7 @@ import type { NextApiRequest } from 'next'
 import { PrismaClient } from '@prisma/client'
 import checkToken from 'lib/checkToken'
 import { NextApiResponseServerIO } from "types/socket"
-import { unlink, unlinkSync } from 'fs'
+import cloudinary from "cloudinary"
 const prisma = new PrismaClient()
 
 import { LimitChecker } from 'lib/limitChecker'
@@ -63,7 +63,12 @@ export default async function handler(
       }
       if (getMattar.attaches) {
         for (const attach of getMattar.attaches) {
-          unlinkSync(`./public/media/${attach.filename}`)
+          cloudinary.v2.config({
+            cloud_name: process.env.CLOUDINARY_NAME,
+            api_key: process.env.CLOUDINARY_API,
+            api_secret: process.env.CLOUDINARY_SECRET,
+          })
+          const deleteImg = await cloudinary.v2.uploader.destroy(attach.id)
         }
       }
       const deleteMattar = await prisma.mattar.delete({
@@ -81,7 +86,7 @@ export default async function handler(
           }
         },
       })
-      res.socket.server.io.emit("delete", getMattar?.message)
+      res.socket.server.io.emit("delete", getMattar)
       res.status(200).json(deleteMattar)
       break
 

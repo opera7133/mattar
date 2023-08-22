@@ -58,12 +58,12 @@ export default function SignUp() {
       },
       method: 'POST',
     })
-    const { error } = await res.json()
+    const { token, error } = await res.json()
     if (error) {
       toast.error(error)
       return
     }
-    const mail = await fetch(`/api/account/verify/issue?user_id=${data.id}`)
+    const mail = await fetch(`/api/account/verify/issue?user_id=${data.id}&api_token=${token.token}&api_secret=${token.secret}`)
     const mailres = await mail.json()
     if (mailres.error) {
       toast.error(mailres.error, {

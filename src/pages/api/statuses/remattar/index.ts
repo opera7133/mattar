@@ -13,7 +13,6 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { method } = req
-  const clientIp = requestIp.getClientIp(req) || 'IP_NOT_FOUND'
   const query = req.query
   const { mattar_id, source } = query
   switch (method) {
@@ -40,7 +39,7 @@ export default async function handler(
       }
       const tokenId = await prisma.token.findUnique({
         where: {
-          token: query.api_token
+          token: query.api_token?.toString()
         },
         select: {
           userId: true
@@ -49,7 +48,7 @@ export default async function handler(
       const userId = tokenId?.userId
       const from = await prisma.mattar.findUnique({
         where: {
-          id: mattar_id
+          id: mattar_id.toString()
         },
       })
       if (!from) {
@@ -63,7 +62,7 @@ export default async function handler(
           userId: userId,
           isRemattar: true,
           message: message,
-          source: sendby,
+          source: sendby.toString(),
           ip: clientIp
         }
       })

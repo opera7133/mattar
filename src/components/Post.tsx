@@ -46,7 +46,6 @@ export const PostMattar = ({ props }: { props: any }) => {
       const sets: Array<string> = []
       const files = Array.from(e.target.files)
       for (const [index, file] of Object.entries(files)) {
-        console.log(attaches.length, attaches)
         if (
           attaches.length >= 1 &&
           attaches[attaches.length - 1].type.slice(0, 5) === 'video'
@@ -93,8 +92,8 @@ export const PostMattar = ({ props }: { props: any }) => {
             method: 'POST',
             body: body,
             headers: {
-              api_token: props.user.apiCredentials.token,
-              api_secret: props.user.apiCredentials.secret,
+              'x-api-key': props.user.apiCredentials.token,
+              'x-api-secret': props.user.apiCredentials.secret,
             },
           })
         ).json()
@@ -104,11 +103,9 @@ export const PostMattar = ({ props }: { props: any }) => {
           })
           return
         } else {
-          mediaIds.push(mres.id)
+          mediaIds.push({ id: mres.id, filetype: mres.filetype })
         }
       }
-
-      console.log(mediaIds)
 
       const res = await (
         await fetch(

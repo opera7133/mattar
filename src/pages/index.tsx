@@ -2,9 +2,8 @@ import Head from 'next/head'
 import Link from 'next/link'
 import Footer from 'components/Footer'
 import Button from 'components/Button'
-import { BsSearch, BsThreeDots } from 'react-icons/bs'
+import { BsSearch } from 'react-icons/bs'
 import { useState, useEffect } from 'react'
-import stringWidth from 'string-width'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
 import type { Prisma } from '@prisma/client'
@@ -16,7 +15,6 @@ import { IndexHome } from 'components/index/Home'
 import { IndexFollowing } from 'components/index/Following'
 import { IndexFollower } from 'components/index/Follower'
 import { Layout } from 'components/Layout'
-import { toast } from 'react-hot-toast'
 import { PostMattar } from 'components/Post'
 
 type UserWithToken = Prisma.UserGetPayload<{
@@ -69,14 +67,22 @@ const Home = (props: Props) => {
   }
   useEffect((): any => {
     if (props.user && props.user.apiCredentials) {
-      const socket = io(process.env.NEXT_PUBLIC_BASE_URL, {
+      const socket = io(process.env.NEXT_PUBLIC_BASE_URL || '', {
         path: '/api/statuses/filter',
         extraHeaders: {
           'x-api-key': `${props.user.apiCredentials.token}`,
           'x-api-secret': `${props.user.apiCredentials.secret}`,
         },
       })
-      socket.on('connect', () => {})
+      socket.on('connect', () => {
+        console.log('Websocket Connected!')
+      })
+      socket.on('delete', (mattar: MattarWithFav) => {
+        refreshData()
+      })
+      socket.on('post', (mattar: MattarWithFav) => {
+        refreshData()
+      })
       socket.on(`message`, (message: string) => {
         refreshData()
       })
@@ -84,7 +90,7 @@ const Home = (props: Props) => {
     } else {
       setPage('home')
     }
-  }, [props.user, refreshData])
+  }, [])
 
   interface Titles {
     [key: string]: string
@@ -270,7 +276,19 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true, attaches: true },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            favorites: true,
+            attaches: true,
+          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -285,17 +303,39 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
           },
           include: {
             favorites: true,
-            following: true,
-            follower: true,
+            following: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            follower: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
             apiCredentials: true,
           },
         })
       )
     )
+    delete user.hash
+    delete user.salt
+    delete user.verifyToken
     return {
       props: {
         user,
-        mattars,
+        mattars: mattars.map((mattar: any) => {
+          delete mattar.ip
+          return mattar
+        }),
         csrfToken: await getCsrfToken(ctx),
       },
     }
@@ -303,7 +343,19 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true, attaches: true },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            favorites: true,
+            attaches: true,
+          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -312,7 +364,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     )
     return {
       props: {
-        mattars,
+        mattars: mattars.map((mattar: any) => {
+          delete mattar.ip
+          return mattar
+        }),
         csrfToken: await getCsrfToken(ctx),
       },
     }

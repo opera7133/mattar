@@ -1,6 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { Server as NetServer, Socket } from "net"
-import { Server as ServerIO } from "socket.io"
+import { Server } from "socket.io"
 import { NextApiResponseServerIO } from "types/socket"
 import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
@@ -29,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponseS
   }
   const token = await prisma.token.findUnique({
     where: {
-      token: api_token
+      token: api_token?.toString()
     }
   })
   if (!token) {
@@ -42,9 +41,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponseS
 
   if (!res.socket.server.io) {
     console.log(`New Socket.io server...`)
-    const httpServer: NetServer = res.socket.server as any
-    const io = new ServerIO(httpServer, {
+    const httpServer = res.socket.server as any
+    const io = new Server(httpServer, {
       path: `/api/statuses/filter`,
+      addTrailingSlash: false
     })
     res.socket.server.io = io
   }

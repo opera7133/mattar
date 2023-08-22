@@ -167,7 +167,7 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
       const load = toast.loading('通報しています...')
       const res = await (
         await fetch(
-          `/api/statuses/destroy/${id}?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+          `/api/statuses/destroy/${id}?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}&reason=`,
           {
             method: 'POST',
           }
@@ -269,6 +269,7 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
             alt={`${item.user.id}\'s Avatar`}
             fill={true}
             className="shrink-0 object-cover"
+            loading="lazy"
           />
         </div>
       </Link>

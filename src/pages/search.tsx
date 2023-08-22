@@ -197,7 +197,19 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
                 contains: query.toString(),
               },
             },
-            include: { user: true, favorites: true, attaches: true },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  profile_picture: true,
+                  admin: true,
+                  moderator: true,
+                },
+              },
+              favorites: true,
+              attaches: true,
+            },
             orderBy: {
               createdAt: 'desc',
             },
@@ -216,10 +228,16 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
           })
         )
       )
+      delete user.hash
+      delete user.salt
+      delete user.verifyToken
       return {
         props: {
           user,
-          mattars,
+          mattars: mattars.map((mattar: any) => {
+            delete mattar.ip
+            return mattar
+          }),
           csrfToken: await getCsrfToken(ctx),
         },
       }
@@ -232,7 +250,19 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
                 contains: query.toString(),
               },
             },
-            include: { user: true, favorites: true, attaches: true },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  profile_picture: true,
+                  admin: true,
+                  moderator: true,
+                },
+              },
+              favorites: true,
+              attaches: true,
+            },
             orderBy: {
               createdAt: 'desc',
             },
@@ -241,7 +271,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       )
       return {
         props: {
-          mattars,
+          mattars: mattars.map((mattar: any) => {
+            delete mattar.ip
+            return mattar
+          }),
           csrfToken: await getCsrfToken(ctx),
         },
       }
@@ -250,7 +283,19 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const mattars = JSON.parse(
       JSON.stringify(
         await prisma.mattar.findMany({
-          include: { user: true, favorites: true, attaches: true },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            favorites: true,
+            attaches: true,
+          },
           orderBy: {
             createdAt: 'desc',
           },
@@ -259,7 +304,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     )
     return {
       props: {
-        mattars,
+        mattars: mattars.map((mattar: any) => {
+          delete mattar.ip
+          return mattar
+        }),
         csrfToken: await getCsrfToken(ctx),
       },
     }

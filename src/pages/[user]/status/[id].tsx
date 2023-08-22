@@ -353,10 +353,23 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
           where: {
             id: id?.toString(),
           },
-          include: { user: true, attaches: true, favorites: true },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            attaches: true,
+            favorites: true,
+          },
         })
       )
     )
+    delete mattar.ip
     const user = JSON.parse(
       JSON.stringify(
         await prisma.user.findUnique({
@@ -375,6 +388,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         notFound: true,
       }
     }
+    delete user.hash
+    delete user.salt
+    delete user.verifyToken
     return {
       props: {
         user,
@@ -388,7 +404,19 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
           where: {
             id: id?.toString(),
           },
-          include: { user: true },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                profile_picture: true,
+                admin: true,
+                moderator: true,
+              },
+            },
+            attaches: true,
+            favorites: true,
+          },
         })
       )
     )
@@ -397,6 +425,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         notFound: true,
       }
     }
+    delete mattar.ip
     return {
       props: {
         mattar,

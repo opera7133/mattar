@@ -33,7 +33,7 @@ export default async function handler(
       }
       const mattar = await prisma.mattar.findUnique({
         where: {
-          id: id
+          id: id.toString()
         },
         select: {
           id: true,
