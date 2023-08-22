@@ -15,10 +15,13 @@ const findUserByCredentials = async (credentials: Record<"username" | "password"
         const pepper = process.env.PEPPER
         if (await argon2.verify(user.hash, pepper + credentials?.password + user.salt)) {
           return user
+        } else {
+          return null
         }
       }
     } catch (e) {
       console.log(e)
+      return null
     }
   }
   return null
@@ -42,13 +45,14 @@ export const authOptions = {
     })
   ],
   callbacks: {
-    async session({ session, token, user }) {
+    async session({ session, token, user }: any) {
       const userInfo = await prisma.user.findUnique({
         where: {
           email: session.user.email
         },
       })
       session.user.id = userInfo?.id
+      session.user.admin = userInfo?.admin
       return session
     },
   },

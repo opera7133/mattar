@@ -5,6 +5,7 @@ type MattarWithFav = Prisma.MattarGetPayload<{
   include: {
     user: true
     favorites: true
+    attaches: true
   }
 }>
 

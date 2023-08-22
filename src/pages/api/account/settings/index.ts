@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { authenticator } from 'otplib'
 import argon2 from "argon2"
 import crypto from "crypto"
-import { unstable_getServerSession } from "next-auth/next"
+import { getServerSession } from "next-auth/next"
 import { authOptions } from 'pages/api/auth/[...nextauth]'
 const prisma = new PrismaClient()
 import { LimitChecker } from 'lib/limitChecker'
@@ -17,7 +17,7 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const session = await unstable_getServerSession(req, res, authOptions)
+  const session = await getServerSession(req, res, authOptions)
   const genSalt = () => {
     const S = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     return Array.from(crypto.randomFillSync(new Uint32Array(24)))

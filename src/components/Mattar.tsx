@@ -162,6 +162,29 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
       refreshData()
     }
   }
+  const reportMattar = async (id: string) => {
+    if (props.user && props.user.apiCredentials) {
+      const load = toast.loading('通報しています...')
+      const res = await (
+        await fetch(
+          `/api/statuses/destroy/${id}?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
+          {
+            method: 'POST',
+          }
+        )
+      ).json()
+      if (res.error) {
+        toast.error(res.error, {
+          id: load,
+        })
+      } else {
+        toast.success('削除しました！', {
+          id: load,
+        })
+      }
+      refreshData()
+    }
+  }
 
   const youtubeReg =
     /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/
@@ -353,6 +376,16 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
                   onClick={() => deleteMattar(item.id)}
                 >
                   削除
+                </button>
+              </Menu.Item>
+            )}
+            {props.user && props.user.id !== item.user.id && (
+              <Menu.Item>
+                <button
+                  className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
+                  onClick={() => reportMattar(item.id)}
+                >
+                  通報
                 </button>
               </Menu.Item>
             )}

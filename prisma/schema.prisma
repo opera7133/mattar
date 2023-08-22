@@ -20,6 +20,7 @@ model Mattar {
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   isRemattar Boolean
   favorites  Favorite[]
+  reports    Report[]
   createdAt  DateTime   @default(now())
 }
 
@@ -63,6 +64,7 @@ model User {
   favorites       Favorite[]
   follower        User[]     @relation("UserFollows")
   following       User[]     @relation("UserFollows")
+  reports        Report[]
   apiCredentials  Token?
   createdAt       DateTime   @default(now())
 }
@@ -73,4 +75,14 @@ model Token {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   token  String @unique
   secret String @unique
+}
+
+model Report {
+  id       String @id @default(cuid())
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  mattar   Mattar @relation(fields: [mattarId], references: [id], onDelete: Cascade)
+  mattarId String
+  reason   String
+  createdAt DateTime @default(now())
 }

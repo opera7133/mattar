@@ -86,6 +86,7 @@ const Settings = (props: Props) => {
   const onInfoSubmit: SubmitHandler<InfoInputs> = async (data) => {
     if (props.user && props.user.apiCredentials) {
       const wait = toast.loading('更新中です...')
+      console.log(props.user.email === data.email)
       const res = await fetch(
         `/api/account/update_profile?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
         {
@@ -94,7 +95,7 @@ const Settings = (props: Props) => {
             email: data.email,
             birthday: data.bday,
             lang: data.lang,
-            verified: props.user.email !== data.email,
+            verified: props.user.email === data.email,
           }),
           headers: {
             'Content-Type': 'application/json',

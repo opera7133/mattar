@@ -37,7 +37,7 @@ export default function SignIn({ csrfToken }: { csrfToken: string }) {
       password: data.password,
       callbackUrl: `${window.location.origin}`,
     }).then((res) => {
-      if (res?.error) {
+      if (!res || res?.error) {
         toast.error('ユーザーID、パスワードを正しく入力してください', {
           id: wait,
         })

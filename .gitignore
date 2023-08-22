@@ -40,3 +40,4 @@ yarn-error.log*
 *.tsbuildinfo
 
 prisma/migrations
+.code-workspace

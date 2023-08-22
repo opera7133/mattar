@@ -30,7 +30,7 @@ export default async function handler(
       if (user_id) {
         const user = await prisma.user.findUnique({
           where: {
-            id: user_id,
+            id: user_id.toString(),
           },
           select: {
             id: true,
