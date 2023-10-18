@@ -1,10 +1,9 @@
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import argon2 from "argon2"
-import prisma from "lib/prisma"
-import { SignJWT } from 'jose'
-import { setCookie } from 'cookies-next'
-import { nanoid } from "nanoid"
+import prisma, { User } from "lib/prisma"
+import { authenticator } from 'otplib'
+import { ErrorCode } from "utils/ErrorCode"
 
 const findUserByCredentials = async (credentials: Record<"username" | "password", string> | undefined) => {
   if (credentials?.username && credentials.password) {
@@ -40,10 +39,25 @@ export const authOptions = {
       credentials: {
         username: { label: "Username or Email", type: "text" },
         password: { label: "Password", type: "password" },
+        totpCode: { label: 'Two-factor Code', type: 'input', placeholder: 'Code from authenticator app' },
       },
       async authorize(credentials, req) {
-        const user = findUserByCredentials(credentials)
+        const user = await findUserByCredentials(credentials) as User
         if (user) {
+          if (user.twofactor) {
+            if (!credentials?.totpCode) {
+              throw new Error(ErrorCode.SecondFactorRequired);
+            }
+            const isValidToken = authenticator.check(credentials.totpCode, user.twofactor);
+            if (!isValidToken) {
+              if (user.backup_codes?.includes(credentials.totpCode)) {
+                return user
+              }
+              throw new Error(ErrorCode.IncorrectTwoFactorCode);
+            } else {
+              return user
+            }
+          }
           return user
         }
         return null

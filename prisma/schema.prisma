@@ -25,7 +25,7 @@ model Mattar {
 }
 
 model Attach {
-  id       String @id @default(cuid())
+  id       String  @id @default(cuid())
   filename String
   filetype String
   width    Int
@@ -52,6 +52,7 @@ model User {
   birthday        String?
   lang            String?
   twofactor       String?
+  backup_codes    String?
   hash            String
   salt            String
   email           String     @unique
@@ -64,7 +65,7 @@ model User {
   favorites       Favorite[]
   follower        User[]     @relation("UserFollows")
   following       User[]     @relation("UserFollows")
-  reports        Report[]
+  reports         Report[]
   apiCredentials  Token?
   createdAt       DateTime   @default(now())
 }
@@ -78,11 +79,11 @@ model Token {
 }
 
 model Report {
-  id       String @id @default(cuid())
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   String
-  mattar   Mattar @relation(fields: [mattarId], references: [id], onDelete: Cascade)
-  mattarId String
-  reason   String
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  mattar    Mattar   @relation(fields: [mattarId], references: [id], onDelete: Cascade)
+  mattarId  String
+  reason    String
   createdAt DateTime @default(now())
 }

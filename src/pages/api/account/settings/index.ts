@@ -70,6 +70,7 @@ export default async function handler(
       if (req.body.twoFactor) {
         if (req.body.twoFactor === "reset") {
           req.body.twofactor = ""
+          req.body.backup_codes = ""
         } else {
           const isValid = authenticator.check(req.body.twoFactor, req.body.twoFactorSecret)
           if (!isValid) {

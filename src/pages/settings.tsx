@@ -58,6 +58,7 @@ const Settings = (props: Props) => {
   const router = useRouter()
   const page = router.query.page || 'info'
   const [state, setState] = useState(page)
+  const [bkc, setBkc] = useState('')
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [searchText, setSearchText] = useState('')
   const {
@@ -134,11 +135,38 @@ const Settings = (props: Props) => {
 
   const onSecuritySubmit: SubmitHandler<SecurityInputs> = async (data) => {
     const wait = toast.loading('更新中です...')
+    let backup = ''
+    if (props.user.twofactor !== data.twoFactor) {
+      const backupCodes: string[] = []
+      const S = 'abcdefghijklnmopqrstuvwxyz0123456789'
+      for (let i = 0; i < 8; i++) {
+        let backupCode = ''
+        while (true) {
+          for (let j = 0; j < 3; j++) {
+            backupCode += Array.from(
+              window.crypto.getRandomValues(new Uint8Array(4))
+            )
+              .map((n) => S[n % S.length])
+              .join('')
+            if (j < 2) {
+              backupCode += '-'
+            }
+          }
+          if (!backupCodes.includes(backupCode)) {
+            break
+          }
+        }
+        backupCodes.push(backupCode)
+      }
+      backup = backupCodes.join(',')
+      setBkc(backup)
+    }
     const res = await fetch('/api/account/settings', {
       body: JSON.stringify({
         id: props.user.id,
         oldPassword: data.oldPassword,
         newPassword: data.newPassword,
+        backup_codes: backup,
         twoFactorSecret: secret,
         twoFactor: data.twoFactor,
       }),
@@ -178,6 +206,7 @@ const Settings = (props: Props) => {
       console.log(error)
       return
     }
+    setBkc('')
     refreshData()
   }
 
@@ -464,6 +493,18 @@ const Settings = (props: Props) => {
                       />
                     </div>
                     <h2 className="text-2xl font-bold my-3">二段階認証</h2>
+                    {bkc && (
+                      <div className="bg-gray-400 dark:bg-zinc-700 px-4 py-2 rounded-md my-4">
+                        <p className="mb-2 font-bold">
+                          バックアップコード（必ず保管してください！）
+                        </p>
+                        {bkc.split(',').map((code) => (
+                          <p key={code} className="mb-2">
+                            {code}
+                          </p>
+                        ))}
+                      </div>
+                    )}
                     {props.user.twofactor ? (
                       <div className="mb-4">
                         <p className="mb-3">設定済み</p>
