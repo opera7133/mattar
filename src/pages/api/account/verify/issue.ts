@@ -18,7 +18,7 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { user_id } = query
+  const { user_id, api_token, api_secret } = query
   const session = await getServerSession(req, res, authOptions)
   const genToken = () => {
     const S = 'abcdefgijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -28,7 +28,20 @@ export default async function handler(
   }
   switch (method) {
     case 'GET':
-      if (!session) {
+      if (!session || !api_token || !api_secret) {
+        res.status(403).json({ error: "You don\'t have permission" })
+        break
+      }
+      const token = await prisma.token.findUnique({
+        where: {
+          token: api_token?.toString()
+        }
+      })
+      if (!token) {
+        res.status(403).json({ error: "You don\'t have permission" })
+        break
+      }
+      if (token.secret !== api_secret) {
         res.status(403).json({ error: "You don\'t have permission" })
         break
       }
@@ -58,7 +71,7 @@ export default async function handler(
       }
       let transporter = nodemailer.createTransport({
         host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
+        port: Number(process.env.EMAIL_SERVER_PORT),
         secure: true,
         auth: {
           user: process.env.EMAIL_SERVER_USER,

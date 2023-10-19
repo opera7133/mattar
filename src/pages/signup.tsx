@@ -1,4 +1,3 @@
-import { Dialog, Transition } from '@headlessui/react'
 import Button from 'components/Button'
 import Footer from 'components/Footer'
 import Head from 'next/head'
@@ -8,7 +7,6 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { getCsrfToken, signIn, useSession } from 'next-auth/react'
 import { CtxOrReq } from 'next-auth/client/_utils'
 import { useRouter } from 'next/router'
-import { passwordStrength } from 'check-password-strength'
 import { Fragment, useState } from 'react'
 import { Layout } from 'components/Layout'
 import toast from 'react-hot-toast'
@@ -30,7 +28,6 @@ export default function SignUp() {
   const {
     register,
     handleSubmit,
-    getValues,
     watch,
     formState: { errors },
   } = useForm<Inputs>()
@@ -60,10 +57,14 @@ export default function SignUp() {
     })
     const { token, error } = await res.json()
     if (error) {
-      toast.error(error)
+      toast.error(error, {
+        id: wait,
+      })
       return
     }
-    const mail = await fetch(`/api/account/verify/issue?user_id=${data.id}&api_token=${token.token}&api_secret=${token.secret}`)
+    const mail = await fetch(
+      `/api/account/verify/issue?user_id=${data.id}&api_token=${token.token}&api_secret=${token.secret}`
+    )
     const mailres = await mail.json()
     if (mailres.error) {
       toast.error(mailres.error, {

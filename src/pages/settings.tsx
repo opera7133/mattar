@@ -213,7 +213,7 @@ const Settings = (props: Props) => {
   const issueToken = async () => {
     const wait = toast.loading('メールを送信中です...')
     const res = await fetch(
-      `/api/account/verify/issue?user_id=${props.user.id}`
+      `/api/account/verify/issue?user_id=${props.user.id}&api_token=${props.user.apiCredentials?.token}&api_secret=${props.user.apiCredentials?.secret}`
     )
     const { error } = await res.json()
     if (error) {
