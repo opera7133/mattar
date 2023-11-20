@@ -1,0 +1,22 @@
+diff --git a/dist/item.js b/dist/item.js
+index ba743393f0ab7cba47e72c30faed590affdb1db4..47a6df26ec3a31695602e0ac19ed37bd11a5807b 100644
+--- a/dist/item.js
++++ b/dist/item.js
+@@ -6,7 +6,7 @@ var __rest = this && this.__rest || function (s, e) {
+   }
+   return t;
+ };
+-import { useRef, useCallback, useContext, useLayoutEffect } from 'react';
++import { useRef, useCallback, useContext, useEffect } from 'react';
+ import PropTypes from 'prop-types';
+ import { Context } from "./context.js";
+ /**
+@@ -26,7 +26,7 @@ export const Item = _a => {
+     handleClick
+   } = useContext(Context);
+   const open = useCallback(e => handleClick(ref, null, null, e), []);
+-  useLayoutEffect(() => {
++  useEffect(() => {
+     set(ref, restProps);
+     return () => remove(ref);
+   }, Object.values(restProps));
