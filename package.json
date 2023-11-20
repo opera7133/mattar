@@ -12,6 +12,7 @@
     "cypress": "cypress open"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^9.7.2",
     "@fontsource/noto-sans-jp": "^5.0.16",
     "@headlessui/react": "^1.7.17",
     "@next-auth/prisma-adapter": "^1.0.7",
@@ -57,8 +58,7 @@
     "socket.io-client": "^4.7.2",
     "string-width": "^7.0.0",
     "tailwind-merge": "^2.0.0",
-    "twemoji": "^14.0.2",
-    "webpack": "^5.89.0"
+    "twemoji": "^14.0.2"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^10.6.1",
@@ -83,7 +83,8 @@
     "postcss": "^8.4.31",
     "prisma": "^5.6.0",
     "tailwindcss": "^3.3.5",
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "webpack": "^5.89.0"
   },
   "pnpm": {
     "patchedDependencies": {
