@@ -26,6 +26,7 @@ import { format } from 'date-fns'
 import { enUS, ja } from 'date-fns/locale'
 import { Layout } from 'components/Layout'
 import { toast } from 'react-hot-toast'
+import NextHeadSeo from 'next-head-seo'
 
 type UserWithToken = Prisma.UserGetPayload<{
   include: {
@@ -131,9 +132,17 @@ const Mattar = (props: Props) => {
   }
   return (
     <Layout>
-      <Head>
-        <title>{`${props.mattar.user.name} on mattar.li: ${props.mattar.message} / mattar.li`}</title>
-      </Head>
+      <NextHeadSeo
+        title={`${props.mattar.user.name} on mattar.li: ${props.mattar.message} / mattar.li`}
+        description={props.mattar.message}
+        og={{
+          title: `${props.mattar.user.name} on mattar.li`,
+          image: props.mattar.user.profile_picture || '/img/default.png',
+        }}
+        twitter={{
+          card: 'summary',
+        }}
+      />
       <main className="px-4 mx-auto max-w-6xl grid grid-cols-3 gap-6">
         <div className="col-span-2 py-4">
           <div className="my-2">

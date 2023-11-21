@@ -16,6 +16,7 @@ import { IndexFollowing } from 'components/index/Following'
 import { IndexFollower } from 'components/index/Follower'
 import { Layout } from 'components/Layout'
 import { PostMattar } from 'components/Post'
+import NextHeadSeo from 'next-head-seo'
 
 type UserWithToken = Prisma.UserGetPayload<{
   include: {
@@ -105,13 +106,21 @@ const Home = (props: Props) => {
   }
   return (
     <Layout>
-      <Head>
-        <title>
-          {state.toString() in titles
+      <NextHeadSeo
+        title={
+          state.toString() in titles
             ? `${titles[state.toString()]} / mattar.li`
-            : 'mattar.li'}
-        </title>
-      </Head>
+            : 'mattar.li'
+        }
+        description="平穏なインターネットを体感しよう。"
+        og={{
+          title:
+            state.toString() in titles
+              ? `${titles[state.toString()]} / mattar.li`
+              : 'mattar.li',
+          image: process.env.NEXT_PUBLIC_BASE_URL + '/img/ogp.png',
+        }}
+      />
       <main className="px-4 mx-auto max-w-6xl grid grid-cols-3 gap-6">
         <div className="col-span-3 lg:col-span-2 py-4">
           {session ? (

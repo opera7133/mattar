@@ -1,13 +1,19 @@
 import Footer from 'components/Footer'
 import { Layout } from 'components/Layout'
 import Head from 'next/head'
+import NextHeadSeo from 'next-head-seo'
 
 export default function TOS() {
   return (
     <Layout>
-      <Head>
-        <title>利用規約 | mattar.li</title>
-      </Head>
+      <NextHeadSeo
+        title="利用規約 | mattar.li"
+        description="Mattarの利用規約"
+        og={{
+          title: '利用規約 | mattar.li',
+          image: process.env.NEXT_PUBLIC_BASE_URL + '/img/ogp.png',
+        }}
+      />
       <article className="pt-10 mb-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
         <h1 className="text-4xl font-bold mb-3">利用規約</h1>
         <details className="my-3 prose lg:prose-md dark:prose-invert">

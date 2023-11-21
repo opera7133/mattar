@@ -1,14 +1,19 @@
 import Footer from 'components/Footer'
 import { Layout } from 'components/Layout'
-import Head from 'next/head'
 import Image from 'next/image'
+import NextHeadSeo from 'next-head-seo'
 
 export default function Media() {
   return (
     <Layout>
-      <Head>
-        <title>メディア | mattar.li</title>
-      </Head>
+      <NextHeadSeo
+        title="メディア | mattar.li"
+        description="Mattarのブランドに関するページ"
+        og={{
+          title: 'メディア | mattar.li',
+          image: process.env.NEXT_PUBLIC_BASE_URL + '/img/ogp.png',
+        }}
+      />
       <article className="pt-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
         <h1 className="text-4xl font-bold mb-3">メディア</h1>
         <p className="text-lg mb-5">Mattarのブランドに関するページです。</p>

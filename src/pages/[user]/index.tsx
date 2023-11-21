@@ -17,6 +17,7 @@ import { Layout } from 'components/Layout'
 import { UserProfile } from 'components/user/Profile'
 import { UserFollower } from 'components/user/Follower'
 import { UserFollowing } from 'components/user/Following'
+import NextHeadSeo from 'next-head-seo'
 
 type UserWithToken = Prisma.UserGetPayload<{
   include: {
@@ -120,9 +121,17 @@ const Profile = (props: Props) => {
 
   return (
     <Layout>
-      <Head>
-        <title>{`${props.pUser.name} (${props.pUser.id}) on mattar.li`}</title>
-      </Head>
+      <NextHeadSeo
+        title={`${props.pUser.name} (${props.pUser.id}) on mattar.li`}
+        description={`${props.pUser.name}のプロフィール`}
+        og={{
+          title: `${props.pUser.name} (${props.pUser.id}) on mattar.li`,
+          image: props.pUser.profile_picture || '/img/default.png',
+        }}
+        twitter={{
+          card: 'summary',
+        }}
+      />
       <main className="px-4 mx-auto max-w-6xl grid grid-cols-3 gap-6">
         <div className="col-span-3 lg:col-span-2 py-4">
           <div className="my-6">

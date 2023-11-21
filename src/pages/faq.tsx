@@ -1,13 +1,18 @@
 import Footer from 'components/Footer'
 import { Layout } from 'components/Layout'
-import Head from 'next/head'
+import NextHeadSeo from 'next-head-seo'
 
 export default function FAQ() {
   return (
     <Layout>
-      <Head>
-        <title>FAQ | mattar.li</title>
-      </Head>
+      <NextHeadSeo
+        title="FAQ | mattar.li"
+        description="よくある質問とその回答"
+        og={{
+          title: 'FAQ | mattar.li',
+          image: process.env.NEXT_PUBLIC_BASE_URL + '/img/ogp.png',
+        }}
+      />
       <article className="pt-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
         <h1 className="text-4xl font-bold mb-4">FAQ</h1>
         <details>

@@ -1,17 +1,21 @@
 import Footer from 'components/Footer'
-import Header from 'components/Header'
 import { Layout } from 'components/Layout'
 import getConfig from 'next/config'
-import Head from 'next/head'
+import NextHeadSeo from 'next-head-seo'
 
 export default function About() {
   const { publicRuntimeConfig } = getConfig()
   const version = publicRuntimeConfig?.version
   return (
     <Layout>
-      <Head>
-        <title>mattar.liについて | mattar.li</title>
-      </Head>
+      <NextHeadSeo
+        title="mattar.liについて | mattar.li"
+        description="殺伐としたインターネットをマターリ過ごすためのマイクロブログ。"
+        og={{
+          title: 'mattar.liについて | mattar.li',
+          image: process.env.NEXT_PUBLIC_BASE_URL + '/img/ogp.png',
+        }}
+      />
       <article className="pt-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
         <h2 className="text-2xl font-bold mb-4">mattar.liについて</h2>
         <p className="text-lg mb-5">

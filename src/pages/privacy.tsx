@@ -1,14 +1,19 @@
 import Footer from 'components/Footer'
 import { Layout } from 'components/Layout'
-import Head from 'next/head'
+import NextHeadSeo from 'next-head-seo'
 import twemoji from 'twemoji'
 
 export default function Privacy() {
   return (
     <Layout>
-      <Head>
-        <title>プライバシーポリシー | mattar.li</title>
-      </Head>
+      <NextHeadSeo
+        title="プライバシーポリシー | mattar.li"
+        description="Mattarのプライバシーポリシー"
+        og={{
+          title: 'プライバシーポリシー | mattar.li',
+          image: process.env.NEXT_PUBLIC_BASE_URL + '/img/ogp.png',
+        }}
+      />
       <article className="pt-10 mb-10 min-h-[60vh] container mx-auto px-5 max-w-6xl">
         <h1 className="text-4xl font-bold mb-3">プライバシーポリシー</h1>
         <details className="my-3 prose lg:prose-md dark:prose-invert">
