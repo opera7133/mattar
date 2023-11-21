@@ -39,3 +39,8 @@ yarn-error.log*
 
 prisma/migrations
 .code-workspace
+
+public/sw.js
+public/site.webmanifest
+public/workbox-*
+public/browserconfig.xml
