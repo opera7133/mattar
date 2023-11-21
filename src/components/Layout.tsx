@@ -28,7 +28,7 @@ export const Layout = ({ children }: { children: ReactNode }) => {
           sizes="16x16"
           href="/img/favicon/favicon-16x16.png"
         />
-        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="manifest" href="/manifest.json" />
         <link
           rel="mask-icon"
           href="/img/favicon/safari-pinned-tab.svg"

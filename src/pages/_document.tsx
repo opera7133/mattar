@@ -4,9 +4,7 @@ export default class MyDocument extends Document {
   render() {
     return (
       <Html lang="ja">
-        <Head>
-          <link rel="manifest" href="/manifest.json" />
-        </Head>
+        <Head />
         <body className="dark:bg-zinc-800 dark:text-white">
           <Main />
           <NextScript />
