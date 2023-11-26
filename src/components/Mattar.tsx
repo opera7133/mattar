@@ -359,7 +359,7 @@ const Mattars: React.FC<MattarProps> = ({ item, props }) => {
                 className="duration-200 px-4 py-2 text-left bg-white hover:bg-gray-200 hover:dark:bg-zinc-600 dark:bg-zinc-800"
                 onClick={() =>
                   navigator.clipboard.writeText(
-                    `${window.location.protocol}://${
+                    `${window.location.protocol}//${
                       window.location.hostname === 'localhost'
                         ? 'localhost:3000'
                         : window.location.hostname
