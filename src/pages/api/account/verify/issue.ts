@@ -28,7 +28,7 @@ export default async function handler(
   }
   switch (method) {
     case 'GET':
-      if (!session || !api_token || !api_secret) {
+      if (!api_token || !api_secret) {
         res.status(403).json({ error: "You don\'t have permission" })
         break
       }
