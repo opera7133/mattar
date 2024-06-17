@@ -3,7 +3,6 @@ import { Layout } from 'components/Layout'
 import prisma from 'lib/prisma'
 import { getSession } from 'next-auth/react'
 import Head from 'next/head'
-import { GetServerSideProps } from 'next/types'
 import { FiUsers } from 'react-icons/fi'
 import { FaPencil } from 'react-icons/fa6'
 

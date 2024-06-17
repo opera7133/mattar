@@ -1,4 +1,3 @@
-import Head from 'next/head'
 import Link from 'next/link'
 import Footer from 'components/Footer'
 import Button from 'components/Button'
@@ -104,7 +103,7 @@ const Profile = (props: Props) => {
 
   useEffect((): any => {
     if (props.user && props.user.apiCredentials) {
-      const socket = io(process.env.NEXT_PUBLIC_BASE_URL, {
+      const socket = io(process.env.NEXT_PUBLIC_BASE_URL || '', {
         path: `/api/statuses/filter`,
         extraHeaders: {
           'x-api-key': `${props.user.apiCredentials.token}`,

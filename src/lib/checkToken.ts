@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { NextApiRequest, NextApiResponse } from 'next'
-import { getServerSession } from 'next-auth'
+import { NextApiRequest } from 'next'
 const prisma = new PrismaClient()
 
 const checkToken = async (req: NextApiRequest) => {

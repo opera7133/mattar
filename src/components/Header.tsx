@@ -1,22 +1,16 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { Fragment, useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   BsHouseFill,
   BsPersonFill,
-  BsPeopleFill,
   BsGearFill,
-  BsQuestionCircleFill,
   BsBoxArrowRight,
   BsBoxArrowInRight,
   BsMoonFill,
   BsSunFill,
 } from 'react-icons/bs'
 import { useSession, signOut } from 'next-auth/react'
-
-function classNames(...classes: any[]) {
-  return classes.filter(Boolean).join(' ')
-}
 
 export const useLocalStorage = (key: string, initialValue: boolean) => {
   const initialize = (key: string) => {
@@ -40,7 +34,7 @@ export const useLocalStorage = (key: string, initialValue: boolean) => {
   }, [])
 
   const setValue = useCallback(
-    (value: () => any) => {
+    (value: any) => {
       try {
         const valueToStore = value instanceof Function ? value() : value
         setState(valueToStore)
@@ -147,6 +141,7 @@ function Header() {
               <button
                 className="hover:opacity-70 duration-200 pt-1"
                 onClick={() => {
+                  // @ts-ignore
                   setDarkMode(!darkMode)
                 }}
               >

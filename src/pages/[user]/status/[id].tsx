@@ -1,10 +1,8 @@
-import Head from 'next/head'
 import Link from 'next/link'
 import Footer from 'components/Footer'
 import Button from 'components/Button'
 import {
   BsSearch,
-  BsThreeDots,
   BsLink,
   BsStar,
   BsReply,

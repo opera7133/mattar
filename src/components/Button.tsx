@@ -4,7 +4,7 @@ interface Props {
   className?: string
   id?: string
   children?: React.ReactNode | string
-  onClick: () => void
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void
 }
 
 const Button: React.FC<Props> = ({ id, className, children, onClick }) => {
