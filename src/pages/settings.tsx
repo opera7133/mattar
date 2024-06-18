@@ -303,7 +303,7 @@ const Settings = (props: Props) => {
               </h1>
               {state === 'info' && (
                 <div className="my-6">
-                  {!props.user.verified && (
+                  {!props.user?.verified && (
                     <p className="text-red-500 font-bold mb-3">
                       メールアドレスが認証されていません。メールをご確認ください。
                       <span>
@@ -326,7 +326,7 @@ const Settings = (props: Props) => {
                       <input
                         id="email"
                         type="text"
-                        defaultValue={props.user.email || ''}
+                        defaultValue={props.user?.email || ''}
                         {...register('email', { required: true })}
                         className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       />
@@ -337,7 +337,7 @@ const Settings = (props: Props) => {
                         id="bday"
                         type="date"
                         pattern="\d{4}-\d{2}-\d{2}"
-                        defaultValue={props.user.birthday || ''}
+                        defaultValue={props.user?.birthday || ''}
                         {...register('bday')}
                         className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       />
@@ -345,7 +345,7 @@ const Settings = (props: Props) => {
                     <div className="flex flex-col mb-4">
                       <label htmlFor="lang">言語</label>
                       <select
-                        defaultValue={props.user.lang || ''}
+                        defaultValue={props.user?.lang || ''}
                         {...register('lang', { required: true })}
                         className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       >
@@ -359,7 +359,7 @@ const Settings = (props: Props) => {
                       className="cursor-pointer px-4 text-white py-2 rounded-md bg-primary shadow-md duration-200 hover:shadow-sm"
                     />
                   </form>
-                  {props.user.verified && (
+                  {props.user?.verified && (
                     <a
                       href={`/api/account/archive/${props.user.id}?api_token=${props.user.apiCredentials?.token}&api_secret=${props.user.apiCredentials?.secret}`}
                       className="px-4 mr-4 text-white py-2 rounded-md bg-red-600 shadow-md duration-200 hover:shadow-sm"
