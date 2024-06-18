@@ -7,7 +7,7 @@ import { useState, Fragment } from 'react'
 import twemoji from 'twemoji'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
-import type { Prisma } from '@prisma/client'
+import type { Prisma, User } from '@prisma/client'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import QRCode from 'react-qr-code'
@@ -89,7 +89,6 @@ const Settings = (props: Props) => {
   const onInfoSubmit: SubmitHandler<InfoInputs> = async (data) => {
     if (props.user && props.user.apiCredentials) {
       const wait = toast.loading('更新中です...')
-      console.log(props.user.email === data.email)
       const res = await fetch(
         `/api/account/update_profile?api_token=${props.user.apiCredentials.token}&api_secret=${props.user.apiCredentials.secret}`,
         {
@@ -327,7 +326,7 @@ const Settings = (props: Props) => {
                       <input
                         id="email"
                         type="text"
-                        defaultValue={props.user.email}
+                        defaultValue={props.user.email || ''}
                         {...register('email', { required: true })}
                         className="bg-gray-200 dark:bg-zinc-700 border-none duration-200 focus:border-none focus:ring-gray-300 focus:bg-gray-100 dark:focus:ring-zinc-500 rounded-md dark:focus:bg-zinc-600"
                       />
@@ -725,6 +724,14 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
         })
       )
     )
+    if (!user || !user.email) {
+      return {
+        redirect: {
+          permanent: false,
+          destination: '/',
+        },
+      }
+    }
     delete user.hash
     delete user.salt
     delete user.verifyToken
