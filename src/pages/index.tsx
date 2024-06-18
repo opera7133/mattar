@@ -9,7 +9,7 @@ import prisma from 'lib/prisma'
 import type { Prisma } from '@prisma/client'
 import Image from 'next/image'
 import { io } from 'socket.io-client'
-import { useSession, getSession, getCsrfToken } from 'next-auth/react'
+import { useSession, getCsrfToken } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { IndexHome } from 'components/index/Home'
 import { IndexFollowing } from 'components/index/Following'
@@ -17,6 +17,8 @@ import { IndexFollower } from 'components/index/Follower'
 import { Layout } from 'components/Layout'
 import { PostMattar } from 'components/Post'
 import NextHeadSeo from 'next-head-seo'
+import { getServerSession } from 'next-auth'
+import { authOptions } from './api/auth/[...nextauth]'
 
 type UserWithToken = Prisma.UserGetPayload<{
   include: {
@@ -280,7 +282,7 @@ const Home = (props: Props) => {
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const session = await getSession(ctx)
+  const session = await getServerSession(ctx.req, ctx.res, authOptions)
   if (session && session.user) {
     const mattars = JSON.parse(
       JSON.stringify(

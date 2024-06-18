@@ -18,13 +18,15 @@ import Linkify from 'linkify-react'
 import 'linkify-plugin-mention'
 import 'linkify-plugin-hashtag'
 import Image from 'next/image'
-import { useSession, getSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { format } from 'date-fns'
 import { enUS, ja } from 'date-fns/locale'
 import { Layout } from 'components/Layout'
 import { toast } from 'react-hot-toast'
 import NextHeadSeo from 'next-head-seo'
+import { getServerSession } from 'next-auth'
+import { authOptions } from 'pages/api/auth/[...nextauth]'
 
 type UserWithToken = Prisma.UserGetPayload<{
   include: {
@@ -352,7 +354,7 @@ const Mattar = (props: Props) => {
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const qUser = ctx.query.user
   const id = ctx.query.id
-  const session = await getSession(ctx)
+  const session = await getServerSession(ctx.req, ctx.res, authOptions)
   if (session && session.user) {
     const mattar = JSON.parse(
       JSON.stringify(

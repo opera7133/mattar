@@ -8,7 +8,7 @@ import twemoji from 'twemoji'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
 import type { Prisma } from '@prisma/client'
-import { useSession, getSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import QRCode from 'react-qr-code'
 import { useForm, SubmitHandler } from 'react-hook-form'
@@ -17,6 +17,8 @@ import { authenticator } from 'otplib'
 import { Dialog, Transition } from '@headlessui/react'
 import { Layout } from 'components/Layout'
 import { toast } from 'react-hot-toast'
+import { getServerSession } from 'next-auth'
+import { authOptions } from './api/auth/[...nextauth]'
 
 type UserWithToken = Prisma.UserGetPayload<{
   include: {
@@ -189,7 +191,7 @@ const Settings = (props: Props) => {
     refreshData()
   }
 
-  const resetTwoFactor = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const resetTwoFactor = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     const res = await fetch('/api/account/settings', {
       body: JSON.stringify({
@@ -706,7 +708,7 @@ const Settings = (props: Props) => {
 }
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
-  const session = await getSession(ctx)
+  const session = await getServerSession(ctx.req, ctx.res, authOptions)
   if (session && session.user && session.user.id) {
     const user = JSON.parse(
       JSON.stringify(

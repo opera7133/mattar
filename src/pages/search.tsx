@@ -7,10 +7,12 @@ import { useState } from 'react'
 import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
 import type { Prisma } from '@prisma/client'
-import { useSession, getSession, getCsrfToken } from 'next-auth/react'
+import { useSession, getCsrfToken } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import Mattars from 'components/Mattar'
 import { Layout } from 'components/Layout'
+import { getServerSession } from 'next-auth'
+import { authOptions } from './api/auth/[...nextauth]'
 
 type MattarWithFav = Prisma.MattarGetPayload<{
   include: {
@@ -186,7 +188,7 @@ const Search = (props: Props) => {
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const query = ctx.query.query
-  const session = await getSession(ctx)
+  const session = await getServerSession(ctx.req, ctx.res, authOptions)
   if (query) {
     if (session && session.user && session.user.id) {
       const mattars = JSON.parse(

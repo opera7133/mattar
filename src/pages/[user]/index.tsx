@@ -7,7 +7,7 @@ import type { GetServerSideProps } from 'next'
 import prisma from 'lib/prisma'
 import type { Prisma } from '@prisma/client'
 import { io } from 'socket.io-client'
-import { useSession, getSession } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { Menu, Transition } from '@headlessui/react'
 import Image from 'next/image'
@@ -17,6 +17,8 @@ import { UserProfile } from 'components/user/Profile'
 import { UserFollower } from 'components/user/Follower'
 import { UserFollowing } from 'components/user/Following'
 import NextHeadSeo from 'next-head-seo'
+import { getServerSession } from 'next-auth'
+import { authOptions } from 'pages/api/auth/[...nextauth]'
 
 type UserWithToken = Prisma.UserGetPayload<{
   include: {
@@ -401,7 +403,7 @@ const Profile = (props: Props) => {
 
 export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const qUser = ctx.query.user
-  const session = await getSession(ctx)
+  const session = await getServerSession(ctx.req, ctx.res, authOptions)
   if (session && session.user) {
     const mattars = JSON.parse(
       JSON.stringify(

@@ -1,10 +1,11 @@
 import Footer from 'components/Footer'
 import { Layout } from 'components/Layout'
 import prisma from 'lib/prisma'
-import { getSession } from 'next-auth/react'
 import Head from 'next/head'
 import { FiUsers } from 'react-icons/fi'
 import { FaPencil } from 'react-icons/fa6'
+import { getServerSession } from 'next-auth'
+import { authOptions } from 'pages/api/auth/[...nextauth]'
 
 export default function FAQ({
   userCount,
@@ -44,7 +45,7 @@ export default function FAQ({
 }
 
 export const getServerSideProps = async (ctx: any) => {
-  const session = await getSession(ctx)
+  const session = await getServerSession(ctx.req, ctx.res, authOptions)
   if (session && session.user) {
     const userCount = await prisma.user.count()
     const postCount = await prisma.mattar.count()
