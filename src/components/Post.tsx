@@ -120,7 +120,6 @@ export const PostMattar = ({ props }: { props: any }) => {
               attaches: mediaIds,
               source: 'Mattar Web Client',
               userId: props.user?.id,
-              isRemattar: false,
             }),
           }
         )

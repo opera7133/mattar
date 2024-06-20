@@ -18,28 +18,42 @@ model Mattar {
   ip         String
   userId     String
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  isRemattar Boolean
+  original   Mattar?    @relation("replies", fields: [originalId], references: [id], onDelete: Cascade)
+  originalId String?
+  replies    Mattar[]   @relation("replies")
+  remattars  Remattar[]
   favorites  Favorite[]
   reports    Report[]
   createdAt  DateTime   @default(now())
 }
 
+model Remattar {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mattar    Mattar   @relation(fields: [mattarId], references: [id], onDelete: Cascade)
+  mattarId  String
+  createdAt DateTime @default(now())
+}
+
 model Attach {
-  id       String  @id @default(cuid())
-  filename String
-  filetype String
-  width    Int
-  height   Int
-  mattar   Mattar? @relation(fields: [mattarId], references: [id], onDelete: Cascade)
-  mattarId String?
+  id        String   @id @default(cuid())
+  filename  String
+  filetype  String
+  width     Int
+  height    Int
+  mattar    Mattar?  @relation(fields: [mattarId], references: [id], onDelete: Cascade)
+  mattarId  String?
+  createdAt DateTime @default(now())
 }
 
 model Favorite {
-  id       String @id @default(cuid())
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId   String
-  mattar   Mattar @relation(fields: [mattarId], references: [id], onDelete: Cascade)
-  mattarId String
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  mattar    Mattar   @relation(fields: [mattarId], references: [id], onDelete: Cascade)
+  mattarId  String
+  createdAt DateTime @default(now())
 }
 
 model User {
@@ -62,6 +76,7 @@ model User {
   admin           Boolean    @default(false)
   moderator       Boolean    @default(false)
   mattars         Mattar[]
+  remattars       Remattar[]
   favorites       Favorite[]
   follower        User[]     @relation("UserFollows")
   following       User[]     @relation("UserFollows")

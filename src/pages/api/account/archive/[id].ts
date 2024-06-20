@@ -58,7 +58,6 @@ export default async function handler(
                 id: true,
                 message: true,
                 source: true,
-                isRemattar: true,
                 createdAt: true,
               }
             },

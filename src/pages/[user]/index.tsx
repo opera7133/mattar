@@ -276,9 +276,6 @@ const Profile = (props: Props) => {
                   state === 'remattars' &&
                   item.userId === props.pUser.id
                 ) {
-                  if (item.isRemattar) {
-                    return <Mattars item={item} props={props} key={item.id} />
-                  }
                 }
               })}
               <UserFollowing state={state.toString()} props={props} />

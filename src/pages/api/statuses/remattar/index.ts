@@ -14,7 +14,7 @@ export default async function handler(
 ) {
   const { method } = req
   const query = req.query
-  const { mattar_id, source } = query
+  const { mattar_id } = query
   switch (method) {
     case 'POST':
       const token = await checkToken(req)
@@ -55,15 +55,18 @@ export default async function handler(
         res.status(404).json({ error: "Mattar not found" })
         break
       }
-      const message = "RT @" + from?.userId + ": " + from?.message
-      const sendby = source || "Mattar API"
-      const remattar = await prisma.mattar.create({
+      const remattar = await prisma.remattar.create({
         data: {
-          userId: userId,
-          isRemattar: true,
-          message: message,
-          source: sendby.toString(),
-          ip: clientIp
+          user: {
+            connect: {
+              id: userId
+            }
+          },
+          mattar: {
+            connect: {
+              id: mattar_id.toString()
+            }
+          },
         }
       })
       const update = await prisma.user.update({

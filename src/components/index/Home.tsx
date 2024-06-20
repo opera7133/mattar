@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Prisma, Remattar } from '@prisma/client'
 import Mattars from 'components/Mattar'
 
 type MattarWithFav = Prisma.MattarGetPayload<{
@@ -28,8 +28,21 @@ type UserWithToken = Prisma.UserGetPayload<{
   }
 }>
 
+type RemattarWithMattar = Prisma.RemattarGetPayload<{
+  include: {
+    mattar: {
+      include: {
+        user: true
+        favorites: true
+        attaches: true
+      }
+    }
+    user: true
+  }
+}>
+
 type Props = {
-  mattars: MattarWithFav[]
+  mattars: MattarWithFav[] | RemattarWithMattar[]
   user: UserWithToken | undefined
 }
 
@@ -43,25 +56,40 @@ export const IndexHome = ({
   return (
     <>
       {props.mattars.map((item) => {
-        if (state === 'at') {
-          if (item.message.includes('@wamo')) {
+        if ('message' in item) {
+          if (state === 'at') {
+            if (item.message.includes('@wamo')) {
+              return <Mattars item={item} props={props} key={item.id} />
+            }
+          } else if (state === 'fav') {
+            if (
+              item.favorites
+                .map(function (i: any) {
+                  return i.userId
+                })
+                .includes(props.user?.id)
+            ) {
+              return <Mattars item={item} props={props} key={item.id} />
+            }
+          } else if (state === 'home') {
             return <Mattars item={item} props={props} key={item.id} />
           }
-        } else if (state === 'fav') {
-          if (
-            item.favorites
-              .map(function (i: any) {
-                return i.userId
-              })
-              .includes(props.user?.id)
-          ) {
-            return <Mattars item={item} props={props} key={item.id} />
-          }
-        } else if (state === 'home') {
-          return <Mattars item={item} props={props} key={item.id} />
-        } else if (state === 'remattars') {
-          if (item.isRemattar && item.userId === props.user?.id) {
-            return <Mattars item={item} props={props} key={item.id} />
+        } else if ('mattarId' in item) {
+          if (item.userId === props.user?.id) {
+            return (
+              <Mattars
+                item={item.mattar}
+                props={props}
+                key={item.id}
+                remattar={{
+                  id: item.id,
+                  user: {
+                    id: item.user.id,
+                    name: item.user.name,
+                  },
+                }}
+              />
+            )
           }
         }
       })}

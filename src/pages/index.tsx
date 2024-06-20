@@ -47,6 +47,97 @@ type MattarWithFav = Prisma.MattarGetPayload<{
   }
 }>
 
+type FollowingUser = Prisma.UserGetPayload<{
+  include: {
+    mattars: {
+      include: {
+        favorites: true
+        attaches: true
+        user: {
+          select: {
+            id: true
+            name: true
+            profile_picture: true
+            admin: true
+            moderator: true
+          }
+        }
+      }
+    }
+    remattars: {
+      include: {
+        mattar: {
+          include: {
+            favorites: true
+            attaches: true
+            user: {
+              select: {
+                id: true
+                name: true
+                profile_picture: true
+                admin: true
+                moderator: true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}>
+
+type UserWithFollowing = Prisma.UserGetPayload<{
+  include: {
+    following: {
+      include: {
+        mattars: {
+          include: {
+            favorites: true
+            attaches: true
+            user: {
+              select: {
+                id: true
+                name: true
+                profile_picture: true
+                admin: true
+                moderator: true
+              }
+            }
+          }
+        }
+        remattars: {
+          include: {
+            mattar: {
+              include: {
+                favorites: true
+                attaches: true
+                user: {
+                  select: {
+                    id: true
+                    name: true
+                    profile_picture: true
+                    admin: true
+                    moderator: true
+                  }
+                }
+              }
+            }
+            user: {
+              select: {
+                id: true
+                name: true
+                profile_picture: true
+                admin: true
+                moderator: true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}>
+
 type Props = {
   mattars: MattarWithFav[]
   user: UserWithToken | undefined
@@ -94,7 +185,6 @@ const Home = (props: Props) => {
       setPage('home')
     }
   }, [])
-
   interface Titles {
     [key: string]: string
   }
@@ -284,24 +374,66 @@ const Home = (props: Props) => {
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getServerSession(ctx.req, ctx.res, authOptions)
   if (session && session.user) {
-    const mattars = JSON.parse(
+    const followingMattars: UserWithFollowing = JSON.parse(
       JSON.stringify(
-        await prisma.mattar.findMany({
+        await prisma.user.findUnique({
+          where: {
+            id: session.user.id,
+          },
           include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                profile_picture: true,
-                admin: true,
-                moderator: true,
+            following: {
+              include: {
+                mattars: {
+                  include: {
+                    favorites: true,
+                    attaches: true,
+                    user: {
+                      select: {
+                        id: true,
+                        name: true,
+                        profile_picture: true,
+                        admin: true,
+                        moderator: true,
+                      },
+                    },
+                  },
+                  orderBy: {
+                    createdAt: 'desc',
+                  },
+                },
+                remattars: {
+                  include: {
+                    mattar: {
+                      include: {
+                        favorites: true,
+                        attaches: true,
+                        user: {
+                          select: {
+                            id: true,
+                            name: true,
+                            profile_picture: true,
+                            admin: true,
+                            moderator: true,
+                          },
+                        },
+                      },
+                    },
+                    user: {
+                      select: {
+                        id: true,
+                        name: true,
+                        profile_picture: true,
+                        admin: true,
+                        moderator: true,
+                      },
+                    },
+                  },
+                  orderBy: {
+                    createdAt: 'desc',
+                  },
+                },
               },
             },
-            favorites: true,
-            attaches: true,
-          },
-          orderBy: {
-            createdAt: 'desc',
           },
         })
       )
@@ -332,21 +464,88 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
                 moderator: true,
               },
             },
+            mattars: {
+              include: {
+                favorites: true,
+                attaches: true,
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    profile_picture: true,
+                    admin: true,
+                    moderator: true,
+                  },
+                },
+              },
+              orderBy: {
+                createdAt: 'desc',
+              },
+            },
+            remattars: {
+              include: {
+                mattar: {
+                  include: {
+                    favorites: true,
+                    attaches: true,
+                    user: {
+                      select: {
+                        id: true,
+                        name: true,
+                        profile_picture: true,
+                        admin: true,
+                        moderator: true,
+                      },
+                    },
+                  },
+                },
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    profile_picture: true,
+                    admin: true,
+                    moderator: true,
+                  },
+                },
+              },
+              orderBy: {
+                createdAt: 'desc',
+              },
+            },
             apiCredentials: true,
           },
         })
       )
     )
+    const myMattars = user.mattars
+    delete user.mattars
     delete user.hash
     delete user.salt
     delete user.verifyToken
     return {
       props: {
         user,
-        mattars: mattars.map((mattar: any) => {
-          delete mattar.ip
-          return mattar
-        }),
+        mattars: followingMattars.following
+          ? followingMattars.following
+              .map((user: FollowingUser) => {
+                return user.mattars
+                  .map((mattar: any) => {
+                    delete mattar.ip
+                    return mattar
+                  })
+                  .concat(user.remattars)
+              })[0]
+              .concat(followingMattars)
+              .concat(myMattars)
+              .concat(user.remattars)
+              .sort((a: MattarWithFav, b: MattarWithFav) => {
+                return (
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+                )
+              })
+          : myMattars,
         csrfToken: await getCsrfToken(ctx),
       },
     }

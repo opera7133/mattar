@@ -177,7 +177,7 @@ const Mattar = (props: Props) => {
                       お気に入り
                     </button>
                   </span>
-                  {!props.mattar.isRemattar && (
+                  {/*!props.mattar.isRemattar && (
                     <span className="ml-2">
                       <button
                         className="duration-200 hover:text-green-400"
@@ -196,7 +196,7 @@ const Mattar = (props: Props) => {
                         リツイート
                       </button>
                     </span>
-                  )}
+                  )*/}
                   {/*!props.mattar.isRemattar && (
                     <span className="ml-2">
                       <button className="duration-200 hover:text-sky-400">

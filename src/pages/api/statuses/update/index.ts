@@ -34,7 +34,6 @@ export default async function handler(
           })
           break
         }
-        req.body.isRemattar = false
         const tokenId = await prisma.token.findUnique({
           where: {
             token: query.api_token?.toString()

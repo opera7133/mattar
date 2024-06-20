@@ -50,7 +50,6 @@ export default async function handler(
               createdAt: true
             }
           },
-          isRemattar: true,
           createdAt: true,
         }
       })
